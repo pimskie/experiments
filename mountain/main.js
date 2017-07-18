@@ -27,16 +27,24 @@ const shape = {
 	speed: 0.01,
 	position: {
 		x: 10,
-		y: midY,
+		y: h,
 	},
 
 	triangles: [
 		{
-			color: 'rgba(0, 0, 0, 0.1)',
+			color: 'rgba(250, 250, 250, 0.3)',
 			points: [
 				{ x: 50, y: -20 },
 				{ x: -90, y: -30 },
 				{ x: -50, y: 0 },
+			],
+		},
+		{
+			color: 'rgba(80, 80, 80, 0.1)',
+			points: [
+				{ x: -45, y: -15 },
+				{ x: -85, y: -25 },
+				{ x: -45, y: 10 },
 			],
 		},
 	],
@@ -46,7 +54,6 @@ const drawCircle = (pos) => {
 	ctx.beginPath();
 	ctx.fillStyle = 'black';
 	ctx.arc(pos.x, pos.y, 2, 0, PI * 2, false);
-	ctx.fill();
 	ctx.closePath();
 };
 
@@ -87,7 +94,6 @@ const loop = () => {
 		ctx.strokeStyle = triangle.color;
 		ctx.fillStyle = triangle.color;
 
-
 		ctx.beginPath();
 
 		triangle.points.forEach((point, index) => {
@@ -106,7 +112,8 @@ const loop = () => {
 	ctx.restore();
 
 	if (shape.position.x > w) {
-		shape.position.x = -r;
+		shape.position.x = -100;
+		shape.rotation = Math.random() * PI2;
 	}
 
 	requestAnimationFrame(loop);

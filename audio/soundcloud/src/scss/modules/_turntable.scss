@@ -1,0 +1,265 @@
+$module: '.turntable';
+
+$button-glow: 0px 0px 3px 1px $color-glow;
+
+#{$module} {
+	position: relative;
+	display: inline-block;
+
+	width: $body-width;
+	height: $body-height;
+	background: url(../img/#{$skin}/body.png) no-repeat;
+	background-size: cover;
+
+	&__rings {
+		position: absolute;
+		top: 10px;
+		left: 15px;
+
+		width: $ring-width;
+		height: $ring-height;
+
+		border-radius: 50%;
+	}
+
+	&__ring {
+		position: absolute;
+		top: 0;
+		left: 0;
+
+		width: 100%;
+		height: 100%;
+
+		border-radius: 50%;
+		background-image: url(../img/#{$skin}/bpm.png);
+		background-size: cover;
+
+		will-change: transform;
+	}
+
+
+	&__disc {
+		position: relative;
+		z-index: 100;
+
+		left: 22px;
+		top: 22px;
+
+		width: $disc-width;
+		height: $disc-height;
+
+		background-image: url(../img/#{$skin}/vinyl.png);
+		background-size: cover;
+		background-repeat: no-repeat;
+
+		border-radius: 50%;
+
+		cursor: grab;
+		user-select: none;
+
+		will-change: transform;
+
+		&::before,
+		&::after {
+			position: absolute;
+			content: '';
+
+			border-radius: 50%;
+		}
+
+		// glint
+		&::before {
+			top: 0;
+			left: 0;
+
+			width: 100%;
+			height: 100%;
+
+			background: url(../img/#{$skin}/vinyl-glint.png) no-repeat;
+			background-size: cover;
+		}
+
+		// center point
+		&::after {
+			top: 50%;
+			left: 50%;
+
+			z-index: 100;
+
+			width: 10px;
+			height: 10px;
+
+			transform: translate(-50%, -50%);
+
+			background: $color-disc;
+		}
+
+		.is-scratching & {
+			cursor: grabbing;
+		}
+
+		&__inner {
+			$scale: 2.8;
+
+			position: absolute;
+			left: 50%;
+			top: 50%;
+
+			width: 40%;
+			height: 40%;
+
+			transform: translate(-50%, -50%);
+
+			background: #fff;
+			background-size: cover;
+			background-repeat: no-repeat;
+
+			border-radius: 50%;
+
+		}
+	}
+
+	&__arm {
+		position: absolute;
+		z-index: 200;
+
+		top: 21px;
+		right: 55px;
+
+		width: $arm-width;
+		height: $arm-height;
+
+		background-image: url(../img/#{$skin}/arm.png);
+		background-size: cover;
+		background-repeat: no-repeat;
+
+		transform-origin: 25px 84px;
+
+		.is-scratching & {
+			pointer-events: none;
+		}
+	}
+
+	&__button,
+	&__power-led {
+		position: absolute;
+	}
+
+	&__button {
+		z-index: 110;
+
+		cursor: pointer;
+		outline: none;
+
+		transition: box-shadow 0.2s ease-out;
+
+		box-shadow: $button-glow;
+	}
+
+	&__button--power {
+		bottom: 69px;
+		left: 15px;
+
+		width: 40px;
+		height: 40px;
+
+		background: black;
+		border-radius: 50%;
+
+		transition: transform 0.5s ease-out;
+
+		.is-powered & {
+			transform: rotate(50deg);
+		}
+
+		// indicator
+		&::before {
+			content: '';
+			position: absolute;
+			z-index: 1;
+
+			top: 0;
+			left: 50%;
+
+			width: 2px;
+			height: 100%;
+
+			margin-left: -1px;
+
+			background: white;
+		}
+	}
+
+	// led
+	&__power-led {
+		position: absolute;
+		z-index: 100;
+		bottom: 85px;
+		left: 22px;
+
+		width: 25px;
+		height: 45px;
+
+		background: $color-glow;
+
+		opacity: 0;
+
+		// the blur filter creates glitches in at least chrome
+		// filter: blur(5px);
+		mix-blend-mode: overlay;
+		transform-origin: center bottom;
+
+		transition: transform 0.5s ease-out,
+					opacity 0.5s ease-out;
+
+		.is-powered & {
+			opacity: 1;
+			transform: rotate(50deg);
+		}
+	}
+
+
+	&__button--start {
+		bottom: 10px;
+		left: 12px;
+
+		height: 43px;
+		width: 59px;
+
+		background: black;
+
+		&::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+
+			width: 100%;
+			height: 100%;
+
+			box-shadow:  0px 3px 6px 0px rgba(0, 0, 0, 0.5);
+		}
+
+		&:active {
+			transform: translateY(2px);
+
+			&::after {
+				box-shadow:  0px 0px 6px 0px rgba(0, 0, 0, 0.5);
+			}
+		}
+	}
+
+	&__tempo-slider {
+		position: absolute;
+		z-index: 100; // underneath `__arm`
+
+		right: 26px;
+		top: 232px;
+
+		width: 27px;
+		height: 159px;
+
+		background: #000;
+	}
+
+}

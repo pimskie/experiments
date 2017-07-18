@@ -1,0 +1,261 @@
+/* Buttons
+   ========================================================================== */
+
+ @mixin button-modifier($color, $border-color, $background-color, $hover-color) {
+//	$hover-color: if($border-color == transparent, $black, $border-color);
+
+	@extend .btn;
+
+	background-color: $background-color;
+	border-color: $border-color;
+	color: $color;
+
+	&:hover,
+	&:focus {
+		border-color: $hover-color;
+		background-color: $hover-color;
+		color: $white;
+	}
+
+	&:active {
+		// border-color: $black;
+		// color: $black;
+	}
+
+	&[disabled],
+	&.is-disabled {
+		background: $gray-lighter;
+		border-color: $gray;
+		color: $gray;
+
+		box-shadow: none;
+		cursor: not-allowed;
+	}
+
+	&.right {
+		float: right;
+	}
+}
+
+.btn {
+	@include transition(all, $speed-1);
+	@include rem(font-size, $font-size-normal);
+	@include appearance(none);
+
+	display: inline-block;
+	padding: 0.675em $grid-gutter 0.6em; // 40px in height (same as .form__field)
+
+	background: $white;
+	border: $border-m solid $brand-color-1;
+	border-radius: $radius;
+	outline: none;
+	color: $brand-color-1;
+
+	// font-family: $brand-font-bold;
+	line-height: 1;
+
+	vertical-align: middle;
+
+	cursor: pointer;
+	text-decoration: none;
+
+	&:hover,
+	&:focus {
+		background-color: $gray-lighter;
+		border: $border-m solid $brand-color-1-dark;
+		color: $brand-color-1-darker;
+	}
+
+	&:active,
+	&.is-active {
+		background-color: $white;
+		border-color: $black;
+		color: $black;
+	}
+
+	&[disabled],
+	&.is-disabled {
+		background: $gray-lighter;
+		border-color: $gray;
+		color: $gray;
+
+		cursor: not-allowed;
+		box-shadow: none;
+	}
+}
+
+// Primary
+.btn--primary {
+	@include button-modifier($white, $brand-color-1, $brand-color-1, $brand-color-1-dark);
+}
+
+// Secondary
+.btn--secondary {
+	@include button-modifier($white, $brand-color-2, $brand-color-2, $brand-color-2-dark);
+}
+
+// As link
+.btn--link,
+.btn--link--nostyle {
+	@include button-modifier($brand-color-1, transparent, transparent, $brand-color-1-dark);
+
+	// font-family: $brand-font-book;
+	font-weight: 400;
+	text-decoration: underline;
+
+	&:hover,
+	&:focus {
+		background: transparent;
+		border-color: transparent;
+		color: $brand-color-1-darker;
+	}
+
+	&:focus {
+		color: $brand-color-1;
+	}
+}
+
+// As link
+.btn--link--secondary,
+.btn--link--secondary--nostyle {
+	@include button-modifier($gray, transparent, transparent, $brand-color-1);
+
+	// font-family: $brand-font-book;
+	font-weight: 400;
+	text-decoration: underline;
+
+	&:hover,
+	&:focus {
+		background: transparent;
+		border-color: transparent;
+		color: $brand-color-1-darker;
+
+		text-decoration: none;
+	}
+}
+
+.btn--link--nostyle,
+.btn--link--secondary--nostyle {
+	text-decoration: none;
+
+	&.no-padding {
+		padding-left: 0;
+		padding-right: 0;
+	}
+}
+
+.btn--offset-right {
+	margin-right: $distance-xs;
+}
+
+.btn--offset-left {
+	margin-left: $distance-xs;
+}
+
+.btn--offset-top {
+	margin-top: $distance-xs;
+}
+
+
+/* Icon buttons
+   ========================================================================== */
+.btn--icon {
+	position: relative;
+	padding-left: $icon-s + $grid-gutter;
+
+	&:before {
+		position: absolute;
+		top: -2px;
+		left: $grid-gutter / 2;
+
+		margin-right: $distance-xs;
+
+		line-height: 1.5em;
+	}
+}
+
+// Icon only
+.btn--icon-only {
+	padding: 0;
+	text-decoration: none;
+
+	&:before {
+		display: inline-block;
+		padding: 0.25em; // Vertically align the icon in the middle
+	}
+}
+
+
+/* Social buttons
+   ========================================================================== */
+.btn--facebook,
+.btn--linkedin {
+	margin-top: $distance-s;
+	margin-bottom: $distance-s;
+
+	span {
+		display: block;
+		margin-bottom: $distance-xs;
+
+		@include rem(font-size, $font-size-smallest);
+		text-transform: uppercase;
+
+		opacity: 0.5;
+	}
+}
+
+.btn--facebook {
+	@include button-modifier($white, $facebook, $facebook, $facebook-dark);
+}
+
+.btn--linkedin {
+	@include button-modifier($white, $linkedin, $linkedin, $linkedin-dark);
+}
+
+
+/* Other buttons
+   ========================================================================== */
+
+.btn--search,
+.btn--search--large {
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+
+	border-radius: 0 $radius $radius 0;
+}
+
+.btn--search,
+.btn--search--large {
+	width: 48px;
+	height: 48px;
+	padding: 0 4px;
+}
+
+.btn--search--large {
+	&:before {
+		top: 2px;
+	}
+
+	@include respond-to(small) {
+		padding: 30px;
+
+		&:before {
+			position: absolute;
+			top: 12px;
+			left: 18px;
+			margin-right: $distance-xs;
+
+			line-height: 1.5em;
+		}
+	}
+}
+
+// Give normal links top and bottom padding like buttons
+// (mainly for vertical alignment on mobile size)
+.btn--padding {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	display: inline-block;
+}

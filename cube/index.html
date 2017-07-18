@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Cube test</title>
+
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+	<button class="btn js-toggle">Still</button>
+
+	<div class="stage is-3d">
+		<div class="cube-container is-3d js-copy">
+			<div class="cube is-3d">
+				<div class="face fronts is-3d"></div>
+				<div class="face sides is-3d"></div>
+				<div class="face floors is-3d"></div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+
+	var cols = 4,
+		count = (cols * cols) - 1,
+		cube = document.querySelector('.js-copy'),
+		btn = document.querySelector('.js-toggle'),
+		i,
+		copy;
+
+
+	for(i = 0; i < count; i++) {
+		copy = cube.cloneNode(true);
+		cube.parentNode.appendChild(copy);
+	}
+
+	btn.addEventListener('click', function() {
+		document.documentElement.classList.toggle('is-still');
+	});
+
+	</script>
+</body>
+</html>

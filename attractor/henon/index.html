@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Index</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+            background-color: #fbfbfb;
+		}
+
+        body {
+            text-align: center;
+        }
+
+		.canvas {
+			display: inline-block;
+            background-color: #fff;
+		}
+
+        .stats {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+        }
+	</style>
+</head>
+<body>
+
+<div class="stats js-stats"></div>
+<canvas class="canvas js-canvas" width="500" height="500"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.0/dat.gui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>

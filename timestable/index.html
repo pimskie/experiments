@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Timestable</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+		body {
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.container {
+			padding: 10px;
+
+			border: 1px solid #dcdcdc;
+			border-radius: 50%;
+		}
+
+	</style>
+</head>
+<body>
+
+	<canvas class="canvas js-canvas"></canvas>
+
+<script src="https://rawgit.com/josephg/noisejs/master/perlin.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.3/dat.gui.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

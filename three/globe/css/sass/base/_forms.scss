@@ -1,0 +1,69 @@
+// Nested within form to override some of the 'normalize.css' settings
+form {
+	button {
+		margin: 1em 0 0;
+	}
+
+	fieldset {
+		margin: 0;
+		padding: 0;
+		border: none;
+	}
+
+	label {
+		display: inline-block;
+		min-width: 10em;
+		margin: 1em 0 0.25em;
+		font-weight: $bold;
+		cursor: pointer;
+
+		&:first-child {
+			margin-top: 0;
+		}
+	}
+
+	legend {
+		@extend .visuallyhidden;
+	}
+
+	#{$all-text-inputs} {
+  		@include box-sizing(border-box);
+	}
+
+	input,
+	select,
+	textarea {
+		@include placeholder {
+			color: $placeholder-text-color;
+		}
+
+		width: 100%;
+		padding: 1em;
+		line-height: 1.5;
+		background: $gray-lightest;
+		border: none;
+		border: $border-m solid $gray-lighter;
+		border-radius: $radius-s;
+
+		&:focus {
+			@include rem(font-size, $font-size-normal); // Smaller font-size forces iOS devices to zoom in when focused
+			background: #ffc;
+
+			@include placeholder {
+				opacity: 0;
+			}
+		}
+	}
+
+	// Reset check- and radioboxes
+	input[type="radio"],
+	input[type="checkbox"] {
+		width: auto;
+		padding: 0;
+		border: none;
+
+		+ label {
+			min-width: 0;
+		}
+	}
+}

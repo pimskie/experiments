@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Sphere shader test</title>
+
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+</head>
+<body>
+
+<script type="x-shader/x-vertex" id="vertexshader">
+// uniform: usable in vertex and fragment, doesn't change in frame
+uniform float time;
+uniform float radius;
+
+// varying: delared in vertex, shared with fragment
+varying vec3 vNormal;
+varying float dX;
+varying float dY;
+
+void main(void) {
+	vec3 v = position;
+	vNormal = normal;
+
+
+	// v.y += sin(1.5 * position.z + (time)) * 2.;
+	// v.z += cos(position.y + (time)) * 4.;
+
+	gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.);
+
+	dX = cos(time * 3. + position.y * .05) * 10.;
+	dY = sin(time * 3. + position.z * .05) * 10.;
+	gl_Position.x += vec3(normal * dX).x;
+	// gl_Position.z +=vec3(normal * dY).z;
+}
+
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentshader">
+uniform float time;
+uniform float radius;
+
+varying vec3 vNormal;
+
+void main(void) {
+	vec3 light = vec3(1, 1, 1);
+	light = normalize(light);
+
+	// inwendig product
+	float dProd = max(0.0, dot(vNormal, light));
+
+	gl_FragColor = vec4(dProd, dProd, dProd, 1.0);
+}
+
+</script>
+
+
+<script src="../../lib/three.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

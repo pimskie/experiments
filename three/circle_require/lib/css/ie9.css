@@ -1,0 +1,379 @@
+/* DIMENSIONS */
+/* COLORS */
+/* ## fonts ## */
+/* ## Fix the clear on elements without the required class. NB: watch it! ## */
+/* ## rounded corners ## */
+/* ## Box shadow ## */
+/* ## Accessibility ## */
+/* Places an item out of sight while keeping it available for screenreaders. */
+/* Focusable elements such as links and inputs are placed back in sight on focus, for keyboard users. */
+/* To hide hide text */
+/* MEDIA QUERIES */
+/* 
+	html5doctor.com Reset Stylesheet
+	v1.6.1
+	Last Updated: 2010-09-17
+	Author: Richard Clark - http://richclarkdesign.com 
+	Twitter: @rich_clark
+*/
+/* line 20, ../../sass/partials/base/_reset.scss */
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+/* line 30, ../../sass/partials/base/_reset.scss */
+body {
+  line-height: 1;
+}
+
+/* line 35, ../../sass/partials/base/_reset.scss */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+/* line 39, ../../sass/partials/base/_reset.scss */
+nav ul {
+  list-style: none;
+}
+
+/* line 43, ../../sass/partials/base/_reset.scss */
+blockquote, q {
+  quotes: none;
+}
+
+/* line 48, ../../sass/partials/base/_reset.scss */
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+
+/* line 53, ../../sass/partials/base/_reset.scss */
+a {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+/* change colours to suit your needs */
+/* line 62, ../../sass/partials/base/_reset.scss */
+ins {
+  background-color: #ff9;
+  color: #000;
+  text-decoration: none;
+}
+
+/* change colours to suit your needs */
+/* line 69, ../../sass/partials/base/_reset.scss */
+mark {
+  background-color: #ff9;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+
+/* line 76, ../../sass/partials/base/_reset.scss */
+del {
+  text-decoration: line-through;
+}
+
+/* line 80, ../../sass/partials/base/_reset.scss */
+abbr[title], dfn[title] {
+  border-bottom: 1px dotted;
+  cursor: help;
+}
+
+/* line 85, ../../sass/partials/base/_reset.scss */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* change border colour to suit your needs */
+/* line 91, ../../sass/partials/base/_reset.scss */
+hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid #cccccc;
+  margin: 1em 0;
+  padding: 0;
+}
+
+/* line 100, ../../sass/partials/base/_reset.scss */
+input, select {
+  vertical-align: middle;
+}
+
+/* line 104, ../../sass/partials/base/_reset.scss */
+* {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: 'pt_sansitalic';
+  src: url("ptsans-light-webfont.eot");
+  src: url("ptsans-light-webfont.eot?#iefix") format("embedded-opentype"), url("ptsans-light-webfont.woff") format("woff"), url("ptsans-light-webfont.ttf") format("truetype"), url("ptsans-light-webfont.svg#pt_sansitalic") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'pt_sans_captionbold';
+  src: url("ptsans-bold-webfont.eot");
+  src: url("ptsans-bold-webfont.eot?#iefix") format("embedded-opentype"), url("ptsans-bold-webfont.woff") format("woff"), url("ptsans-bold-webfont.ttf") format("truetype"), url("ptsans-bold-webfont.svg#pt_sans_captionbold") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'pt_sans_captionregular';
+  src: url("ptsans-regular-webfont.eot");
+  src: url("ptsans-regular-webfont.eot?#iefix") format("embedded-opentype"), url("ptsans-regular-webfont.woff") format("woff"), url("ptsans-regular-webfont.ttf") format("truetype"), url("ptsans-regular-webfont.svg#pt_sans_captionregular") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* line 1, ../../sass/partials/base/_base.scss */
+html, body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 100%;
+}
+
+/* line 6, ../../sass/partials/base/_base.scss */
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* line 13, ../../sass/partials/base/_base.scss */
+strong {
+  font-weight: bold;
+}
+
+/* line 14, ../../sass/partials/base/_base.scss */
+em {
+  font-style: italic;
+}
+
+/* line 16, ../../sass/partials/base/_base.scss */
+.templates {
+  display: none;
+}
+
+/* line 18, ../../sass/partials/base/_base.scss */
+#artist_image {
+  position: absolute;
+  z-index: 99999;
+  top: 60px;
+}
+
+/* line 24, ../../sass/partials/base/_base.scss */
+#scroll {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  overflow: hidden;
+  background: #bcbcbc;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #bcbcbc 0%, #0a0506 6%, #444444 91%, #0a0506 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #bcbcbc), color-stop(6%, #0a0506), color-stop(91%, #444444), color-stop(100%, #0a0506));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #bcbcbc 0%, #0a0506 6%, #444444 91%, #0a0506 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #bcbcbc 0%, #0a0506 6%, #444444 91%, #0a0506 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #bcbcbc 0%, #0a0506 6%, #444444 91%, #0a0506 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #bcbcbc 0%, #0a0506 6%, #444444 91%, #0a0506 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#bcbcbc', endColorstr='#0a0506',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 42, ../../sass/partials/base/_base.scss */
+#container {
+  transition: background 1s ease-out;
+  -webkit-transition: background 1s ease-out;
+  -ms-transition: background 1s ease-out;
+  -moz-transition: background 1s ease-out;
+  -o-transition: background 1s ease-out;
+}
+
+/* line 46, ../../sass/partials/base/_base.scss */
+#trail {
+  position: absolute;
+  z-index: 99;
+  width: 3000px;
+  overflow: hidden;
+}
+/* line 52, ../../sass/partials/base/_base.scss */
+#trail #buttons {
+  float: left;
+  overflow: hidden;
+}
+/* line 54, ../../sass/partials/base/_base.scss */
+#trail a {
+  display: block;
+  float: left;
+  color: black;
+  text-decoration: none;
+  font-family: "Roboto Condensed", sans-serif;
+  padding: 6px 10px;
+  margin: 5px 0px 5px 0;
+  background: #ffffff;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, white 0%, #f1f1f1 50%, #e1e1e1 51%, #f6f6f6 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(50%, #f1f1f1), color-stop(51%, #e1e1e1), color-stop(100%, #f6f6f6));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, white 0%, #f1f1f1 50%, #e1e1e1 51%, #f6f6f6 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, white 0%, #f1f1f1 50%, #e1e1e1 51%, #f6f6f6 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, white 0%, #f1f1f1 50%, #e1e1e1 51%, #f6f6f6 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #ffffff 0%, #f1f1f1 50%, #e1e1e1 51%, #f6f6f6 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f6f6f6',GradientType=0 );
+  /* IE6-9 */
+  text-shadow: 1px 1px 0px white;
+  filter: dropshadow(color=white, offx=1, offy=1);
+  border-radius: 0;
+}
+/* line 74, ../../sass/partials/base/_base.scss */
+#trail a:hover, #trail a:active {
+  background: #fcfcfc;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #fcfcfc 0%, #e1e1e1 48%, #f1f1f1 50%, white 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fcfcfc), color-stop(48%, #e1e1e1), color-stop(50%, #f1f1f1), color-stop(100%, white));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #fcfcfc 0%, #e1e1e1 48%, #f1f1f1 50%, white 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #fcfcfc 0%, #e1e1e1 48%, #f1f1f1 50%, white 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #fcfcfc 0%, #e1e1e1 48%, #f1f1f1 50%, white 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #fcfcfc 0%, #e1e1e1 48%, #f1f1f1 50%, #ffffff 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fcfcfc', endColorstr='#ffffff',GradientType=0 );
+  /* IE6-9 */
+  -webkit-box-shadow: inset 0px 2px 5px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0px 2px 5px 0px rgba(0, 0, 0, 0.5);
+}
+/* line 88, ../../sass/partials/base/_base.scss */
+#trail a:active {
+  -webkit-box-shadow: inset 0px 2px 5px 0px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0px 2px 5px 0px rgba(0, 0, 0, 0.7);
+}
+/* line 93, ../../sass/partials/base/_base.scss */
+#trail a:first-child {
+  border-radius: 10px;
+}
+/* line 97, ../../sass/partials/base/_base.scss */
+#trail a:last-child {
+  border-bottom-right-radius: 10px;
+  border-top-right-radius: 10px;
+}
+/* line 102, ../../sass/partials/base/_base.scss */
+#trail a:not(:last-child):after {
+  content: '>';
+  margin: 0 0 0 15px;
+}
+/* line 107, ../../sass/partials/base/_base.scss */
+#trail a.append {
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+/* line 116, ../../sass/partials/base/_base.scss */
+.sidebar {
+  width: 490px;
+  height: 100%;
+  position: absolute;
+  right: -392px;
+  padding: 80px 40px 40px 40px;
+  color: white;
+  background-image: url(../img/more.png);
+  background-position: left center;
+  background-repeat: no-repeat;
+  transition: right 0.2s ease-in;
+  -webkit-transition: right 0.2s ease-in;
+  -ms-transition: right 0.2s ease-in;
+  -moz-transition: right 0.2s ease-in;
+  -o-transition: right 0.2s ease-in;
+  line-height: 20px;
+}
+/* line 131, ../../sass/partials/base/_base.scss */
+.sidebar h2 {
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: none;
+}
+/* line 137, ../../sass/partials/base/_base.scss */
+.sidebar a {
+  color: white;
+}
+/* line 141, ../../sass/partials/base/_base.scss */
+.sidebar .content {
+  display: none;
+  margin: 0 0 1em 0;
+}
+/* line 145, ../../sass/partials/base/_base.scss */
+.sidebar .section {
+  opacity: 0;
+  -webkit-opacity: 0;
+  -ms-opacity: 0;
+  -moz-opacity: 0;
+  -o-opacity: 0;
+  transition: opacity 0.2 ease-out;
+  -webkit-transition: opacity 0.2 ease-out;
+  -ms-transition: opacity 0.2 ease-out;
+  -moz-transition: opacity 0.2 ease-out;
+  -o-transition: opacity 0.2 ease-out;
+}
+/* line 151, ../../sass/partials/base/_base.scss */
+.sidebar:hover, .sidebar.open {
+  right: 0px;
+  background-position: -100px center;
+  background-color: rgba(28, 28, 28, 0.95);
+}
+/* line 156, ../../sass/partials/base/_base.scss */
+.sidebar:hover .bio, .sidebar.open .bio {
+  display: block;
+}
+/* line 158, ../../sass/partials/base/_base.scss */
+.sidebar:hover .section, .sidebar.open .section {
+  opacity: 1;
+  -webkit-opacity: 1;
+  -ms-opacity: 1;
+  -moz-opacity: 1;
+  -o-opacity: 1;
+}

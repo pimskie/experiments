@@ -1,0 +1,147 @@
+/* Grid
+	========================================================================== */
+
+$grid-gutter: 					16px;
+$grid-push:						true;
+$grid-pull:						true;
+$grid-offset:					true;
+$breakpoints: 					(mobile: 0, tiny: 30em, small: 37.5em, medium: 60em, large: 71.25em); // 0, 480, 600px, 960px, 1140px
+
+
+/* Layout
+	========================================================================== */
+
+$max-total-width:				80em; // 1280px
+$gutter:						$grid-gutter;
+
+
+/* Type
+	========================================================================== */
+
+$font-size:						16px;
+$body-font-size:				14px;
+
+// Base fonts
+$display-font:					"Helvetica Neue", Helvetica, Arial, sans-serif;
+$body-font:						"Helvetica Neue", Helvetica, Arial, sans-serif;
+$mono-font:						"Lucida Console", "Lucida Sans Typewriter", Monaco, "Bitstream Vera Sans Mono", monospace;
+
+// Font sizes
+$font-size-huge:				60px;
+$font-size-largest:				48px;
+$font-size-larger:				36px;
+$font-size-large:				24px;
+$font-size-medium:				21px;
+$font-size-normal:				16px;
+$font-size-small:				14px;
+$font-size-smaller:				12px;
+$font-size-smallest:			10px;
+
+// Font weights
+$thin:							100;
+$extra-light:					200;
+$light:							300;
+$normal:						400;
+$medium:						500;
+$semi-bold:						600;
+$bold:							700;
+$extra-bold:					800;
+$black:							900;
+
+
+/* Colors
+	========================================================================== */
+
+// Base colors
+$black:							#1c1c1c;
+$white:							#fff;
+$mark:							lighten(yellow, 30%);
+
+$negative:						crimson;
+$positive:						mediumseagreen;
+
+// Gray tints
+$gray:							#ccc;
+$gray-light:					lighten($gray, 7.5%);
+$gray-lighter:					lighten($gray, 10%);
+$gray-lightest:					lighten($gray, 17.5%);
+$gray-dark:						darken($gray, 7.5%);
+$gray-darker:					darken($gray, 10%);
+$gray-darkest:					darken($gray, 17.5%);
+
+// Brand colors
+$brand-color-1: 				#1abadd;
+$brand-color-1-light:			lighten($brand-color-1, 7.5%);
+$brand-color-1-lighter:			lighten($brand-color-1, 10%);
+$brand-color-1-dark: 			darken($brand-color-1, 7.5%);
+$brand-color-1-darker: 			darken($brand-color-1, 10%);
+
+$brand-color-2:	 				black;
+$brand-color-2-light:			lighten($brand-color-2, 7.5%);
+$brand-color-2-lighter:			lighten($brand-color-2, 10%);
+$brand-color-2-dark: 			darken($brand-color-2, 7.5%);
+$brand-color-2-darker: 			darken($brand-color-2, 10%);
+
+// Anchor colors
+$anchor:						blue;
+$anchor-hover:					tomato;
+$anchor-visited:				indigo;
+
+// Social
+$facebook:						#3b5998;
+$facebook-dark:					darken($facebook, 5%);
+
+$linkedin:						#0e76a8;
+$linkedin-dark:					darken($linkedin, 5%);
+
+$twitter:						#00acee;
+$twitter-dark:					darken($twitter, 5%);
+
+
+/* Scaffolding
+	========================================================================== */
+
+$body-background-color:			$white;
+$body-text-color:				$black;
+
+$placeholder-text-color:		$gray-darkest;
+
+
+/* Icons
+	========================================================================== */
+
+$icon-s:						24px;
+$icon-m:						$icon-s * 2;
+$icon-l:						$icon-s * 4;
+
+
+/* Borders
+	========================================================================== */
+
+$border-s:						1px;
+$border-m:						2px;
+$border-l:						4px;
+
+$radius:						2px;
+$radius-s:						2px;
+$radius-m:						$radius-s * 2;
+$radius-l:						$radius-s * 3;
+$radius-full:					50%;
+
+
+/* Alignments
+	========================================================================== */
+
+$distance-xs:					$grid-gutter;
+$distance-s:					$distance-xs * 2;
+$distance-m:					$distance-xs * 4;
+$distance-l:					$distance-xs * 8;
+$distance-xl:					$distance-xs * 16;
+
+
+/* Speeds
+	========================================================================== */
+
+$speed-1:						0.25s;
+$speed-2:						$speed-1 * 2;
+$speed-3:						$speed-1 * 4;

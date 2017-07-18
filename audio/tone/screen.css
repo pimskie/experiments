@@ -1,0 +1,16 @@
+html, 
+body, 
+canvas {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+	background: #fff;
+}
+
+
+canvas {
+ 	border: 1px solid #BFBFBF;
+ 	position: relative;
+}

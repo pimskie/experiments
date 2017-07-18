@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html lang="en" class="no-js ie6 oldie"> <![endif]-->
+<!--[if IE 7]>    <html lang="en" class="no-js ie7 oldie"> <![endif]-->
+<!--[if IE 8]>    <html lang="en" class="no-js ie8 oldie"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+  <!--<![endif]-->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
+    <!--[if IE]>
+    <meta http-equiv="imagetoolbar" content="false">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <![endif]-->
+
+    <!-- <meta content="width=device-width, initial-scale=1.0" name="viewport" /> -->
+
+    <title>Canvas Pixel Shifting</title>
+
+    <meta name="description" content="" />
+    <meta property="og:url" content=""/>
+    <meta property="og:title" content=""/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:description" content="" />
+    <meta property="og:image" content=""/>
+    <meta property="og:site_name" content=""/>
+
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="lib/img/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="lib/img/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="lib/img/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="lib/img/apple-touch-icon-57x57-precomposed.png">
+
+
+    <link rel="shortcut icon" href="lib/img/favicon.ico" />
+
+    <!-- JS -->
+
+    <!-- CSS -->
+    <!--[if IE 7]> <link href="lib/css/ie7.css" rel="stylesheet" /> <![endif]-->
+    <!--[if IE 8]> <link href="lib/css/ie8.css" rel="stylesheet" /> <![endif]-->
+    <!--[if IE 9]> <link href="lib/css/ie9.css" rel="stylesheet" /> <![endif]-->
+    <link href="lib/css/screen.css" rel="stylesheet" />
+    <link href="lib/css/ui.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="lib/js/modernizr.custom.min.js"></script>
+  </head>
+<body>
+  <div class="chrome">
+
+    <a href="http://www.google.nl/intl/nl/chrome/browser/">
+      <img src="lib/img/chrome.png" />
+      download Chrome
+    </a>
+  </div>
+
+  <div class="wrapper">
+    <div class="row canvas">
+      <canvas id="canvas" width="300" height="300">
+        Je hebt een peppie browser
+      </canvas>
+
+      <canvas id="canvas_copy" width="300" height="300">
+        Je hebt een peppie browser
+      </canvas>
+
+      <canvas id="canvas_slice" width="300" height="300">
+        Je hebt een peppie browser
+      </canvas>
+    </div>
+
+    <div class="row controls">
+      <div class="column">&nbsp;</div>
+      <div class="column">
+        <div class="control"><label for="red">Red: </label> <input type="range" id="red" class="color smallslider-out" value="255" step="1" /></div>
+        <div class="control"><label for="green">Green: </label> <input type="range" id="green" class="color smallslider-out" value="0" step="1" /></div>
+        <div class="control"><label for="blue">Blue: </label> <input type="range" id="blue" class="color smallslider-out" value="0" step="1" /></div>
+        <div class="control"><label for="overbright">Overbright: </label> <input type="range" id="overbright" class="smallslider-out" value="0" step="1" /></div>
+        <div class="control"><label for="contrast">Contrast: </label> <input type="range" id="contrast" class="smallslider-out" value="0" step="1" /></div>
+      </div>
+
+      <div class="column">
+        <div class="control"><label for="tiles">Tile size: </label> <input type="range" id="tiles" class="tiles smallslider-out" value="1" step="1" /></div>
+        <div class="control"><label for="force">Force: </label> <input type="range" id="force" class="force smallslider-out" value="1" step="1" /></div>
+        <div class="control"><label for="grow">Grow: </label> <input type="range" id="grow" class="grow smallslider-out" value="1" step="1" /></div>
+      </div>
+
+    </div>
+  </div>
+
+    <script src="lib/js/jquery-1.9.0.min.js"></script>
+    <script src="lib/js/selectivizr-min.js"></script>
+    <script src="lib/js/main.js"></script>
+
+    <script>
+      var _gaq=[["_setAccount","UA-XXXXX-X"],["_trackPageview"],["_trackPageLoadTime"]];
+      (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+      g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
+      s.parentNode.insertBefore(g,s)}(document,"script"));
+    </script>
+    <!--[if lt IE 7]>
+      <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+      <script>
+        window.attachEvent("onload",function(){CFInstall.check({mode:"overlay"})});
+      </script>
+    <![endif]-->
+  </body>
+</html>

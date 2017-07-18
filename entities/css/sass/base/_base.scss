@@ -1,0 +1,11 @@
+html, body {
+	font-family: $font-family;
+}
+
+.output {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	padding: 1em;
+	border: 1px solid grey;
+}

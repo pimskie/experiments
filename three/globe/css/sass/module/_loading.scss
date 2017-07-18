@@ -1,0 +1,49 @@
+.loading {
+	position: fixed;
+	z-index: 999;
+
+	display: none;
+
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, .2);
+
+	&:before {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+
+		width: 50px;
+		height: 50px;
+
+		margin-top: -25px;
+		margin-left: -25px;
+
+		display: inline-block;
+		content: "";
+
+		border-radius: 50%;
+		border: 2px solid crimson;
+		border-right: none;
+		border-bottom: none;
+
+		@include animation-name(spin);
+		@include animation-duration(1s);
+		@include animation-timing-function(linear);
+		@include animation-iteration-count(infinite);
+	}
+
+	&.show {
+		display: block;
+	}
+}
+
+@include keyframes(spin) {
+	0% { 
+		transform: rotate(0deg);
+	}
+
+	100% { 
+		transform: rotate(360deg);
+	}
+}

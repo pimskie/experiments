@@ -1,0 +1,118 @@
+/*! /* https://gist.github.com/haggen/e462cd22269cef8e0e0b */
+@import url("https://cdn.rawgit.com/haggen/e462cd22269cef8e0e0b/raw/f6a413b363acb43a76da4eba7aafdd1bb939e356/pragmatica-web.css");
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; }
+
+body {
+  font-family: 'Pragmatica Web', sans-serif;
+  color: #fff;
+  background: linear-gradient(45deg, #dddddd 36%, #a6aeaf 100%);
+  background-size: cover; }
+
+h1 {
+  text-transform: uppercase;
+  font-size: 3.7rem;
+  letter-spacing: -4px; }
+
+h2 {
+  margin: 0;
+  font-size: 2.7rem;
+  letter-spacing: -3px; }
+
+.canvas-draw {
+  display: none; }
+
+.info {
+  position: absolute;
+  top: 0;
+  left: 11.7%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  display: none; }
+
+.header {
+  margin-bottom: 11vh;
+  text-transform: uppercase;
+  font-weight: 700; }
+  .header::before {
+    content: '';
+    width: 0.75rem;
+    height: 0.75rem;
+    display: inline-block;
+    margin-right: 10px;
+    background: #fff; }
+
+.title {
+  margin-bottom: 16vh;
+  line-height: 0.9; }
+  .title__name {
+    display: block;
+    font-size: 10rem;
+    margin-left: -10px; }
+  .title__underline {
+    margin-top: 6vh;
+    height: 3px;
+    background: #fff; }
+
+.target__icon, .target__name {
+  display: inline-block;
+  vertical-align: middle; }
+
+.target__icon {
+  margin-right: 6px;
+  padding: 0.75rem;
+  border-radius: 6px;
+  background: #fff; }
+
+.target__name {
+  margin: 0;
+  font-size: 2.7rem; }
+
+.clock {
+  position: relative;
+  width: 1.5rem;
+  height: 1.5rem;
+  vertical-align: middle;
+  border: 2px solid #a6aeaf;
+  border-radius: 50%; }
+  .clock::before, .clock::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: calc(50% - 2px);
+    width: 40%;
+    height: 2px;
+    background: #a6aeaf;
+    transform-origin: left center; }
+  .clock::before {
+    transform: rotate(10deg); }
+  .clock::after {
+    transform: rotate(100deg); }
+  .clock__tick {
+    width: 100%;
+    height: 3px;
+    position: absolute;
+    top: calc(50% - (3px / 2)); }
+    .clock__tick::after, .clock__tick::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 20%;
+      height: 100%;
+      background: #a6aeaf; }
+    .clock__tick::before {
+      left: -20%; }
+    .clock__tick::after {
+      right: -20%; }
+    .clock__tick--vertical {
+      transform: rotate(90deg); }
+      .clock__tick--vertical::before, .clock__tick--vertical::after {
+        top: 0; }

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Collatz</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+		body {
+			min-height: 100vh;
+		}
+
+		.container {
+			display: flex;
+			align-items: center;
+		}
+
+	</style>
+</head>
+<body>
+	<!--<div>
+		<blockquote>
+			No matter what (whole) you start with, you will always eventually reach 1
+		</blockquote>
+		<code>3n + 1 conjecture</code>
+	</div>-->
+
+	<div class="container">
+		<canvas class="canvas js-canvas"></canvas>
+	</div>
+
+<script src="https://rawgit.com/josephg/noisejs/master/perlin.js"></script>
+<script src="https://rawgit.com/pimskie/vector/master/vector.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.3/dat.gui.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

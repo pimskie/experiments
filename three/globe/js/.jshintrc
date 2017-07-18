@@ -1,0 +1,36 @@
+{
+	"globals":  {
+		"Modernizr"	: false,
+		"define"	: false,
+		"require"	: false,
+		"_"			: false,
+		"THREE"		: false
+	},
+
+	"maxerr"		: 100,
+
+	"bitwise"		: false,
+	"camelcase"		: false,
+	"curly"			: true,
+	"eqeqeq"		: true,
+	"forin"			: true,
+	"immed"			: true,
+	"indent"		: 4,
+	"latedef"		: true,
+	"newcap"		: true,
+	"noarg"			: true,
+	"noempty"		: true,
+	"nonew"			: true,
+	"plusplus"		: false,
+	"quotmark"		: "single",
+
+	"undef"			: true,
+	
+	"strict"		: true,
+	"trailing"		: true,
+	"maxparams"		: false,
+
+	"browser"		: true,
+	"devel"			: true,
+	"jquery"		: true
+}

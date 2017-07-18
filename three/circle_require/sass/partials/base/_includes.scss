@@ -1,0 +1,132 @@
+// Fall back values for ie boolean vars
+$ie7: false !default;
+$ie8: false !default;
+$ie9: false !default;
+
+$lte-ie7: false !default;
+$lte-ie8: false !default;
+$lte-ie9: false !default;
+
+/* DIMENSIONS */
+$min-width: 940px;
+$max-width: 1280px;
+$white-space: 80px;
+
+/* COLORS */
+$fontcolor-default:#666;
+
+$blue-dark: #002154;
+$blue-light: #87bbe2;
+$purple: #7b0f70;
+
+$grey: #999;
+$black: #000;
+$white: #fff;
+
+//font-sizes
+$fsize-default: 1em;
+$fsize-h1: 3.75em;
+$fsize-h2: 1.5em;
+
+/* ## fonts ## */
+@mixin default-fontfamily { font-family:'Lucida Grande','Lucida Sans',Arial,Verdana,"Helvetica", sans-serif; }
+
+@mixin custom-fontfamily {
+	font-family:'pt_sansitalic', 'Lucida Grande','Lucida Sans',Arial,Verdana,"Helvetica", sans-serif; font-weight:normal;
+}
+
+/* ## Fix the clear on elements without the required class. NB: watch it! ## */
+@mixin cf { *zoom:1;
+	&:before, &:after { content: ""; display: table; }
+	&:after { clear: both; }
+}
+
+
+/* ## rounded corners ## */
+@mixin rounded-corners ($radius: 5px) {
+	border-radius: $radius;
+	-webkit-border-radius: $radius;
+	-moz-border-radius: $radius; }
+
+/* ## Box shadow ## */
+@mixin dropshadow($hor:2px,$vert:2px,$blur:2px,$spread:2px,$color:rgba(0,0,0,0.3)) {
+	-webkit-box-shadow: $hor $vert $blur $spread $color;
+	-moz-box-shadow: $hor $vert $blur $spread $color;
+	box-shadow: $hor $vert $blur $spread $color;
+} 
+@mixin dropshadow-inset($hor:2px,$vert:2px,$blur:2px,$spread:2px,$color:rgba(0,0,0,0.3)) { -webkit-box-shadow: $hor $vert $blur $spread $color inset; -moz-box-shadow: $hor $vert $blur $spread $color inset; box-shadow: $hor $vert $blur $spread $color inset; }
+
+@mixin textshadow {
+  text-shadow:2px 1px 2px rgba(0,0,0,0.3);
+}
+
+/* ## Accessibility ## */
+/* Places an item out of sight while keeping it available for screenreaders. */
+/* Focusable elements such as links and inputs are placed back in sight on focus, for keyboard users. */
+@mixin accHide { position:absolute; left:-999em; top:0; &:focus { left:1em; } }
+
+/* To hide hide text */
+@mixin hide-text { text-indent:100%; white-space:nowrap; overflow:hidden; }
+@mixin show-text { text-indent:0; white-space:normal; overflow:auto; }
+
+@mixin box-sizing {
+	-moz-box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	box-sizing:border-box;
+}
+@mixin no-box-sizing { -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; }
+
+@mixin ellipsIt { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+@mixin vendor_prefix( $property, $value ) {
+    #{$property}: #{$value};
+    -webkit-#{$property}: #{$value};
+   -ms-#{$property}: #{$value};
+   -moz-#{$property}: #{$value};
+    -o-#{$property}: #{$value};
+}
+
+@mixin transition( $property: all, $time: 1s, $timing: ease-out) {
+    $value: $property $time $timing;
+    @include vendor_prefix( transition, $value );
+}
+
+/* MEDIA QUERIES */
+$mobile: 480px;
+$tablet: 480px;
+$desktop: 1024px;
+$desktop-large: 1280px;
+
+// HOW TO:
+// @include device(mobile) { ... }
+// @include device(tablet) { ... }
+// @include device(desktop) { ... }
+
+@mixin device($device) {
+  @if $device == mobile {
+  	@media only screen and (max-width: $mobile) { @content; }
+  }
+  @else if $lte-ie8 {
+  	@content;
+  }
+  @else if $device == tablet {
+    @media only screen and (min-width: $tablet) { @content; }
+  }
+  @else if $device == desktop {
+    @media only screen and (min-width: $desktop) { @content; }
+  }
+  @else if $device == desktop-small {
+    @media only screen and (max-width: $desktop-large) { @content; }
+  }
+  @else if $device == desktop-large {
+    @media only screen and (min-width: $desktop-large) { @content; }
+  }
+}
+
+//RETINA MIXIN
+@mixin retina() {
+	@media only screen and (-webkit-min-device-pixel-ratio:2) {
+		background-size:auto 100%;
+    	@content;
+    }
+}

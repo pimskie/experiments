@@ -1,0 +1,228 @@
+$dimension: 100px;
+$perspective: 1000px;
+
+$cols: 4;
+$count: $cols * $cols;
+$totalWidth: $cols * $dimension;
+
+$anim-time: 1s;
+
+body,
+html {
+	width: 100%;
+	height: 100%;
+
+	overflow: hidden;
+}
+
+
+body {
+	perspective: $perspective;
+}
+
+.btn {
+	padding: 10px;
+
+	color: white;
+	background: #50AED4;
+	border: none;
+
+	cursor: pointer;
+
+	transition: background .2s ease-out;
+
+	&:hover {
+		background: darken(#50AED4, 10%);
+	}
+}
+
+.is-3d {
+	transform-style: preserve-3d;
+}
+
+.stage {
+	$offset: (($cols) * $dimension) / 2;
+
+	position: absolute;
+	top: 40vh;
+	left: calc(50% - #{$offset});
+
+	width: $totalWidth;
+	height: $totalWidth;
+
+	transform-origin: ($totalWidth / 2) center #{-$totalWidth / 2};
+	transition: transform 1s ease-out;
+	transform: translateY(-#{$dimension}) rotateX(55deg) rotateY(0deg) rotateZ(40deg);
+
+	.is-still & {
+		transform: translateY(-#{$dimension}) rotateX(0deg);
+	}
+}
+
+
+.cubes {
+	position: relative;
+	transform-origin: ($totalWidth / 2) center #{-$totalWidth / 2};
+}
+
+.cube-container {
+	position: absolute;
+
+	// shadow
+	&:after {
+		content: '';
+		width: 100px;
+		height: 100px;
+		background: lighten($gray, 5%);
+		display: block;
+
+		filter: blur(5px);
+		transform: translateY(-#{$dimension}) translateZ(-#{$dimension});
+		animation: shadow $anim-time ease-out infinite;
+
+		.is-still & {
+			animation: none;
+		}
+	}
+}
+
+.cube {
+	width: $dimension;
+	height: $dimension;
+
+	transform-style: preserve-3d;
+	animation: scale $anim-time ease-out infinite;
+
+	.is-still & {
+		animation: none;
+	}
+}
+
+
+.face {
+	position: absolute;
+
+	width: $dimension;
+	height: $dimension;
+
+	&:before,
+	&:after {
+		content: '';
+		position: absolute;
+		width: 100%;
+		height: 100%;
+
+		background: white;
+	}
+
+}
+
+.fronts {
+	&:after {
+		transform: translateZ(-#{$dimension});
+	}
+}
+
+.sides {
+	&::before,
+	&::after {
+		background: lighten($gray, 10%);
+	}
+
+	&::before {
+		transform-origin: 100% 0;
+		transform: translateX(-100%) rotateY(-90deg);
+	}
+
+	&::after {
+		transform-origin: 0 0;
+		transform: translateX(100%) rotateY(90deg);
+	}
+}
+
+
+.floors {
+	&::before,
+	&::after {
+		background: lighten($gray, 15%);
+	}
+
+	&::before {
+		transform-origin: 0 0;
+		transform: rotateX(-90deg);
+	}
+
+	&::after {
+		transform-origin: 0 100%;
+		transform: rotateX(90deg);
+	}
+}
+
+
+$x: 0px;
+$z: 0px;
+$delay: 0s;
+$delay-inc: 0.02;
+$color-per: 0%;
+$color-per-inc: 100 / $count;
+$depth: 1000;
+
+@for $i from 1 to $count + 1 {
+
+	.cube-container:nth-child(#{$i}) {
+		transform: translateX($x) translateY($z);
+		z-index: $depth;
+
+		.cube,
+		&:after {
+			animation-delay: $delay;
+		}
+	}
+
+	$x: $x + $dimension;
+	$delay: $delay + $delay-inc;
+	$color-per: $color-per + $color-per-inc;
+
+	@if ($i % $cols == 0) {
+		$x: 0px;
+		$z: $z + $dimension;
+		$depth: $depth - 1;
+	}
+
+}
+
+
+
+@keyframes shadow {
+	0% {
+		opacity: 0.6;
+		filter: blur(5px);
+		transform: translateY(-#{$dimension}) translateZ(-#{$dimension}) scale(1);
+	}
+
+	40% {
+		opacity: 0.1;
+		filter: blur(10px);
+		transform: translateY(-#{$dimension}) translateZ(-#{$dimension}) scale(0.2);
+	}
+
+	100% {
+		opacity: 0.6;
+		filter: blur(5px);
+		transform: translateY(-#{$dimension}) translateZ(-#{$dimension}) scale(1);
+	}
+}
+
+@keyframes scale {
+	0% {
+		transform: translateZ(0) scaleZ(1);
+	}
+
+	40% {
+		transform: translateZ(#{$dimension / 2}) scaleZ(0.1);
+	}
+
+	100% {
+		transform: translateZ(0) scaleZ(1);
+	}
+}

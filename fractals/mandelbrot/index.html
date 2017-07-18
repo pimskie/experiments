@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Index</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+		.stats {
+			position: absolute;
+			top: 0;
+			right: 0;
+		}
+
+		.container {
+			position: relative;
+
+			width: 400px;
+			height: 400px;
+		}
+
+		.canvas {
+			display: block;
+			border: 1px solid black;
+		}
+
+        .canvas {
+            cursor: zoom-in;
+            cursor: -webkit-zoom-in;
+        }
+
+        .zoom-out .canvas {
+            cursor: zoom-out;
+            cursor: -webkit-zoom-out;
+        }
+
+	</style>
+</head>
+<body>
+
+<div class="stats js-stats"></div>
+
+
+<div class="container">
+	<canvas class="canvas js-canvas" width="500" height="500"></canvas>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
+<!-- <script src="https://rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script> -->
+<script src="main.js"></script>
+</body>
+</html>

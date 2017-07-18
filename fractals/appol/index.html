@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+
+	<style>
+		canvas {
+			border: 1px solid gray;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Apollonian gasket</h1>
+
+		<canvas width="400" height="400"></canvas>
+
+		<div class="btns">
+			<button class="btn is-selected" data-set="symmetric">symmetric</button>
+			<button class="btn" data-set="asymmetric">asymmetric</button>
+			<button class="btn" data-set="nested">nested</button>
+		</div>
+
+		<h2>The Kiss Precise</h2>
+		<blockquote>
+			<p class="content">
+			For pairs of lips to kiss maybe <br />
+			Involves no trigonometry. <br />
+			'Tis not so when four circles kiss <br />
+			Each one the other three.
+			</p>
+
+			<footer>
+			— <cite><a href="https://en.wikipedia.org/wiki/Frederick_Soddy#Descartes.27_theorem" target="_blank">Frederick Soddy</a></cite>
+			</footer>
+		</blockquote>
+
+		<h2>Sources</h2>
+		<ul class="reading-list js-reading-list"></ul>
+
+		</div>
+
+
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/TweenMax.min.js"></script>
+	<script src="http://rawgit.com/infusion/Complex.js/master/complex.js"></script>
+	<script src="main.js"></script>
+</body>
+</html>

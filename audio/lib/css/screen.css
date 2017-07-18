@@ -1,0 +1,177 @@
+/* RESET STYLES
+----------------------------------------------- */
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	font-size: 100%;
+	font-weight: inherit;
+	font-style: normal;
+	vertical-align: baseline;
+	background: transparent;
+	border: 0;
+	outline: 0; }
+
+/* HTML5 RESETS FOR OLDER BROWSERS */
+article, aside, figure, figure img, hgroup, footer, header, nav, section { display: block; }
+ 
+ol, ul { list-style: none; }
+blockquote, q { quotes: none; }
+blockquote:before, blockquote:after,
+q:before, q:after { content: ''; content: none; }
+table { border-collapse: collapse; border-spacing: 0; }
+input, select { vertical-align: middle; }
+input { outline:none; }
+a img { border: 0; }
+:focus { outline: 0; }
+a:hover, a:active { outline: none; }
+* {
+    -moz-box-sizing: border-box; 
+    -webkit-box-sizing: border-box; 
+    box-sizing: border-box;
+}
+
+/* GENERAL
+----------------------------------------------- */
+html, body {
+	background:#FFF;
+	color:#2e2e2e;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:14px;
+	line-height:21px; }
+	
+@font-face {
+    font-family: 'DinProRegular';
+    src: url('dinpro-regular-webfont.eot');
+    src: url('dinpro-regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('dinpro-regular-webfont.woff') format('woff'),
+         url('dinpro-regular-webfont.ttf') format('truetype'),
+         url('dinpro-regular-webfont.svg#DinProRegular') format('svg');
+    font-weight: normal;
+    font-style: normal; }
+    
+@font-face {
+    font-family: 'DinProMedium';
+    src: url('dinpro-medium-webfont.eot');
+    src: url('dinpro-medium-webfont.eot?#iefix') format('embedded-opentype'),
+         url('dinpro-medium-webfont.woff') format('woff'),
+         url('dinpro-medium-webfont.ttf') format('truetype'),
+         url('dinpro-medium-webfont.svg#DinProMedium') format('svg');
+    font-weight: normal;
+    font-style: normal; }
+
+@font-face {
+    font-family: 'DinProBold';
+    src: url('din-bold-webfont.eot');
+    src: url('din-bold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('din-bold-webfont.woff') format('woff'),
+         url('din-bold-webfont.ttf') format('truetype'),
+         url('din-bold-webfont.svg#DinProBold') format('svg');
+    font-weight: normal;
+    font-style: normal; }
+        
+strong  {font-weight:bold;}
+em 		{font-style:italic;}
+
+h3 {
+    text-align: center;
+    text-transform: uppercase;
+    margin: 0 0 20px 0;
+    font-weight: bold;
+}
+
+#wrapper {
+    margin: 30px;  
+}
+
+label {
+    clear: left;
+    float: left;
+}
+label.bottom { 
+    display: inline-block; 
+    width: 100%;
+    margin: 10px 0 0 0;
+}
+
+input[type=radio] {
+    float: left;
+}
+.controls-set {
+    overflow: hidden;
+    margin: 10px 0;
+    padding: 10px 30px 30px 30px;
+    clear: both;
+    border: 1px solid #ccc;
+    float: left;
+    border-radius: 10px;
+}
+#toggle {
+    display: block;
+    height: 40px;
+    width: 40px;
+    text-indent: -1000px;
+    overflow: hidden;
+    background: red;
+}
+#toggle.stop { background: green;}
+
+.column {
+    width: 80px;
+    margin: 0 10px;
+    float: left;
+}
+.column.wide {
+    width: 200px;
+}
+
+.slider-holder {
+    padding: 10px 0 0 0;
+}
+
+.slider {
+    clear: both;
+    margin: 0 auto;
+}
+
+.visual-container {
+    width: 150px;
+    height: 150px;
+    float: left;
+    -webkit-border-radius: 75px;
+    overflow: hidden;
+    background: white;
+    margin: 20px;
+    -moz-box-shadow:inset -1px -3px 16px #8f8f8f;
+    -webkit-box-shadow:inset -1px -3px 16px #8f8f8f;
+    box-shadow:inset -1px -3px 16px #8f8f8f;
+
+    background: -moz-radial-gradient(center, ellipse cover, #c9c9c9 1%, #ffffff 55%); /* FF3.6+ */
+    background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(1%,#c9c9c9), color-stop(55%,#ffffff)); /* Chrome,Safari4+ */
+    background: -webkit-radial-gradient(center, ellipse cover, #c9c9c9 1%,#ffffff 55%); /* Chrome10+,Safari5.1+ */
+    background-position: center center;
+    background-repeat: no-repeat;;
+}
+.visual-container canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.visual-container#uv-container #pin {
+    width: 2px;
+    height: 300px;
+    background: black;
+    bottom: 100px;
+    position: relative;
+    -webkit-transform: rotate(0deg);
+    -webkit-transform-origin: 0% 100%;
+    margin: 0 auto;
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>test file</title>
+
+	<style>
+		@keyframes pulse {
+			0% {
+				transform: scale(1);
+			}
+
+			40% {
+				transform: scale(1.1);
+			}
+
+			100% {
+				transform: scale(1);
+			}
+		}
+
+		html,
+		body {
+			width: 100%;
+			height: 100%;
+
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+
+			perspective: 500px;
+
+			background: #9ee4ff;
+			background-image: radial-gradient(circle, #ffffff 0%, #ffcaca 95%);
+		}
+
+		.image-container {
+			position: absolute;
+			z-index: 2;
+
+			width: 180px;
+
+			transition: transform .2s cubic-bezier(0.130, 0.815, 0.525, 0.970);
+		}
+
+		.image-container:not(.is-animating):hover {
+			transform: scale(1.1);
+		}
+
+		.image-container:hover .image {
+			animation-play-state: paused;
+		}
+
+		.image {
+			animation: pulse 1s cubic-bezier(0.130, 0.815, 0.525, 0.970) infinite;
+			width: 100%;
+
+			cursor: pointer;
+		}
+
+		.canvas {
+			position: absolute;
+			z-index: 1;
+
+			width: 100%;
+			height: 100%;
+		}
+
+		.canvas {
+			display: none;
+		}
+
+		.heart {
+			width: 60px;
+			height: 60px;
+
+			position: absolute;
+
+			transform-style: preserve-3d;
+
+			background-image: url(https://dl.dropboxusercontent.com/u/4792988/heart.png);
+			background-size: contain;
+			background-repeat: no-repeat;
+		}
+
+	</style>
+</head>
+<body>
+	<div class="image-container js-container">
+		<!--<img src="heart.png" alt="Clickie BOOOMMMM" class="image" />-->
+		<img src="https://dl.dropboxusercontent.com/u/4792988/heart.png" alt="Clickie BOOOMMMM" class="image js-img-heart" />
+	</div>
+
+	<canvas class="canvas js-canvas"></canvas>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/plugins/CSSPlugin.min.js"></script>
+	<script src="main.js"></script>
+</body>
+</html>

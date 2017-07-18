@@ -1,0 +1,194 @@
+/* ==========================================================================
+   Typography TODO: cleanup!
+   ========================================================================== */
+
+
+/* Snippets
+   ========================================================================== */
+
+%paragraph {
+	@include rem(font-size, $font-size-normal);
+	font-family: $body-font;
+	line-height: 1.5;
+}
+
+
+/* Base type
+   ========================================================================== */
+
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4,
+h5, .h5,
+h6, .h6 {
+	margin: 1em 0 0;
+	font-family: $display-font;
+	font-weight: $bold;
+	line-height: 1.25;
+}
+
+h1, .h1 {
+	@include rem(font-size, $font-size-largest/1.5);
+	margin-bottom: 1em;
+	border-bottom: 1px solid $gray;
+	
+
+	@include respond-to(medium) {
+		@include rem(font-size, $font-size-larger);
+	}
+}
+
+h2, .h2,
+.intro {
+	@include rem(font-size, $font-size-large);
+}
+
+h3, .h3,
+blockquote p,
+cite,
+.large {
+	@include rem(font-size, $font-size-medium);
+}
+
+// Header 4 is the same as a standard paragraph, move up or down the type ladder from this point.
+h4, .h4,
+blockquote cite,
+dd,
+dt,
+figcaption,
+input,
+label,
+li,
+p,
+textarea {
+	@extend %paragraph;
+}
+
+h5, .h5,
+code,
+pre,
+small,
+.small,
+td {
+	@include rem(font-size, $font-size-small);
+}
+
+h6, .h6 {
+	@include rem(font-size, $font-size-smaller);
+}
+
+p {
+	margin: 0.5em 0 0;
+}
+
+
+/* Lists
+   ========================================================================== */
+
+.unstyled {
+	padding-left: 0;
+	list-style: none;
+}
+
+
+/* Other type
+   ========================================================================== */
+a {
+	color: $anchor;
+
+	&:hover,
+	&.active {
+		color: $anchor-hover;
+		text-decoration: none;
+	}
+}
+
+b, .bold {
+	font-weight: $bold;
+}
+
+blockquote {
+	margin: 0;
+
+	p {
+		margin-bottom: 0;
+	}
+}
+
+cite {
+	font-style: normal;
+}
+
+dl {
+	dt {
+		margin-top: 0.5em;
+		font-weight: $bold;
+
+		&:first-child {
+			margin-top: 0;
+		}
+	}
+
+	dd {
+		margin-left: 0;
+	}
+}
+
+em, .emphasis {
+	font-style: italic;
+}
+
+mark {
+	background-color: $mark;
+}
+
+
+/* Font families
+   ========================================================================== */
+
+.display-font {
+	font-family: $display-font;
+}
+
+.body-font {
+	font-family: $body-font;
+}
+
+.mono-font {
+	font-family: $mono-font;
+}
+
+
+/* Alignment
+   ========================================================================== */
+
+.align-center {
+	text-align: center;
+}
+
+.align-right {
+	text-align: right;
+}
+
+.align-left {
+	text-align: left;
+}
+
+
+/* Variations
+   ========================================================================== */
+
+.uppercase {
+	text-transform: uppercase;
+}
+
+// When text is less important
+.subjacent {
+	color: $gray;
+}
+
+// When text is more important
+.superjacent {
+	color: $brand-color-1;
+}

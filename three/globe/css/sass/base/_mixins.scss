@@ -1,0 +1,100 @@
+/* Animations
+   ========================================================================== */
+@mixin keyframes($name) {
+	@-webkit-keyframes #{$name} {
+		@content;
+	}
+	@-moz-keyframes #{$name} {
+		@content;
+	}
+	@-ms-keyframes #{$name} {
+		@content;
+	}
+	@keyframes #{$name} {
+		@content;
+	}
+}
+
+@mixin animation($name, $iteration-count:1, $timing-function:ease, $duration:$speed-1 * 5, $delay:0, $direction:normal, $play-state:running, $fill-mode:forwards) {
+	-webkit-animation-delay: $delay;
+	-webkit-animation-name: $name;
+	-webkit-animation-iteration-count: $iteration-count;
+	-webkit-animation-timing-function: $timing-function;
+	-webkit-animation-duration: $duration;
+	animation-delay: $delay;
+	animation-name: $name;
+	animation-iteration-count: $iteration-count;
+	animation-timing-function: $timing-function;
+	animation-duration: $duration;
+
+	@if ($direction == normal) {
+		-webkit-animation-direction: $direction;
+		animation-direction: $direction;
+	}
+
+	@if ($play-state == running) {
+		-webkit-animation-play-state: $play-state;
+		animation-play-state: $play-state;
+	}
+
+	@if ($fill-mode == forwards) {
+		-webkit-animation-fill-mode: $fill-mode;
+		animation-fill-mode: $fill-mode;
+	}
+}
+
+
+/* Baseline measured in pixels
+   ========================================================================== */
+// The value should be the same as the font-size value for the html element
+// If the html element's font-size is set to 62.5% (of the browser's default font-size of 16px),
+// then the variable below would be 10px.
+
+$baseline-px: $font-size;
+
+@mixin rem($property, $px-values) {
+	// Convert the baseline into rems
+	$baseline-rem: $baseline-px / 1rem;
+	// Print the first line in pixel values
+	#{$property}: $px-values;
+	// If there is only one (numeric) value, return the property/value line for it.
+	@if type-of($px-values) == "number" {
+	#{$property}: $px-values / $baseline-rem; }
+	@else {
+	// Create an empty list that we can dump values into
+	$rem-values: unquote("");
+	@each $value in $px-values {
+		// If the value is zero, return 0
+		@if $value == 0 {
+		$rem-values: append($rem-values, $value); }
+		@else {
+		$rem-values: append($rem-values, $value / $baseline-rem); } }
+	// Return the property and its list of converted values
+	#{$property}: $rem-values; }
+}
+
+
+/* Hide text
+   ========================================================================== */
+@mixin hide-text { text-indent:100%; white-space:nowrap; overflow:hidden; }
+@mixin show-text { text-indent:0; white-space:normal; overflow:auto; }
+
+// Accessibility
+// Places an item out of sight while keeping it available for screenreaders.
+// Focusable elements such as links and inputs are placed back in sight on focus, for keyboard users.
+@mixin accHide { position: absolute; left: -999em; top: 0; &:focus { left: 1em; } }
+@mixin accShow { position: relative; left: 0; top: 0; &:focus { left: 0; } }
+
+
+/* Ellipsis
+   ========================================================================== */
+@mixin ellipsIt { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+
+/* Opacity
+   ========================================================================== */
+@mixin opacity($opacity) {
+	opacity: $opacity;
+	$opacity-ie: $opacity * 100;
+	filter: alpha(opacity=$opacity-ie); //IE8
+}

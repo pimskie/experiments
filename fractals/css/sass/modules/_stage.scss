@@ -1,0 +1,23 @@
+.stage {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+
+	animation: rotate 15s linear infinite;
+}
+
+@keyframes rotate {
+	0% {
+		transform: rotate(0deg) scale(1);
+	}
+
+	50% {
+		transform: rotate(181deg) scale(1.2);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}

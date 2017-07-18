@@ -1,0 +1,159 @@
+
+/* Variables - Overwrite these in variables.scss
+   ========================================================================== */
+
+$grid-columns: 					12;
+$grid-gutter: 					1em !default;
+
+$grid-push:						false !default;
+$grid-pull:						false !default;
+$grid-offset:					false !default;
+
+$media-queries: 				true !default;
+$media-query-free-breakpoint: 	medium !default;
+$breakpoints: 					(mobile: 0, small: 37.5em, medium: 60em, large: 71.25em) !default; // 0, 600px, 960px, 1140px
+
+$grid-class:					"row" !default;
+$grid-item-class:				"col" !default;
+
+
+/* Grid classes
+   ========================================================================== */
+
+.container {
+	@include clearfix;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: $grid-gutter/2;
+	padding-right:  $grid-gutter/2;
+}
+
+.#{$grid-class} {
+	@include clearfix;
+	margin: 0 (-$grid-gutter/2);
+	padding: 0;
+	list-style: none;
+}
+
+.#{$grid-item-class},
+[class^="#{$grid-item-class + "-"}"],
+[class*="#{" " + $grid-item-class + "-"}"] {
+	@include box-sizing(border-box);
+	position: relative;
+	float: left;
+	width: 100%; // Mobile first
+	min-height: 1px; // Prevent from collapsing when empty
+	margin: 0;
+	padding: 0 $grid-gutter/2;
+}
+
+
+/* Global MQ mixin
+   ========================================================================== */
+
+@mixin respond-to($min-width) {
+	$min-width: convert-breakpoint($min-width);
+	$max-breakpoint: convert-breakpoint($media-query-free-breakpoint);
+
+	@if $media-queries {
+		@media only screen and (min-width: $min-width), print {
+			@content;
+		}
+	}
+	@else if ($min-width and $max-breakpoint) and ($min-width <= $max-breakpoint) {
+		@content;
+	}
+}
+
+// Convert the breakpoint keyword to its corresponding unit (em)
+@function convert-breakpoint($break, $breakpoints: $breakpoints) {
+	$value: false;
+
+	// It's already a number
+	@if type-of($break) == number {
+		$value: $break;
+	}
+	// Get the value from the breakpoints map
+	@else if type-of($break) == string and map-has-key($breakpoints, $break) {
+		$value: map-get($breakpoints, $break);
+	}
+	@else {
+		@warn "Invalid $break parameter passed to @function convert-breakpoint(). Expected: valid map key or number value. Actual value: #{$break}";
+	}
+
+	@return $value;
+}
+
+
+/* Create grid
+   ========================================================================== */
+
+@mixin create-grid($columns, $breakpoints) {
+	@each $break-class, $break-size in $breakpoints {
+		$is-mobile: if($break-size == 0, true, false);
+
+		@include create-grid-columns($columns, $break-class, width, $is-mobile);
+
+		@if $grid-push == true {
+			@include create-grid-columns($columns, $break-class, push, $is-mobile);
+		}
+
+		@if $grid-pull == true {
+			@include create-grid-columns($columns, $break-class, pull, $is-mobile);
+		}
+
+		@if $grid-offset == true {
+			@include create-grid-columns($columns, $break-class, offset, $is-mobile);
+		}
+	}
+}
+
+
+/* Create grid column widths, pull, push and offset
+   ========================================================================== */
+
+@mixin create-grid-columns($columns, $break-class, $type, $is-mobile: false) {
+	$start: if($type == width, 1, 0);
+
+	@if $is-mobile {
+		@for $column from $start through $columns {
+			@include calc-grid-column($column, $break-class, $type, $is-mobile);
+		}
+
+	} @else {
+		@include respond-to($break-class) {
+			@for $column from $start through $columns {
+				@include calc-grid-column($column, $break-class, $type, $is-mobile);
+			}
+		}
+	}
+}
+
+
+/* Calculate grid column
+   ========================================================================== */
+
+@mixin calc-grid-column($column, $break-class, $type, $is-mobile) {
+	$type-class: if($type == width, "-", "-#{$type}-");
+	$break-class: if($is-mobile, "", "-#{$break-class}"); // On mobile don't prefix with MQ name
+
+	.#{$grid-item-class}#{$break-class}#{$type-class}#{$column} {
+		@if $type == width {
+			width: if($column == $grid-columns, 100%, percentage(($column / $grid-columns)));
+		} @else if $type == push {
+			left: if($column == 0, auto, percentage(($column / $grid-columns)));
+		} @else if $type == pull {
+			right: if($column == 0, auto, percentage(($column / $grid-columns)));
+		} @else if $type == offset {
+			margin-left: if($column == 0, 0, percentage(($column / $grid-columns)));
+		} @else {
+			@warn "Invalid $type parameter passed to @mixin calc-grid-column().\nExpected: width, push, pull, offset\nActual: #{$type}";
+		}
+	}
+}
+
+
+/* And finally create the grid!
+   ========================================================================== */
+
+@include create-grid($grid-columns, $breakpoints);

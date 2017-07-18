@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Index</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+		.canvas {
+			display: block;
+		}
+	</style>
+</head>
+<body>
+
+<select class="js-curve">
+	<option value="hilbert">Hilbert</option>
+	<option value="koch">koch</option>
+	<option value="kochSnowflake">koch snowflake</option>
+	<option value="sierpinski">sierpinski</option>
+	<option value="sierpinskiArrowHead">sierpinskiArrowHead</option>
+	<option value="levy" >Lévy C curve</option>
+	<option value="tree">Tree</option>
+	<option value="tree2">Tree 2</option>
+	<option value="gosper" selected>gosper</option>
+</select>
+
+<canvas class="canvas js-canvas" width="500" height="500"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/TweenMax.min.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>

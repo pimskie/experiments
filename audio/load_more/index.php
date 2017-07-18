@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html lang="en" class="no-js ie6 oldie"> <![endif]-->
+<!--[if IE 7]>    <html lang="en" class="no-js ie7 oldie"> <![endif]-->
+<!--[if IE 8]>    <html lang="en" class="no-js ie8 oldie"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+  <!--<![endif]-->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
+    <!--[if IE]>
+    <meta http-equiv="imagetoolbar" content="false">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <![endif]-->
+
+    <!-- <meta content="width=device-width, initial-scale=1.0" name="viewport" /> -->
+
+    <title>HTML 5 test | Audio - Context</title>
+
+    <meta name="description" content="" /> 
+    <meta property="og:url" content=""/> 
+    <meta property="og:title" content=""/> 
+    <meta property="og:type" content="website"/> 
+    <meta property="og:description" content="" /> 
+    <meta property="og:image" content=""/> 
+    <meta property="og:site_name" content=""/>
+
+    <link rel="shortcut icon" href="lib/img/favicon.ico" />
+
+    <!-- JS -->
+
+    <!-- CSS -->
+    <!--[if IE 7]> <link href="lib/css/ie7.css" rel="stylesheet" /> <![endif]-->
+    <!--[if IE 8]> <link href="lib/css/ie8.css" rel="stylesheet" /> <![endif]-->
+    <!--[if IE 9]> <link href="lib/css/ie9.css" rel="stylesheet" /> <![endif]-->
+    <link href="../lib/css/screen.css" rel="stylesheet" />
+
+  </head>
+<body>
+
+    <div id="wrapper">
+      <label for="volume">Volume: </label> <input type="range" id="volume" min="0" max="1" step="0.001" value="1" />
+
+      <a href="#" id="toggle">Playing</a>
+    </div>
+
+    <script src="../lib/js/jquery-1.9.0.min.js"></script>
+    <script src="../lib/js/selectivizr-min.js"></script>
+    <script src="../lib/js/buffer-loader.js"></script>
+    <script src="../lib/js/load-more.js"></script>
+    
+    <script>
+      var _gaq=[["_setAccount","UA-XXXXX-X"],["_trackPageview"],["_trackPageLoadTime"]];
+      (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+      g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
+      s.parentNode.insertBefore(g,s)}(document,"script"));
+    </script>
+    <!--[if lt IE 7]>
+      <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+      <script>
+        window.attachEvent("onload",function(){CFInstall.check({mode:"overlay"})});
+      </script>
+    <![endif]-->
+  </body>
+</html>

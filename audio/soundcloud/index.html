@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>SC test</title>
+
+	<link href="https://a-v2.sndcdn.com/assets/images/sc-icons/favicon-2cadd14b.ico" rel="icon">
+	<link rel="stylesheet" href="dist/css/skin1.css" id="skin" />
+</head>
+
+<body>
+
+	<div class="decks-container">
+		<div class="controller js-controller-left">
+
+			<div class="turntable js-turntable">
+				<div class="turntable__rings">
+					<div class="turntable__ring js-motor"></div>
+					<div class="turntable__disc js-disc">
+						<div class="turntable__disc__inner js-disc-image"></div>
+					</div>
+				</div>
+
+				<div class="turntable__arm js-arm"></div>
+
+				<div class="turntable__button turntable__button--power js-toggle-power"></div>
+				<div class="turntable__power-led"></div>
+
+				<div class="turntable__button turntable__button--start js-toggle-motor"></div>
+
+				<div class="">
+					<div class="slider turntable__tempo-slider js-slider-tempo">
+						<div class="slider__handle js-handle"></div>
+					</div>
+				</div>
+			</div>
+
+			<select name="track" class="js-track-select">
+			<option value="">-select-</option>
+			<option value="https://soundcloud.com/dj-krush-official/dj-krush-everything-and-nothing-feat-divine-styler-30sec">DJ Krush (0:30)</option>
+			<option value="https://soundcloud.com/lucas-portela-1/non-phixion-its-us" >Non Phixion</option>
+			<option value="https://soundcloud.com/pimskie/sound-test">Pannekoek</option>
+			<option selected value="https://soundcloud.com/timo_bakker/sprookje">Sprookje NL</option>
+			<option value="https://soundcloud.com/carnavalfestivalef/assepoester-sprookje">Assepoester</option>
+			<option value="https://soundcloud.com/dmagog/where_there_were_dragons">Sprookje RU</option>
+			<option value="https://soundcloud.com/officialtih/arealvoice">Hardcore</option>
+		</select>
+
+			<br />
+
+			<input type="text" name="trackUrl" class="js-track-input" value="https://s3-us-west-2.amazonaws.com/s.cdpn.io/481938/Find_My_Way_Home.mp3"
+			/>
+			<button class="js-load-track">Load track</button>
+
+			<br />
+
+			<input type="range" class="js-volume" min="0" max="1" step="0.01" value="1" /> <br />
+			<input type="range" class="js-multiply" min="1" max="150" value="75" />
+
+			<br />
+			<br />
+
+			<label for="reverb-none">None</label>
+			<input type="radio" name="reverb" id="reverb-none" value="" checked> <br />
+
+			<label for="reverb-space">Space</label>
+			<input type="radio" name="reverb" id="reverb-space" value="space"> <br />
+
+			<label for="reverb-hall">Hall</label>
+			<input type="radio" name="reverb" id="reverb-hall" value="large-hall"> <br />
+
+			<br />
+
+
+			<div class="drawer js-drawer">
+				<div class="drawer__position js-drawer-progress"></div>
+				<canvas class="drawer__canvas js-drawer-canvas"></canvas>
+			</div>
+
+			<br />
+
+			<div class="js-output"></div>
+		</div>
+
+		<select name="skin">
+		<option value="skin1">skin1</option>
+		<option value="skin2">skin2</option>
+		<option value="skin3">skin3</option>
+		<option value="skin4">skin4</option>
+	</select>
+
+	</div>
+
+	<script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>
+	<script src="dist/js/main.js"></script>
+
+</body>
+
+</html>

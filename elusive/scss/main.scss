@@ -1,0 +1,204 @@
+$white: #fff;
+$gray-light: #dddddd;
+$gray-dark: #a6aeaf;
+
+/*! /* https://gist.github.com/haggen/e462cd22269cef8e0e0b */
+@import url('https://cdn.rawgit.com/haggen/e462cd22269cef8e0e0b/raw/f6a413b363acb43a76da4eba7aafdd1bb939e356/pragmatica-web.css');
+
+html,
+body {
+	width: 100%;
+	height: 100%;
+
+	margin: 0;
+	padding: 0;
+
+	overflow: hidden;
+}
+
+body {
+	font-family: 'Pragmatica Web', sans-serif;
+	color: $white;
+
+	background: linear-gradient(45deg, $gray-light 36%, $gray-dark 100%);
+	background-size: cover;
+
+	// background: url('elusive.jpg');
+	// background-repeat: no-repeat;
+	// background-position: 50% 50%;
+}
+
+h1,
+h2,
+h3 {
+}
+
+h1 {
+	text-transform: uppercase;
+	font-size: 3.7rem;
+	letter-spacing: -4px;
+}
+
+h2 {
+	margin: 0;
+	font-size: 2.7rem;
+	letter-spacing: -3px;
+}
+
+.canvas-draw
+ {
+	display: none;
+}
+
+.info {
+
+	position: absolute;
+	top: 0;
+	left: 11.7%;
+	height: 100vh;
+
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+
+
+	display: none;
+}
+
+.header {
+	margin-bottom: 11vh;
+
+	text-transform: uppercase;
+	font-weight: 700;
+
+	&::before {
+		content: '';
+
+		width: 0.75rem;
+		height: 0.75rem;
+
+		display: inline-block;
+
+		margin-right: 10px;
+
+		background: $white;
+	}
+}
+
+.title {
+	margin-bottom: 16vh; // 3rem;
+	line-height: 0.9;
+
+	&__name {
+		display: block;
+		font-size: 10rem;
+
+		margin-left: -10px;
+	}
+
+	&__underline {
+		margin-top: 6vh; // 3.75rem;
+		height: 3px;
+
+		background: $white;
+	}
+}
+
+.target {
+	&__icon,
+	&__name {
+		display: inline-block;
+		vertical-align: middle;
+	}
+
+	&__icon {
+		margin-right: 6px;
+		padding: 0.75rem;
+		border-radius: 6px;
+		background: $white;
+	}
+
+	&__name {
+		margin: 0;
+		font-size: 2.7rem;
+	}
+}
+
+.clock {
+	position: relative;
+	width: 1.5rem;
+	height: 1.5rem;
+
+	vertical-align: middle;
+
+	border: 2px solid $gray-dark;
+	border-radius: 50%;
+
+	&::before,
+	&::after {
+		content: '';
+
+		position: absolute;
+		left: 50%;
+		top: calc(50% - 2px);
+
+		width: 40%;
+		height: 2px;
+
+		background: $gray-dark;
+
+		transform-origin: left center;
+	}
+
+	&::before {
+		transform: rotate(10deg);
+	}
+	&::after {
+		transform: rotate(100deg);
+	}
+
+	&__tick {
+		$width: 20%;
+		$height: 3px;
+
+		width: 100%;
+		height: $height;
+
+		position: absolute;
+		top: calc(50% - (#{$height} / 2));
+
+		&::after,
+		&::before {
+			content: '';
+			position: absolute;
+
+			top: 0;
+
+			width: $width;
+			height: 100%;
+			background: $gray-dark;
+		}
+
+		&::before {
+			left: -20%;
+		}
+
+		&::after {
+			right: -20%;
+		}
+
+		&--vertical {
+			&::before,
+			&::after {
+				top: 0;
+			}
+
+			&:after {
+				// right: -36%;
+			}
+
+			transform: rotate(90deg);
+		}
+	}
+}

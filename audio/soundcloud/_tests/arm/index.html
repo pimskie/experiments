@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Arm test</title>
+
+	<style>
+		.turntable {
+			position: absolute;
+
+			top: 100px;
+			left: 100px;
+
+			width: 700px;
+			height: 500px;
+
+			background: black;
+		}
+
+		.turntable__arm {
+			position: absolute;
+
+			top: 30px;
+			right: 30px;
+
+			width: 50px;
+			height: 400px;
+
+			transform-origin: 50% 50px;
+
+			transform: rotate(0deg);
+
+			background: crimson;
+		}
+	</style>
+</head>
+<body>
+	<div class="turntable">
+		<div class="turntable__arm js-arm"></div>
+	</div>
+
+	<script src="main.js"></script>
+</body>
+</html>

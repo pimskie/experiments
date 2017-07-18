@@ -1,0 +1,37 @@
+.nav {
+	padding: 0 $gutter $gutter;
+	border-bottom: solid $border-m $gray-light;
+}
+
+.nav-list {
+	@include respond-to(small) {
+		text-align: center;
+	}
+}
+
+.nav-list-item {
+	@include respond-to(small) {
+		display: inline-block;
+		margin: 0 1em;
+	}
+
+	a {
+		display: block;
+		padding: 1em;
+	}
+
+	&.is-active {
+		a {
+			color: $black;
+			background: $gray-light;
+		}
+	}
+}
+
+.nav-search {
+	@include respond-to(small) {
+		position: relative;
+		float: right;
+		top: -3em;
+	}
+}

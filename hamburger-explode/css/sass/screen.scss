@@ -1,0 +1,46 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+html, body {
+	margin: 0;
+	padding: 0;
+
+	font-family: sans-serif;
+
+	color: #000;
+	background: #000;
+}
+
+h1 {
+	text-align: center;
+}
+
+.canvas-source {
+	position: absolute;
+	z-index: 200;
+	opacity: 0.2;
+	display: none;
+}
+
+.btn {
+	position: absolute;
+	z-index: 10;
+
+	right: 20px;
+	bottom: 20px;
+
+	padding: 10px;
+
+	background: #247886;
+	color: #fff;
+
+	border: none;
+}
+
+.dg {
+	z-index: 999;
+
+  input,
+  select {
+    color: #000;
+  }
+}

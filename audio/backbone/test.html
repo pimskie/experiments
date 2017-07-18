@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html lang="en" class="no-js ie6 oldie"> <![endif]-->
+<!--[if IE 7]>    <html lang="en" class="no-js ie7 oldie"> <![endif]-->
+<!--[if IE 8]>    <html lang="en" class="no-js ie8 oldie"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+  <!--<![endif]-->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
+    <!--[if IE]>
+    <meta http-equiv="imagetoolbar" content="false">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <![endif]-->
+
+    <!-- <meta content="width=device-width, initial-scale=1.0" name="viewport" /> -->
+
+    <title>HTML 5 test | Audio - Filter</title>
+
+    <meta name="description" content="" />
+    <meta property="og:url" content=""/>
+    <meta property="og:title" content=""/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:description" content="" />
+    <meta property="og:image" content=""/>
+    <meta property="og:site_name" content=""/>
+
+    <link rel="shortcut icon" href="lib/img/favicon.ico" />
+
+    <!-- JS -->
+
+    <!-- CSS -->
+    <!--[if IE 7]> <link href="lib/css/ie7.css" rel="stylesheet" /> <![endif]-->
+    <!--[if IE 8]> <link href="lib/css/ie8.css" rel="stylesheet" /> <![endif]-->
+    <!--[if IE 9]> <link href="lib/css/ie9.css" rel="stylesheet" /> <![endif]-->
+    <link href="../lib/css/screen.css" rel="stylesheet" />
+    <link href="../lib/css/jquery-ui-1.10.0.custom.css" rel="stylesheet" />
+
+  </head>
+<body>
+
+    <div id="wrapper">
+    </div>
+
+    <script>
+      var ctx;
+
+      if (typeof AudioContext !== "undefined") {
+        ctx = new AudioContext();
+      } else if (typeof webkitAudioContext !== "undefined") {
+        ctx = new webkitAudioContext();
+      } else {
+        throw new Error('Audio Context not supported.');
+      }
+
+      window.audio = new Audio();
+      audio.seekable = true;
+      audio.loop = true;
+      audio.controls = false;
+      audio.src = 'sound/ring_of_fire.mp3';
+      document.querySelector('#wrapper').appendChild(audio);
+
+      var volume = ctx.createGainNode();
+        volume.gain.value = 0.4;
+        console.log(volume);
+
+      function onLoad(e) {
+
+
+        var source = ctx.createMediaElementSource( audio );
+        source.connect( volume );
+        volume.connect( ctx.destination );
+        audio.play();
+      }
+
+      window.addEventListener('load', onLoad, false);
+    </script>
+
+  </body>
+</html>

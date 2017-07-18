@@ -1,0 +1,102 @@
+// This makes sure windows tablets etc. do not scale down, but behave responsively
+@-ms-viewport {
+	width: device-width;
+}
+
+*,
+*:after,
+*:before {
+	@include box-sizing(border-box);
+}
+
+html {
+	min-height: 100%;
+	font: 1em/1.5 $display-font;
+}
+
+body {
+	color: $body-text-color;
+}
+
+html,
+body {
+	color: $body-text-color;
+	background: $body-background-color;
+}
+
+// n00b browsers
+.browsehappy {
+	margin-top: 0;
+	padding: 10px 0;
+	color: $white;
+	background: $brand-color-1;
+	text-align: center;
+
+	a {
+		color: $white;
+		text-decoration: underline;
+
+		&:hover {
+			color: $black;
+		}
+	}
+}
+
+
+/* Base classes & styling
+   ========================================================================== */
+// Reset list
+nav,
+footer {
+	ul,
+	ol,
+	li {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+}
+
+a {
+	text-decoration: none;
+}
+
+
+/* Responsive images
+   ========================================================================== */
+
+img {
+	width: auto; // IE8: http://www.456bereastreet.com/archive/201306/how_to_proportionally_scale_images_that_have_dimension_attributes/
+    max-width: 100%;
+    height: auto;
+	vertical-align: bottom; // Prevents margin on bottom of images or use display: block
+}
+
+
+/* Remove text-shadow in selection highlight. h5bp.com/i
+   ========================================================================== */
+
+::-moz-selection {
+    background: $brand-color-1;
+    text-shadow: none;
+}
+
+::selection {
+    background: $brand-color-1;
+    text-shadow: none;
+}
+
+
+/* Show scrollbars in iOS & Other webkit browsers. http://davidwalsh.name/osx-overflow
+   ========================================================================== */
+
+::-webkit-scrollbar {
+	-webkit-appearance: none;
+	width: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 4px;
+	background-color: rgba(0, 0, 0, .5);
+	box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+}

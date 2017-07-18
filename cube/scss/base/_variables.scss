@@ -1,0 +1,14 @@
+
+/* Colors
+   ========================================================================== */
+
+// Base
+$black:							#1c1c1c;
+$white:							#fff;
+
+// Grays
+$gray:							#ccc;
+$gray-light:					lighten($gray, 7.5%);
+$gray-lighter:					lighten($gray, 12.5%);
+$gray-dark:						darken($gray, 7.5%);
+$gray-darker:					darken($gray, 12.5%);

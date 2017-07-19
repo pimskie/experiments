@@ -1,125 +1,82 @@
-/* globals noise: false */
-
-noise.seed(Math.random());
-
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
-const PI = Math.PI;
-const PI2 = PI * 2;
-const TO_RADIAN = PI / 180;
-const TO_DEGREE = 180 / PI;
-const TICK_SPEED = 0.02;
-
-// all set in `setStage`
-let w = window.innerWidth;
-let h = 500;
-let midY = h >> 1;
-
-let tick = 0;
+let w = 800;
+let h = 300;
 
 canvas.width = w;
 canvas.height = h;
 
-const shape = {
-	color: '#000',
-	angle: 0,
-	speed: 0.01,
-	position: {
-		x: 10,
-		y: h,
+const x = -100;
+const y = h;
+
+const triangles = [
+	{
+		pos: { x, y },
+		angle: 0,
+		color: 'rgba(100, 100, 100, 0.1)',
+		points: [
+			{ x: 50, y: 0 },
+			{ x: -30, y: 20 },
+			{ x: -80, y: -20 },
+		],
 	},
-
-	triangles: [
-		{
-			color: 'rgba(250, 250, 250, 0.3)',
-			points: [
-				{ x: 50, y: -20 },
-				{ x: -90, y: -30 },
-				{ x: -50, y: 0 },
-			],
-		},
-		{
-			color: 'rgba(80, 80, 80, 0.1)',
-			points: [
-				{ x: -45, y: -15 },
-				{ x: -85, y: -25 },
-				{ x: -45, y: 10 },
-			],
-		},
-	],
-};
-
-const drawCircle = (pos) => {
-	ctx.beginPath();
-	ctx.fillStyle = 'black';
-	ctx.arc(pos.x, pos.y, 2, 0, PI * 2, false);
-	ctx.closePath();
-};
-
-const setupStage = () => {
-	onResize();
-};
-
-const onResize = () => {
-	w = window.innerWidth;
-
-	midY = h >> 1;
-
-	canvas.width = w;
-	canvas.height = h;
-};
-
-const clear = () => {
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-};
-
-let r = 10;
+	{
+		pos: { x, y },
+		angle: 0,
+		color: 'rgba(250, 250, 250, 0.2)',
+		points: [
+			{ x: 40, y: -10 },
+			{ x: -25, y: 25 },
+			{ x: -95, y: -10 },
+		],
+	},
+	{
+		pos: { x, y },
+		angle: 0,
+		color: 'rgba(220, 220, 220, 0.2)',
+		points: [
+			{ x: 20, y: 40 },
+			{ x: -30, y: 45 },
+			{ x: -30, y: -60 },
+		],
+	},
+];
 
 const loop = () => {
-	// clear();
-
-	shape.position.x += 1;
-	shape.position.y = midY;
-
-	shape.angle -= shape.speed;
-
-	const { x: fromX, y: fromY } = shape.position;
-
-	ctx.save();
-	ctx.translate(fromX, fromY);
-	ctx.rotate(shape.angle);
-
-	shape.triangles.forEach((triangle) => {
-		ctx.strokeStyle = triangle.color;
-		ctx.fillStyle = triangle.color;
+	triangles.forEach((t) => {
+		ctx.save();
+		ctx.translate(t.pos.x, t.pos.y);
+		ctx.rotate(t.angle);
 
 		ctx.beginPath();
 
-		triangle.points.forEach((point, index) => {
-			if (index === 0) {
-				ctx.moveTo(point.x, point.y);
+		ctx.strokeStyle = t.color;
+		ctx.fillStyle = t.color;
+
+		t.points.forEach((p, i) => {
+			if (i === 0) {
+				ctx.moveTo(p.x, p.y);
 			} else {
-				ctx.lineTo(point.x, point.y);
+				ctx.lineTo(p.x, p.y);
 			}
 		});
 
-		ctx.lineTo(triangle.points[0].x, triangle.points[0].y);
-		ctx.stroke();
+		ctx.lineTo(t.points[2].x, t.points[2].y);
+
 		ctx.closePath();
+		ctx.stroke();
+		ctx.restore();
+
+		t.angle -= 0.01;
+		t.pos.x += 1;
+
+		if (t.pos.x > w) {
+			t.pos.x = 0;
+		}
 	});
-
-	ctx.restore();
-
-	if (shape.position.x > w) {
-		shape.position.x = -100;
-		shape.rotation = Math.random() * PI2;
-	}
 
 	requestAnimationFrame(loop);
 };
 
-window.addEventListener('resize', onResize);
-
-setupStage();
 loop();

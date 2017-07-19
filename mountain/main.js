@@ -1,3 +1,6 @@
+// Inspired by: https://www.openprocessing.org/sketch/85797
+// Which is also much nicer
+
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 

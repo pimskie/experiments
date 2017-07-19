@@ -139,15 +139,9 @@ const drawBranch = (branch, phase) => {
 	});
 };
 
-const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2
+const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 
-const clear = (phase) => {
-	const h = ~~(200 + (160 * phase));
-	const l = 98;
-	const color = `hsl(${h}, 80%, ${l}%)`;
-
-	// document.body.style.backgroundColor = color;
-
+const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
 };

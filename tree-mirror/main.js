@@ -1,6 +1,3 @@
-// Inspired by: https://www.openprocessing.org/sketch/85797
-// Which is also much nicer
-
 const canvas = document.querySelector('.js-canvas');
 const ctx = canvas.getContext('2d');
 
@@ -25,8 +22,7 @@ let spread = 45 * TO_RADIAN;
 let tick = 0;
 
 let autoSpeed = 0.004;
-let diverAtAuto = 0;
-let spreadAuto = 0;
+let autoTick = 0;
 
 canvas.width = canvas2.width = w;
 canvas.height = canvas2.height = h;
@@ -152,13 +148,12 @@ const loop = () => {
 	clear(phase);
 
 	if (autoAnimate) {
-		phase = map(Math.sin(spreadAuto), -1, 1, 0, 1);
+		phase = map(Math.sin(autoTick), -1, 1, 0, 1);
 
 		spread = phase * maxSpread;
-		divergeAt = map(Math.sin(diverAtAuto), -1, 1, 0, 0.5);
+		divergeAt = map(Math.sin(autoTick), -1, 1, 0, 0.5);
 
-		spreadAuto += autoSpeed;
-		diverAtAuto += autoSpeed;
+		autoTick += autoSpeed;
 	}
 
 	rootBranch.update(spread, divergeAt);
@@ -208,6 +203,5 @@ document.addEventListener('mouseenter', () => {
 document.addEventListener('mouseleave', () => {
 	autoAnimate = true;
 });
-
 
 loop();

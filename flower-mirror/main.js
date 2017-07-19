@@ -7,19 +7,32 @@ const ctx = canvas.getContext('2d');
 const canvas2 = document.querySelector('.js-duplicate');
 const ctx2 = canvas2.getContext('2d');
 
-const w = 500;
-const h = 500;
+const dim = Math.min(window.innerWidth, window.innerHeight) * 0.95;
+const w = dim;
+const h = dim;
 const midX = w >> 1;
 const midY = h >> 1;
 
 const PI = Math.PI;
 const TO_RADIAN = PI / 180;
 
+const maxDepth = 5;
+const maxSpread = 90 * TO_RADIAN;
+
+let autoAnimate = true;
+let divergeAt = 0.5;
+let spread = 45 * TO_RADIAN;
+let tick = 0;
+
+let autoSpeed = 0.004;
+let diverAtAuto = 0;
+let spreadAuto = 0;
+
 canvas.width = canvas2.width = w;
 canvas.height = canvas2.height = h;
 
 class Branch {
-	constructor(position = {x : 0, y: 0}, length = 100, divergeAt = 0.5, angle = 0, depth = 0, amp = 45 * TO_RADIAN) {
+	constructor(position = {x : 0, y: 0}, length = 100, divergeAt = 0.5, angle = 0, depth = 0, spread = 45 * TO_RADIAN) {
 		this.position = position;
 		this.length = length;
 		this.divergeAt = divergeAt;
@@ -27,7 +40,7 @@ class Branch {
 		this.depth = depth;
 
 		this.color = '#000';
-		this.amp = amp;
+		this.spread = spread;
 		this.branches = [];
 
 		this.grow();
@@ -48,23 +61,23 @@ class Branch {
 				this.growPosition,
 				nextLength,
 				this.divergeAt,
-				this.angle + this.amp,
+				this.angle + this.spread,
 				nextDepth,
-				this.amp
+				this.spread
 			),
 			new Branch(
 				this.growPosition,
 				nextLength,
 				this.divergeAt,
-				this.angle - this.amp,
+				this.angle - this.spread,
 				nextDepth,
-				this.amp
+				this.spread
 			)
 		);
 	}
 
-	update(amp, divergeAt) {
-		this.amp = amp;
+	update(spread, divergeAt) {
+		this.spread = spread;
 		this.divergeAt = divergeAt;
 
 		this.grow();
@@ -80,61 +93,87 @@ class Branch {
 	}
 
 	get canBranch() {
-		return this.depth < 4;
+		return this.depth < maxDepth;
 	}
 }
 
-const branchPos = { x: midX, y: midY };
-const divergeAt = 0.5;
 const rootBranch = new Branch(
-	branchPos,
-	midY,
+	{ x: midX, y: midY },
+	midY * 0.5,
 	divergeAt,
 	-90 * TO_RADIAN,
-	0
+	0,
+	spread
 );
 
-const drawBranch = (b) => {
-	const endX = b.length;
+const drawBranch = (branch, phase) => {
+	const h = ~~(200 + (160 * phase));
+	const l = 50 + ~~(((branch.depth / (maxDepth + 1))) * 50);
+
+	const endX = branch.length;
 	const endY = 0;
 	const r = 2;
 
 	ctx.save();
+
+	ctx.strokeStyle = `hsl(${h}, 100%, ${l}%)`;
+	ctx.translate(branch.position.x, branch.position.y);
+	ctx.rotate(branch.angle);
+
 	ctx.beginPath();
-
-	ctx.strokeStyle = b.color;
-	ctx.translate(b.position.x, b.position.y);
-	ctx.rotate(b.angle);
-
 	ctx.moveTo(0, 0);
 	ctx.lineTo(endX, endY);
-
 	ctx.stroke();
 	ctx.closePath();
 
 	ctx.beginPath();
+	ctx.fillStyle = `hsl(${h}, 100%, 50%)`;
 	ctx.arc(endX, endY, r, 0, PI * 2, false);
 	ctx.fill();
 	ctx.closePath();
 
 	ctx.restore();
 
-	b.branches.forEach(drawBranch);
+	branch.branches.forEach((b) => {
+		drawBranch(b, phase);
+	});
 };
 
-const clear = () => {
+const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2
+
+const clear = (phase) => {
+	const h = ~~(200 + (160 * phase));
+	const l = 98;
+	const color = `hsl(${h}, 80%, ${l}%)`;
+
+	// document.body.style.backgroundColor = color;
+
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
 };
 
 const loop = () => {
-	clear();
+	let phase = rootBranch.spread / maxSpread;
 
-	drawBranch(rootBranch);
+	clear(phase);
 
-	const numSegments = 6;
+	if (autoAnimate) {
+		phase = map(Math.sin(spreadAuto), -1, 1, 0, 1);
+
+		spread = phase * maxSpread;
+		divergeAt = map(Math.sin(diverAtAuto), -1, 1, 0, 0.5);
+
+		spreadAuto += autoSpeed;
+		diverAtAuto += autoSpeed;
+	}
+
+	rootBranch.update(spread, divergeAt);
+
+	drawBranch(rootBranch, phase);
+
+	const numSegments = 12;
 	const angleInc = PI * 2 / numSegments;
-	let angle = 0;
+	let angle = tick;
 
 	for (let i = 0; i < numSegments; i++) {
 		ctx2.save();
@@ -142,33 +181,39 @@ const loop = () => {
 		ctx2.rotate(angle);
 		ctx2.drawImage(canvas, -w / 2, -h / 2);
 		ctx2.restore();
-
 		angle += angleInc;
 	}
 
-	ctx.drawImage(canvas2, 0, 0);
+	tick += 0.002;
 
 	requestAnimationFrame(loop);
 };
 
 const onPointerMove = (e) => {
+	if (autoAnimate) {
+		return;
+	}
+
 	const target = (e.touches && e.touches.length) ? e.touches[0] : e;
-	const { offsetX: x, offsetY: y } = target;
+	const { clientX: x, clientY: y } = target;
 
-	const width = e.target.width;
-	const height = e.target.height;
+	const width = window.innerWidth;
+	const height = window.innerHeight;
 
-	const maxAmp = PI / 6; // 90 * TO_RADIAN;
-
-	// const widthHalf = width / 2;
-	// const ampX = ((x - widthHalf) / widthHalf) * (45 * TO_RADIAN);
-	const ampX = (x / width) * maxAmp;
-	const ampY = y / height;
-
-	rootBranch.update(ampX, ampY);
+	spread = (x / width) * maxSpread;
+	divergeAt = y / height;
 };
 
-canvas2.addEventListener('mousemove', onPointerMove);
-canvas2.addEventListener('touchmove', onPointerMove);
+document.body.addEventListener('mousemove', onPointerMove);
+document.body.addEventListener('touchmove', onPointerMove);
+
+document.addEventListener('mouseenter', () => {
+	autoAnimate = false;
+});
+
+document.addEventListener('mouseleave', () => {
+	autoAnimate = true;
+});
+
 
 loop();

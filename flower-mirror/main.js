@@ -4,9 +4,6 @@
 const canvas = document.querySelector('.js-canvas');
 const ctx = canvas.getContext('2d');
 
-const canvas2 = document.querySelector('.js-duplicate');
-const ctx2 = canvas2.getContext('2d');
-
 const w = 500;
 const h = 500;
 const midX = w >> 1;
@@ -15,8 +12,8 @@ const midY = h >> 1;
 const PI = Math.PI;
 const TO_RADIAN = PI / 180;
 
-canvas.width = canvas2.width = w;
-canvas.height = canvas2.height = h;
+canvas.width = w;
+canvas.height = h;
 
 class Branch {
 	constructor(position = {x : 0, y: 0}, length = 100, divergeAt = 0.5, angle = 0, depth = 0, amp = 45 * TO_RADIAN) {
@@ -85,14 +82,8 @@ class Branch {
 }
 
 const branchPos = { x: midX, y: midY };
-const divergeAt = 0.5;
-const rootBranch = new Branch(
-	branchPos,
-	midY,
-	divergeAt,
-	-90 * TO_RADIAN,
-	0
-);
+let divergeAt = 0.5;
+let spread = 45 * TO_RADIAN;
 
 const drawBranch = (b) => {
 	const endX = b.length;
@@ -124,29 +115,29 @@ const drawBranch = (b) => {
 
 const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-	ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
 };
 
 const loop = () => {
 	clear();
 
-	drawBranch(rootBranch);
-
 	const numSegments = 6;
-	const angleInc = PI * 2 / numSegments;
-	let angle = 0;
+	const angleInc = (PI * 2) / numSegments;
+	let angle = -90 * TO_RADIAN;
 
-	for (let i = 0; i < numSegments; i++) {
-		ctx2.save();
-		ctx2.translate(midX, midY);
-		ctx2.rotate(angle);
-		ctx2.drawImage(canvas, -w / 2, -h / 2);
-		ctx2.restore();
+	for (let i =  0; i < numSegments; i++) {
+		drawBranch(
+			new Branch(
+				branchPos,
+				midY,
+				divergeAt,
+				angle,
+				0,
+				spread
+			)
+		);
 
 		angle += angleInc;
 	}
-
-	ctx.drawImage(canvas2, 0, 0);
 
 	requestAnimationFrame(loop);
 };
@@ -158,17 +149,13 @@ const onPointerMove = (e) => {
 	const width = e.target.width;
 	const height = e.target.height;
 
-	const maxAmp = PI / 6; // 90 * TO_RADIAN;
+	const maxSpread = PI / 6; // 90 * TO_RADIAN;
 
-	// const widthHalf = width / 2;
-	// const ampX = ((x - widthHalf) / widthHalf) * (45 * TO_RADIAN);
-	const ampX = (x / width) * maxAmp;
-	const ampY = y / height;
-
-	rootBranch.update(ampX, ampY);
+	spread = (x / width) * maxSpread;
+	divergeAt = y / height;
 };
 
-canvas2.addEventListener('mousemove', onPointerMove);
-canvas2.addEventListener('touchmove', onPointerMove);
+canvas.addEventListener('mousemove', onPointerMove);
+canvas.addEventListener('touchmove', onPointerMove);
 
 loop();

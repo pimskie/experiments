@@ -11,9 +11,6 @@ let drops = [];
 let width;
 let height;
 
-let rafId = null;
-let frame = 0;
-
 const imageLoaded = () => {
 	[ width, height ] = [ image.width * 0.5, image.height * 0.5 ];
 
@@ -25,15 +22,11 @@ const imageLoaded = () => {
 
 	ctxImage.drawImage(image, 0, 0, width, height);
 
-	canvasPaint.addEventListener('mousemove', (e) => { 
+	canvasPaint.addEventListener('mousemove', (e) => {
 		addDrop(e);
-		if (frame % 10 === 0) {
-		}
 	});
-	// addDrop();
-
 	loop();
-}
+};
 
 const addDrop = (e) => {
 	const [x, y] = [e.clientX, e.clientY];
@@ -51,17 +44,17 @@ const addDrop = (e) => {
 		width,
 		speed,
 		decay,
-		alpha
+		alpha,
 	});
 
 	radius += 5;
 	width += 1;
-}
+};
 
-const loop = () => { 
+const loop = () => {
 	ctxPaint.clearRect(0, 0, width, height);
-	
-	drops.forEach((drop) => { 
+
+	drops.forEach((drop) => {
 		ctxPaint.beginPath();
 		ctxPaint.lineWidth = drop.width;
 		ctxPaint.strokeStyle = `rgba(255, 0, 0, ${drop.alpha})`;
@@ -76,7 +69,7 @@ const loop = () => {
 	});
 
 	drops = drops.filter(d =>d.alpha > 0.1);
-	
+
 	const scale = 1.1;
 	const scaleWidth = width * scale;
 	const scaleHeight = height * scale;
@@ -91,10 +84,8 @@ const loop = () => {
 
 	ctxPaint.globalCompositeOperation = 'source-over';
 
-	frame++;
-
-	rafId = requestAnimationFrame(loop);
-}
+	requestAnimationFrame(loop);
+};
 
 const image = document.createElement('img');
 image.addEventListener('load', imageLoaded);

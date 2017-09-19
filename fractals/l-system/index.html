@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Index</title>
+    <meta name="viewport" content="width=device-width" />
+	<link rel="stylesheet" href=" dist/css/main.css">
+</head>
+<body>
+
+<div class="grid">
+    <div class="stage">
+        <canvas class="canvas js-canvas"></canvas>
+    </div>
+
+    <div class="controls js-controls">
+        <filters inline-template>
+            <div>
+                <div class="form__item">
+                    <select class="form__field js-curve" v-model="selectedPresetKey">
+                        <option v-for="(value, key) in presets" v-bind:value="key">{{key}}</option>
+                    </select>
+                </div>
+
+                <div class="form__item">
+                    <label for="axiom">Axiom</label>
+                    <input type="text" class="form__field" v-model="selectedPreset.axiom" v-on:change="toUpperCase" />
+                </div>
+
+                <div class="form__item">
+                    <label for="variable-0">Variables</label>
+                     <div v-for="(variable, index) in selectedPreset.variables">
+                         <input v-for="(variable, index) in selectedPreset.variables" class="form__field"
+                            maxlength="1"
+                            required
+                            v-model="selectedPreset.variables[index]"
+                            v-on:change="toUpperCase"
+                        />
+                        <button v-on:click="selectedPreset.variables.splice(index, 1)">X</button>
+                    </div>
+
+                    <button v-on:click="selectedPreset.variables.push('')">Add</button>
+                </div>
+
+                <div class="form__item">
+                    <label for="rules-0">Rules</label>
+                    <div v-for="(value, index) in selectedPreset.rules">
+                        <input type="text" v-model="selectedPreset.rules[index]" class="form__field" v-on:change="toUpperCase" />
+                        <button v-if="selectedPreset.rules.length > 1" v-on:click="selectedPreset.rules.splice(index, 1)">X</button>
+                    </div>
+                    <button v-on:click="selectedPreset.rules.push('')">Add</button>
+                </div>
+
+                <div class="form__item">
+                    <label for="angle">angle</label>
+                    <input type="number" class="form__field" v-model="selectedPreset.angle" min="0" max="359" />
+                </div>
+
+                <div class="form__item">
+                    <label for="maxDepth">Iterations: {{ selectedPreset.depth }}</label>
+                    <input type="range" class="form__field" v-model="selectedPreset.depth" min="1" v-bind:max="selectedPreset.maxDepth" />
+                </div>
+
+                <button v-on:click="draw">Draw</button>
+            </div>
+        </filters>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.2/vue.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>

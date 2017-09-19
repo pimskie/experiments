@@ -1,0 +1,68 @@
+html {
+	box-sizing: border-box;
+}
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+
+	overflow: hidden;
+}
+
+body {
+	font-size: 1rem;
+	font-family: Arial, Helvetica, sans-serif;
+
+	min-width: 100vw;
+	height: 100vh;
+}
+
+.grid {
+	display: flex;
+	height: 100vh;
+}
+
+.stage,
+.controls {
+}
+
+.stage {
+	display: flex;
+	flex-basis: 80%;
+	padding-right: 1rem;
+
+	border-right: 1px solid #eee;
+}
+
+.canvas {
+	flex-grow: 1;
+	flex-shrink: 1;
+	flex-basis: auto;
+}
+
+.canvas.is-sized {
+	width: auto;
+}
+
+.controls {
+	padding-left: 1rem;
+	flex-basis: 20%;
+}
+.form__item {
+	margin-bottom: 0.75rem;
+}
+
+.form__field {
+	display: block;
+	width: 100%;
+
+	padding: 0.5rem;
+}
+
+.form__field[type="text"] {
+	letter-spacing: 2px;
+}

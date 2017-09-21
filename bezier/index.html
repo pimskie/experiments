@@ -13,17 +13,90 @@
 			overflow: hidden;
 		}
 
-		.canvas {
-			display: block;
-            width: 100%;
-            height: 100%;
-		}
+        .container {
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .canvas {
+            background: #000;
+        }
 	</style>
 </head>
 <body>
 
-<canvas class="canvas js-canvas" width="500" height="500"></canvas>
+<div class="container js-container">
+    <div>
+        <div class="ui">
+                <div class="ui__item">
+                    <label for="startX" class="ui__label">startX</label>
+                    <input type="number" id="startX" class="ui__input" v-model="shape.startX">
 
+                    <label for="startY" class="ui__label">startY</label>
+                    <input type="number" id="startY" class="ui__input" v-model="shape.startY">
+                </div>
+
+                <div class="ui__item">
+                    <label for="cp1x" class="ui__label">cp1x</label>
+                    <input type="number" id="cp1x" class="ui__input" v-model="shape.cp1x">
+
+                    <label for="cp1y" class="ui__label">cp1y</label>
+                    <input type="number" id="cp1y" class="ui__input" v-model="shape.cp1y">
+                </div>
+
+                <div class="ui__item">
+                    <label for="cp2x" class="ui__label">cp2x</label>
+                    <input type="number" id="cp2x" class="ui__input" v-model="shape.cp2x">
+
+                    <label for="cp2y" class="ui__label">cp2y</label>
+                    <input type="number" id="cp2y" class="ui__input" v-model="shape.cp2y">
+                </div>
+
+                <div class="ui__item">
+                    <label for="endX1" class="ui__label">endX1</label>
+                    <input type="number" id="endX1" class="ui__input" v-model="shape.endX1">
+
+                    <label for="endY2" class="ui__label">endY2</label>
+                    <input type="number" id="endY2" class="ui__input" v-model="shape.endY2">
+                </div>
+
+
+
+                <div class="ui__item">
+                    <label for="cp3x" class="ui__label">cp3x</label>
+                    <input type="number" id="cp3x" class="ui__input" v-model="shape.cp3x">
+
+                    <label for="cp3y" class="ui__label">cp3y</label>
+                    <input type="number" id="cp3y" class="ui__input" v-model="shape.cp3y">
+                </div>
+
+                <div class="ui__item">
+                    <label for="cp4x" class="ui__label">cp4x</label>
+                    <input type="number" id="cp4x" class="ui__input" v-model="shape.cp4x">
+
+                    <label for="cp4y" class="ui__label">cp4y</label>
+                    <input type="number" id="cp4y" class="ui__input" v-model="shape.cp4y">
+                </div>
+
+                <div class="ui__item">
+                    <label for="endX2" class="ui__label">endX2</label>
+                    <input type="number" id="endX2" class="ui__input" v-model="shape.endX2">
+
+                    <label for="endY2" class="ui__label">endY2</label>
+                    <input type="number" id="endY2" class="ui__input" v-model="shape.endY2">
+                    </div>
+            </div>
+
+            <canvas class="canvas js-canvas" width="500" height="500"  v-draw="shape"></canvas>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.min.js"></script>
 <script src="main.js"></script>
 
 </body>

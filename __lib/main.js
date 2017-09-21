@@ -7,7 +7,7 @@ const PI2 = Math.PI * 2;
 // all set in `setStage`
 const w = 500;
 const h = 500;
-const hw = w * 0.5;
+const wh = w * 0.5;
 const hh = h * 0.5;
 
 canvas.width = w;

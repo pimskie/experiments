@@ -1,4 +1,8 @@
 /**
+ * https://gamedevelopment.tutsplus.com/tutorials/make-a-splash-with-dynamic-2d-water-effects--gamedev-236
+ */
+
+/**
  * Hooke's law:
  * The force provided by a spring is given by Hooke's Law
  * F = -kx
@@ -33,37 +37,32 @@ const canvas = q('canvas');
 const ctx = canvas.getContext('2d');
 const PI2 = Math.PI * 2;
 
-const w = 500;
+const w = window.innerWidth;
 const h = 500;
-const wh = w * 0.5;
-const hh = h * 0.5;
 
 canvas.width = w;
 canvas.height = h;
-
-const springs = [];
-const numSprings = 50;
-const springSpacing = w / (numSprings - 1);
-const springHeight = 150;
-const springConstant = 0.025;
-const springDamp = 0.015;
-const waveSpread = 0.25;
 
 class Spring {
 	constructor(index, x, y, k, damp, targetHeight, height) {
 		this.index = index;
 		this.x = x;
 		this.y = y;
+
 		this.k = k;
 		this.damp = damp;
+
 		this.targetHeight = targetHeight;
 		this.height = height;
 
 		this.acceleration = 0;
+		this.transportingForce = 0;
 	}
 
 	draw(ctx) {
 		ctx.beginPath();
+		ctx.fillstyle = this.color;
+		ctx.strokeStyle = this.color;
 		ctx.moveTo(this.x, this.y);
 		ctx.lineTo(this.x, this.toY);
 		ctx.stroke();
@@ -75,17 +74,33 @@ class Spring {
 		ctx.closePath();
 	}
 
+	// Hooke's law
 	update() {
 		const displacement = this.targetHeight - this.height;
 
-		this.acceleration += this.k * displacement - this.acceleration * this.damp;
+		this.acceleration += this.k * displacement;
+		this.acceleration *= this.damp;
+
 		this.height += this.acceleration;
+
 	}
 
 	get toY() {
 		return this.y - this.height;
 	}
+
+	get color() {
+		return Math.abs(this.acceleration) > 0.05 ? '#ff0000' : '#000';
+	}
 }
+
+const springs = [];
+const numSprings = 150;
+const springSpacing = w / (numSprings - 1);
+const springHeight = 100;
+const springConstant = 0.025;
+const springDamp = 0.94;
+const waveSpread = 0.1;
 
 let springX = 0;
 for (let i = 0; i < numSprings; i++) {
@@ -108,69 +123,62 @@ const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-
-// const firstSpring = springs[1];
-// const secondSpring = springs[2];
-// const thirdSpring = springs[3];
-
-// firstSpring.acceleration = -5;
-
-// const loop = () => {
-// 	clear();
-
-// 	secondSpring.acceleration = waveSpread * (firstSpring.height - secondSpring.height);
-// 	thirdSpring.acceleration = waveSpread * (secondSpring.height - thirdSpring.height);
-
-// 	springs.forEach((spring => {
-// 		spring.update();
-// 		spring.draw(ctx);
-// 	}));
-
-// 	requestAnimationFrame(loop);
-// };
-
-const spring = springs[25];
-spring.acceleration = -45;
+const spring = springs[~~(springs.length / 2)];
+// const spring = springs[0];
+spring.acceleration = -20;
 
 const loop = () => {
 	clear();
-
-	const leftDeltas = [];
-	const rightDeltas = [];
 
 	springs.forEach((spring => {
 		spring.update();
 		spring.draw(ctx);
 	}));
 
-	// for (let i = 0; i < springs.length - 1; i++) {
-	// 	const currentSpring = springs[i];
-	// 	const nextSpring = springs[i + 1];
+	for (let i = 0; i < springs.length; i++) {
+		const currentSpring = springs[i];
 
-	// 	nextSpring.acceleration = waveSpread * (currentSpring.height - nextSpring.height);
+		if (i > 0) {
+			const previousSpring = springs[i - 1];
+			const force = waveSpread * (currentSpring.height - previousSpring.height);
+
+			previousSpring.acceleration += force;
+			previousSpring.height += force * 0.99;
+		}
+
+		if (i < springs.length - 1) {
+			const nextSpring = springs[i + 1];
+			const force = waveSpread * (currentSpring.height - nextSpring.height);
+
+			nextSpring.acceleration += force;
+			nextSpring.height += force * 0.99;
+		}
+	}
+
+	// const leftDeltas = [];
+	// const rightDeltas = [];
+
+	// for (let i = 0; i < springs.length; i++) {
+	// 	if (i > 0) {
+	// 		leftDeltas[i] = waveSpread * (springs[i].height - springs[i - 1].height);
+	// 		springs[i - 1].acceleration += leftDeltas[i];
+	// 	}
+
+	// 	if (i < springs.length - 1) {
+	// 		rightDeltas[i] = waveSpread * (springs[i].height - springs[i + 1].height);
+	// 		springs[i + 1].acceleration += rightDeltas[i];
+	// 	}
 	// }
 
-	for (let i = 0; i < springs.length; i++) {
-		if (i > 0) {
-			leftDeltas[i] = waveSpread * (springs[i].height - springs[i - 1].height);
-			springs[i - 1].acceleration += leftDeltas[i];
-		}
+	// for (let i = 0; i < springs.length; i++) {
+	// 	if (i > 0) {
+	// 		springs[i - 1].height += leftDeltas[i];
+	// 	}
 
-		if (i < springs.length - 1) {
-			rightDeltas[i] = waveSpread * (springs[i].height - springs[i + 1].height);
-			springs[i + 1].acceleration += rightDeltas[i];
-		}
-	}
-
-	for (let i = 0; i < springs.length; i++) {
-		if (i > 0) {
-			springs[i - 1].height += leftDeltas[i];
-		}
-
-		if (i < springs.length - 1) {
-			springs[i + 1].height += rightDeltas[i];
-		}
-	}
+	// 	if (i < springs.length - 1) {
+	// 		springs[i + 1].height += rightDeltas[i];
+	// 	}
+	// }
 
 	requestAnimationFrame(loop);
 };
@@ -186,8 +194,8 @@ const onPointerDown = (e) => {
 	const waveWidth = w / numSprings;
 	const springIndex = Math.round(clickedX / waveWidth);
 
-	springs[springIndex].acceleration = -3;
+	springs[springIndex].acceleration = -100;
 };
 
-// canvas.addEventListener('mousedown', onPointerDown);
-// canvas.addEventListener('touchstart', onPointerDown);
+canvas.addEventListener('mousedown', onPointerDown);
+canvas.addEventListener('touchstart', onPointerDown);

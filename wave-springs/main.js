@@ -56,7 +56,6 @@ class Spring {
 		this.height = height;
 
 		this.acceleration = 0;
-		this.transportingForce = 0;
 	}
 
 	draw(ctx) {
@@ -82,7 +81,18 @@ class Spring {
 		this.acceleration *= this.damp;
 
 		this.height += this.acceleration;
+	}
 
+	updateOthers() {
+		if (this.previousSpring) {
+			this.previousSpring.acceleration += this.forceLeft;
+			this.previousSpring.height += this.forceLeft;
+		}
+
+		if (this.nextSpring) {
+			this.nextSpring.acceleration += this.forceRight;
+			this.nextSpring.height += this.forceRight;
+		}
 	}
 
 	get toY() {
@@ -95,18 +105,31 @@ class Spring {
 }
 
 const springs = [];
-const numSprings = 150;
+const numSprings = 200;
 const springSpacing = w / (numSprings - 1);
-const springHeight = 100;
+const springHeight = 200;
 const springConstant = 0.025;
 const springDamp = 0.94;
 const waveSpread = 0.1;
 
+const springY = h;
 let springX = 0;
-for (let i = 0; i < numSprings; i++) {
-	const springY = h;
+let currentSpring = new Spring(
+	0,
+	springX,
+	springY,
+	springConstant,
+	springDamp,
+	springHeight,
+	springHeight
+);
 
-	springs.push(new Spring(
+springs.push(currentSpring);
+
+for (let i = 1; i < numSprings; i++) {
+	springX += springSpacing;
+
+	const spring = new Spring(
 		i,
 		springX,
 		springY,
@@ -114,18 +137,22 @@ for (let i = 0; i < numSprings; i++) {
 		springDamp,
 		springHeight,
 		springHeight
-	));
+	);
 
-	springX += springSpacing;
+	springs.push(spring);
+
+	spring.previousSpring = currentSpring;
+	currentSpring.nextSpring = spring;
+
+	currentSpring = spring;
+
 }
 
 const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-const spring = springs[~~(springs.length / 2)];
-// const spring = springs[0];
-spring.acceleration = -20;
+// springs[5].acceleration = -100;
 
 const loop = () => {
 	clear();
@@ -135,50 +162,29 @@ const loop = () => {
 		spring.draw(ctx);
 	}));
 
-	for (let i = 0; i < springs.length; i++) {
-		const currentSpring = springs[i];
+	const leftForces = [];
+	const rightForces = [];
 
-		if (i > 0) {
-			const previousSpring = springs[i - 1];
-			const force = waveSpread * (currentSpring.height - previousSpring.height);
+	for (let index = 1; index < springs.length - 1; index++) {
+		const currentSpring = springs[index];
+		const previousSpring = springs[index - 1];
+		const nextSpring = springs[index + 1];
 
-			previousSpring.acceleration += force;
-			previousSpring.height += force * 0.99;
-		}
-
-		if (i < springs.length - 1) {
-			const nextSpring = springs[i + 1];
-			const force = waveSpread * (currentSpring.height - nextSpring.height);
-
-			nextSpring.acceleration += force;
-			nextSpring.height += force * 0.99;
-		}
+		leftForces[index] = waveSpread * (currentSpring.height - previousSpring.height);
+		rightForces[index] = waveSpread * (currentSpring.height - nextSpring.height);
 	}
 
-	// const leftDeltas = [];
-	// const rightDeltas = [];
 
-	// for (let i = 0; i < springs.length; i++) {
-	// 	if (i > 0) {
-	// 		leftDeltas[i] = waveSpread * (springs[i].height - springs[i - 1].height);
-	// 		springs[i - 1].acceleration += leftDeltas[i];
-	// 	}
+	for (let index = 1; index < springs.length - 1; index++) {
+		const previousSpring = springs[index - 1];
+		const nextSpring = springs[index + 1];
 
-	// 	if (i < springs.length - 1) {
-	// 		rightDeltas[i] = waveSpread * (springs[i].height - springs[i + 1].height);
-	// 		springs[i + 1].acceleration += rightDeltas[i];
-	// 	}
-	// }
+		previousSpring.acceleration += leftForces[index];
+		previousSpring.height += leftForces[index];
 
-	// for (let i = 0; i < springs.length; i++) {
-	// 	if (i > 0) {
-	// 		springs[i - 1].height += leftDeltas[i];
-	// 	}
-
-	// 	if (i < springs.length - 1) {
-	// 		springs[i + 1].height += rightDeltas[i];
-	// 	}
-	// }
+		nextSpring.acceleration += rightForces[index];
+		nextSpring.height += rightForces[index];
+	}
 
 	requestAnimationFrame(loop);
 };
@@ -194,7 +200,7 @@ const onPointerDown = (e) => {
 	const waveWidth = w / numSprings;
 	const springIndex = Math.round(clickedX / waveWidth);
 
-	springs[springIndex].acceleration = -100;
+	springs[springIndex].acceleration = -50;
 };
 
 canvas.addEventListener('mousedown', onPointerDown);

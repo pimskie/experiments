@@ -42,13 +42,12 @@ canvas.width = w;
 canvas.height = h;
 
 const springs = [];
-const numSprings = 10;
+const numSprings = 50;
 const springSpacing = w / (numSprings - 1);
 const springHeight = 150;
 const springConstant = 0.025;
-const springDamp = 0.025;
-const springTension = 0.025;
-const waveSpread = 0.15;
+const springDamp = 0.015;
+const waveSpread = 0.25;
 
 class Spring {
 	constructor(index, x, y, k, damp, targetHeight, height) {
@@ -130,29 +129,65 @@ const clear = () => {
 // 	requestAnimationFrame(loop);
 // };
 
-const [firstSpring] = springs;
-firstSpring.acceleration = -5;
+const spring = springs[25];
+spring.acceleration = -45;
 
 const loop = () => {
 	clear();
 
-	for (let i = 0; i < springs.length - 1; i++) {
-		const currentSpring = springs[i];
-		const nextSpring = springs[i + 1];
-
-		nextSpring.acceleration = waveSpread * (currentSpring.height - nextSpring.height);
-	}
+	const leftDeltas = [];
+	const rightDeltas = [];
 
 	springs.forEach((spring => {
 		spring.update();
 		spring.draw(ctx);
 	}));
 
+	// for (let i = 0; i < springs.length - 1; i++) {
+	// 	const currentSpring = springs[i];
+	// 	const nextSpring = springs[i + 1];
+
+	// 	nextSpring.acceleration = waveSpread * (currentSpring.height - nextSpring.height);
+	// }
+
+	for (let i = 0; i < springs.length; i++) {
+		if (i > 0) {
+			leftDeltas[i] = waveSpread * (springs[i].height - springs[i - 1].height);
+			springs[i - 1].acceleration += leftDeltas[i];
+		}
+
+		if (i < springs.length - 1) {
+			rightDeltas[i] = waveSpread * (springs[i].height - springs[i + 1].height);
+			springs[i + 1].acceleration += rightDeltas[i];
+		}
+	}
+
+	for (let i = 0; i < springs.length; i++) {
+		if (i > 0) {
+			springs[i - 1].height += leftDeltas[i];
+		}
+
+		if (i < springs.length - 1) {
+			springs[i + 1].height += rightDeltas[i];
+		}
+	}
 
 	requestAnimationFrame(loop);
 };
 
-
 loop();
 
 
+const onPointerDown = (e) => {
+	const event = (e.touches && e.touches.length) ? e.touches[0] : e;
+	const { target, clientX: pointerX } = event;
+
+	const clickedX = pointerX - target.offsetLeft;
+	const waveWidth = w / numSprings;
+	const springIndex = Math.round(clickedX / waveWidth);
+
+	springs[springIndex].acceleration = -3;
+};
+
+// canvas.addEventListener('mousedown', onPointerDown);
+// canvas.addEventListener('touchstart', onPointerDown);

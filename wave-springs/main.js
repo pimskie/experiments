@@ -2,35 +2,6 @@
  * https://gamedevelopment.tutsplus.com/tutorials/make-a-splash-with-dynamic-2d-water-effects--gamedev-236
  */
 
-/**
- * Hooke's law:
- * The force provided by a spring is given by Hooke's Law
- * F = -kx
- * F = force produced by spring
- * k = spring constant
- * x = spring displacement
- * https://en.wikipedia.org/wiki/Hooke's_law
- *
- * Newton's second Law of Motion:
- * Force equals mass times acceleration.
- * F = ma
- * F = force
- * m = mass
- * a = acceleration
- * http://en.wikipedia.org/wiki/Newton%27s_laws
- * http://natureofcode.com/book/chapter-2-forces/ (2.2)
- *
- * Two formulas combined:
- * a = -(k / m) * x - (d * v)
- *
- * a: acceleration
- * k: spring constant
- * m: mass (can be left out if mass is always the same)
- * x: spring displacement
- * d: damping (to stop spring over time)
- * v: velocity
- */
-
 const q = (sel) => document.querySelector(sel);
 
 const canvas = q('canvas');
@@ -38,7 +9,7 @@ const ctx = canvas.getContext('2d');
 const PI2 = Math.PI * 2;
 
 const w = window.innerWidth;
-const h = 500;
+const h = window.innerHeight;
 
 canvas.width = w;
 canvas.height = h;
@@ -83,18 +54,6 @@ class Spring {
 		this.height += this.acceleration;
 	}
 
-	updateOthers() {
-		if (this.previousSpring) {
-			this.previousSpring.acceleration += this.forceLeft;
-			this.previousSpring.height += this.forceLeft;
-		}
-
-		if (this.nextSpring) {
-			this.nextSpring.acceleration += this.forceRight;
-			this.nextSpring.height += this.forceRight;
-		}
-	}
-
 	get toY() {
 		return this.y - this.height;
 	}
@@ -108,27 +67,14 @@ const springs = [];
 const numSprings = 200;
 const springSpacing = w / (numSprings - 1);
 const springHeight = 200;
-const springConstant = 0.025;
-const springDamp = 0.94;
+const springConstant = 0.015;
+const springDamp = 0.98;
 const waveSpread = 0.1;
 
 const springY = h;
 let springX = 0;
-let currentSpring = new Spring(
-	0,
-	springX,
-	springY,
-	springConstant,
-	springDamp,
-	springHeight,
-	springHeight
-);
 
-springs.push(currentSpring);
-
-for (let i = 1; i < numSprings; i++) {
-	springX += springSpacing;
-
+for (let i = 0; i < numSprings; i++) {
 	const spring = new Spring(
 		i,
 		springX,
@@ -141,25 +87,18 @@ for (let i = 1; i < numSprings; i++) {
 
 	springs.push(spring);
 
-	spring.previousSpring = currentSpring;
-	currentSpring.nextSpring = spring;
-
-	currentSpring = spring;
-
+	springX += springSpacing;
 }
 
 const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-// springs[5].acceleration = -100;
-
 const loop = () => {
 	clear();
 
 	springs.forEach((spring => {
 		spring.update();
-		spring.draw(ctx);
 	}));
 
 	const leftForces = [];
@@ -174,17 +113,28 @@ const loop = () => {
 		rightForces[index] = waveSpread * (currentSpring.height - nextSpring.height);
 	}
 
+	ctx.beginPath();
+	ctx.moveTo(0, h);
 
-	for (let index = 1; index < springs.length - 1; index++) {
-		const previousSpring = springs[index - 1];
-		const nextSpring = springs[index + 1];
+	for (let index = 0; index < springs.length; index++) {
+		const currentSpring = springs[index];
 
-		previousSpring.acceleration += leftForces[index];
-		previousSpring.height += leftForces[index];
+		if (index > 0) {
+			springs[index - 1].height += leftForces[index] || 0;
+			springs[index - 1].acceleration += leftForces[index] || 0;
+		}
 
-		nextSpring.acceleration += rightForces[index];
-		nextSpring.height += rightForces[index];
+		if (index < springs.length - 1) {
+			springs[index + 1].height += rightForces[index] || 0;
+			springs[index + 1].acceleration += rightForces[index] || 0;
+		}
+
+		ctx.lineTo(currentSpring.x, currentSpring.toY);
 	}
+
+	ctx.lineTo(w, h);
+	ctx.fill();
+	ctx.closePath();
 
 	requestAnimationFrame(loop);
 };
@@ -192,7 +142,7 @@ const loop = () => {
 loop();
 
 
-const onPointerDown = (e) => {
+const onPointerMove = (e) => {
 	const event = (e.touches && e.touches.length) ? e.touches[0] : e;
 	const { target, clientX: pointerX } = event;
 
@@ -200,8 +150,8 @@ const onPointerDown = (e) => {
 	const waveWidth = w / numSprings;
 	const springIndex = Math.round(clickedX / waveWidth);
 
-	springs[springIndex].acceleration = -50;
+	springs[springIndex].acceleration = -20;
 };
 
-canvas.addEventListener('mousedown', onPointerDown);
-canvas.addEventListener('touchstart', onPointerDown);
+canvas.addEventListener('mousemove', onPointerMove);
+canvas.addEventListener('touchmove', onPointerMove);

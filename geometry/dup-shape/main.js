@@ -59,10 +59,10 @@ const iterate = (iteration, totalIterations, shapeWidth, rotationStep, scaleStep
 
 	ctx.beginPath();
 
-  const grad = ctx.createLinearGradient(0, canvasH / 4, canvasW / 4, canvasH / 4);
+	const grad = ctx.createLinearGradient(0, canvasH / 4, canvasW / 4, canvasH / 4);
 
-  grad.addColorStop(0, '#fc1154');
-  grad.addColorStop(1, '#81dfef');
+	grad.addColorStop(0, '#fc1154');
+	grad.addColorStop(1, '#81dfef');
 
 	ctx.strokeStyle = grad;
 

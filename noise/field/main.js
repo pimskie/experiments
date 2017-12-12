@@ -36,8 +36,8 @@ class Flowfield {
 			field[x] = new Array(this.rows);
 
 			for (let y = 0; y < this.rows; y++) {
-				const angle = noise.perlin3(x * this.differ, y * this.differ, this.phase) * PI2;
-				const length = noise.simplex3(x * 0.1 + 1000, y * 0.1 + 1000, this.phase);
+				const angle = noise.simplex3(x * this.differ, y * this.differ, this.phase) * PI2;
+				const length = 1 + noise.simplex3(x * 0.01 + 1000, y * 0.01 + 1000, this.phase);
 
 				const v = new Vector();
 
@@ -150,6 +150,7 @@ const settings = {
 let flowfield;
 let particles;
 let rafId;
+let phase = 0;
 
 const reset = () => {
 	cancelAnimationFrame(rafId);
@@ -176,11 +177,13 @@ const loop = () => {
 		particle.wrap(width, height);
 
 		const { position: { x, y } } = particle;
-		const force = flowfield.getForce(x, y);
+		const v = flowfield.getForce(x, y);
 
-		particle.update(force);
+		particle.update(v);
 		particle.draw(ctx);
 	});
+
+	phase += settings.updateSpeed * 0.001;
 
 	rafId = requestAnimationFrame(loop);
 };

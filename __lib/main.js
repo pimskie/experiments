@@ -4,13 +4,13 @@ const canvas = q('canvas');
 const ctx = canvas.getContext('2d');
 const PI2 = Math.PI * 2;
 
-const w = 500;
-const h = 500;
-const wh = w * 0.5;
-const hh = h * 0.5;
+const width = 500;
+const height = 500;
+const widthHalf = width * 0.5;
+const heightHalf = height * 0.5;
 
-canvas.width = w;
-canvas.height = h;
+canvas.width = width;
+canvas.height = height;
 
 
 const clear = () => {

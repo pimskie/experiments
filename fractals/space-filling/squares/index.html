@@ -13,24 +13,26 @@
 			overflow: hidden;
 		}
 
-          body {
-            height: 100vh;
+		.container {
+			width: 100vw;
+			height: 100vh;
 
-            display: flex;
-			align-items: center;
+			display: flex;
 			justify-content: center;
-        }
+			align-items: center;
+		}
 
 		.canvas {
-			display: block;
-
-            border: 1px solid black;
+            transform: rotate(45deg);
+            border-radius: 50%;
 		}
 	</style>
 </head>
 <body>
 
-<canvas class="canvas js-canvas" width="500" height="500"></canvas>
+<div class="container">
+	<canvas class="canvas js-canvas" width="500" height="500"></canvas>
+</div>
 
 <script src="main.js"></script>
 

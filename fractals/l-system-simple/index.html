@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+    <meta name="viewport" content="width=device-width" />
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+
+            overflow: hidden;
+        }
+
+        .controls,
+        .canvas {
+            position: absolute;
+        }
+
+        .controls {
+            z-index: 10;
+
+            top: 0;
+            right: 0;
+        }
+
+        .canvas {
+            z-index: 1;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="controls">
+        <select class="js-curve">
+            <option value="hilbert">Hilbert</option>
+            <option value="koch">koch</option>
+            <option value="kochSnowflake">koch snowflake</option>
+            <option value="sierpinski">sierpinski</option>
+            <option value="sierpinskiArrowHead">sierpinskiArrowHead</option>
+            <option value="levy">Lévy C curve</option>
+            <option value="peanoGosper">Peano-Gosper Curve</option>
+            <option value="peano">Peano Curve</option>
+            <option value="dragon" selected>Dragon curve</option>
+            <option value="tree">Tree</option>
+            <option value="tree2">Tree 2</option>
+        </select>
+    </div>
+
+    <canvas class="canvas js-canvas" width="500" height="500"></canvas>
+
+    <script src="main.js"></script>
+</body>
+
+</html>

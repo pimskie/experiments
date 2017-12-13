@@ -12,25 +12,26 @@
 
 			overflow: hidden;
 		}
-        body {
+
+        .container {
+            width: 100vw;
             height: 100vh;
 
             display: flex;
-			align-items: center;
-			justify-content: center;
+            justify-content: center;
+            align-items: center;
         }
 
-		.canvas {
-			display: block;
-            background: #000;
-		}
-
+        .canvas {
+            border: 1px solid;
+        }
 	</style>
 </head>
 <body>
 
-<canvas class="canvas js-canvas" width="500" height="500"></canvas>
-
+<div class="container">
+    <canvas class="canvas js-canvas" width="500" height="500"></canvas>
+</div>
 <script src="main.js"></script>
 
 </body>

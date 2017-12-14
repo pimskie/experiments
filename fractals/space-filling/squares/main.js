@@ -63,7 +63,12 @@ class Box {
 
 		const corners = this.corners;
 		const isColliding = this.isColliding(otherBoxes);
-		const isOutOfBounds = corners.left < 0 || corners.right > this.sw || corners.top < 0 || corners.bottom > this.sh;
+		const isOutOfBounds = (
+			corners.left < 0 ||
+			corners.right > this.sw ||
+			corners.top < 0 ||
+			corners.bottom > this.sh
+		);
 
 		if (isColliding || isOutOfBounds) {
 			this.canUpdate = false;
@@ -115,21 +120,20 @@ const maxBoxes = 1000;
 
 const addBox = () => {
 	let box = new Box(width, height, 2);
-	let collides = box.isColliding(boxes);
+	let isColliding = box.isColliding(boxes);
 
-	if (collides) {
+	if (isColliding) {
 		let tries = boxes.length;
 
-		while (tries > 0 && collides) {
+		while (tries > 0 && isColliding) {
 			box.init();
-			collides = box.isColliding(boxes);
+			isColliding = box.isColliding(boxes);
 
 			tries--;
 		}
 	}
 
-	if (!collides) {
-		// box.hue = 180 + Math.abs(180 * Math.sin((box.x * 0.009)));
+	if (!isColliding) {
 		const a = Math.atan2(box.y, box.x) / (Math.PI / 2);
 
 		box.hue = 180 + (180 * a);
@@ -166,7 +170,7 @@ const loop = () => {
 	requestAnimationFrame(loop);
 };
 
+canvas.addEventListener('mousedown', init);
+
 init();
 loop();
-
-canvas.addEventListener('mousedown', init);

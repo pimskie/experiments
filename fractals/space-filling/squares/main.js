@@ -24,8 +24,8 @@ class Box {
 		this.sh = stageHeight;
 
 		this.hue = 200;
-		this.growX = 1 + (Math.random() * 3);
-		this.growY = 1 + (Math.random() * 3);
+		this.growX = 1 + ~~(Math.random() * 3);
+		this.growY = 1 + ~~(Math.random() * 3);
 
 		this.hasDiverged = false;
 		this.canUpdate = true;
@@ -110,21 +110,21 @@ class Box {
 	}
 }
 
-const boxes = [];
-const maxBoxes = 2000;
+let boxes = [];
+const maxBoxes = 1000;
 
 const addBox = () => {
 	let box = new Box(width, height, 2);
 	let collides = box.isColliding(boxes);
 
 	if (collides) {
-		let i = Math.floor(boxes.length * 2);
+		let tries = boxes.length;
 
-		while (i > 0 && collides) {
+		while (tries > 0 && collides) {
 			box.init();
 			collides = box.isColliding(boxes);
 
-			i--;
+			tries--;
 		}
 	}
 
@@ -141,10 +141,15 @@ const addBox = () => {
 	return false;
 };
 
+const init = () => {
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-for (let i = 0; i < 3; i++) {
-	addBox();
-}
+	boxes = [];
+
+	for (let i = 0; i < 3; i++) {
+		addBox();
+	}
+};
 
 const loop = () => {
 	boxes.forEach((box) => {
@@ -152,9 +157,7 @@ const loop = () => {
 		const wasUpdated = box.update(others);
 
 		if (!wasUpdated && !box.hasDiverged && boxes.length < maxBoxes) {
-			box.hasDiverged = true;
-
-			addBox();
+			box.hasDiverged = addBox();
 		}
 
 		box.draw(ctx);
@@ -163,4 +166,7 @@ const loop = () => {
 	requestAnimationFrame(loop);
 };
 
+init();
 loop();
+
+canvas.addEventListener('mousedown', init);

@@ -24,12 +24,15 @@ class Box {
 		this.sh = stageHeight;
 
 		this.hue = 200;
-		this.grow = 1 + (Math.random() * 3);
+		this.growX = 1 + (Math.random() * 3);
+		this.growY = 1 + (Math.random() * 3);
 
 		this.hasDiverged = false;
 		this.canUpdate = true;
 
-		this.dimension = dimension;
+		this.dimensionX = dimension;
+		this.dimensionY = dimension;
+
 		this.x = 0;
 		this.y = 0;
 
@@ -39,11 +42,11 @@ class Box {
 	get corners() {
 		const spacing = 2;
 
-		const right = this.x + spacing + (this.dimension * 0.5);
-		const left = this.x - spacing - (this.dimension * 0.5);
+		const right = this.x + spacing + (this.dimensionX * 0.5);
+		const left = this.x - spacing - (this.dimensionX * 0.5);
 
-		const top = this.y - spacing - (this.dimension * 0.5);
-		const bottom = this.y + spacing + (this.dimension * 0.5);
+		const top = this.y - spacing - (this.dimensionY * 0.5);
+		const bottom = this.y + spacing + (this.dimensionY * 0.5);
 
 		return { top, right, bottom, left };
 	}
@@ -68,7 +71,8 @@ class Box {
 			return false;
 		}
 
-		this.dimension += this.grow;
+		this.dimensionX += this.growX;
+		this.dimensionY += this.growY;
 
 		return true;
 	}
@@ -100,7 +104,7 @@ class Box {
 		ctx.lineWidth = 0.5;
 
 		// tranform origin: center center
-		ctx.rect(corners.left, corners.top, this.dimension, this.dimension);
+		ctx.rect(corners.left, corners.top, this.dimensionX, this.dimensionY);
 		ctx.fill();
 		ctx.closePath();
 	}
@@ -114,7 +118,7 @@ const addBox = () => {
 	let collides = box.isColliding(boxes);
 
 	if (collides) {
-		let i = Math.floor(boxes.length / 1);
+		let i = Math.floor(boxes.length * 2);
 
 		while (i > 0 && collides) {
 			box.init();
@@ -130,7 +134,11 @@ const addBox = () => {
 
 		box.hue = 180 + (180 * a);
 		boxes.push(box);
+
+		return true;
 	}
+
+	return false;
 };
 
 

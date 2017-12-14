@@ -1,13 +1,10 @@
 
 /**
  * http://www.complexification.net/gallery/machines/boxFitting
- * http://www.complexification.net/gallery/machines/boxFitting/appletm/BoxFitting_m.pde
  *
  * A region of space is filled through exhaustive placement of slowly expanding boxes.
  * Each box begins very small (2 x 2 pixels) and increases in size until an obstacle
  * (surface border or other box) is encountered.
- *
- * This probably isn't the fastest way to fill a region, but it is certainly interesting to watch.
  */
 
 const q = (sel) => document.querySelector(sel);
@@ -22,17 +19,20 @@ canvas.width = width;
 canvas.height = height;
 
 class Box {
-	constructor(stageWidth, stageHeight, dimension = 2, hue = 120) {
+	constructor(stageWidth, stageHeight, dimension = 2) {
 		this.sw = stageWidth;
 		this.sh = stageHeight;
 
-		this.hue = hue;
-		this.grow = 2;
+		this.hue = 200;
+		this.growX = 1 + ~~(Math.random() * 3);
+		this.growY = 1 + ~~(Math.random() * 3);
 
 		this.hasDiverged = false;
 		this.canUpdate = true;
 
-		this.dimension = dimension;
+		this.dimensionX = dimension;
+		this.dimensionY = dimension;
+
 		this.x = 0;
 		this.y = 0;
 
@@ -42,11 +42,11 @@ class Box {
 	get corners() {
 		const spacing = 2;
 
-		const right = this.x + spacing + (this.dimension * 0.5);
-		const left = this.x - spacing - (this.dimension * 0.5);
+		const right = this.x + spacing + (this.dimensionX * 0.5);
+		const left = this.x - spacing - (this.dimensionX * 0.5);
 
-		const top = this.y - spacing - (this.dimension * 0.5);
-		const bottom = this.y + spacing + (this.dimension * 0.5);
+		const top = this.y - spacing - (this.dimensionY * 0.5);
+		const bottom = this.y + spacing + (this.dimensionY * 0.5);
 
 		return { top, right, bottom, left };
 	}
@@ -62,25 +62,26 @@ class Box {
 		}
 
 		const corners = this.corners;
+		const isColliding = this.isColliding(otherBoxes);
+		const isOutOfBounds = (
+			corners.left < 0 ||
+			corners.right > this.sw ||
+			corners.top < 0 ||
+			corners.bottom > this.sh
+		);
 
-		if (corners.left < 0 || corners.right > this.sw || corners.top < 0 || corners.bottom > this.sh) {
+		if (isColliding || isOutOfBounds) {
 			this.canUpdate = false;
 
 			return false;
 		}
 
-		if (this.isColliding(otherBoxes)) {
-			this.canUpdate = false;
-
-			return false;
-		}
-
-		this.dimension += this.grow;
+		this.dimensionX += this.growX;
+		this.dimensionY += this.growY;
 
 		return true;
 	}
 
-	// https://stackoverflow.com/questions/2752349/fast-rectangle-to-rectangle-intersection
 	isColliding(boxes) {
 		const corners = this.corners;
 
@@ -103,59 +104,64 @@ class Box {
 		const corners = this.corners;
 
 		ctx.beginPath();
-		ctx.fillStyle = `hsl(${this.hue}, 50%, 50%)`;
-		ctx.strokeStyle = '#000';
+		ctx.fillStyle = `hsl(${this.hue}, 75%, 50%)`;
+		ctx.strokeStyle = '#fff';
 		ctx.lineWidth = 0.5;
+
 		// tranform origin: center center
-		ctx.rect(corners.left, corners.top, this.dimension, this.dimension);
+		ctx.rect(corners.left, corners.top, this.dimensionX, this.dimensionY);
 		ctx.fill();
-		ctx.stroke();
 		ctx.closePath();
 	}
 }
 
-const boxes = [];
-const maxBoxes = 2000;
+let boxes = [];
+const maxBoxes = 1000;
 
 const addBox = () => {
-
 	let box = new Box(width, height, 2);
-	let collides = box.isColliding(boxes);
+	let isColliding = box.isColliding(boxes);
 
-	if (collides) {
-		let i = Math.floor(boxes.length / 1);
+	if (isColliding) {
+		let tries = boxes.length;
 
-		while (i > 0 && collides) {
+		while (tries > 0 && isColliding) {
 			box.init();
-			collides = box.isColliding(boxes);
+			isColliding = box.isColliding(boxes);
 
-			i--;
+			tries--;
 		}
 	}
 
-	if (collides) {
-		box = null;
-	} else {
-		box.hue = 180 + Math.abs(180 * Math.sin((box.y * 0.009)));
+	if (!isColliding) {
+		const a = Math.atan2(box.y, box.x) / (Math.PI / 2);
+
+		box.hue = 180 + (180 * a);
 		boxes.push(box);
+
+		return true;
 	}
+
+	return false;
 };
 
+const init = () => {
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-for (let i = 0; i < 3; i++) {
-	addBox();
-}
+	boxes = [];
+
+	for (let i = 0; i < 3; i++) {
+		addBox();
+	}
+};
 
 const loop = () => {
 	boxes.forEach((box) => {
 		const others = boxes.filter(b => b !== box);
-
 		const wasUpdated = box.update(others);
 
 		if (!wasUpdated && !box.hasDiverged && boxes.length < maxBoxes) {
-			box.hasDiverged = true;
-
-			addBox();
+			box.hasDiverged = addBox();
 		}
 
 		box.draw(ctx);
@@ -164,4 +170,7 @@ const loop = () => {
 	requestAnimationFrame(loop);
 };
 
+canvas.addEventListener('mousedown', init);
+
+init();
 loop();

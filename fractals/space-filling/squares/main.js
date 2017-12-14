@@ -19,12 +19,12 @@ canvas.width = width;
 canvas.height = height;
 
 class Box {
-	constructor(stageWidth, stageHeight, dimension = 2, hue = 120) {
+	constructor(stageWidth, stageHeight, dimension = 2) {
 		this.sw = stageWidth;
 		this.sh = stageHeight;
 
-		this.hue = hue;
-		this.grow = 2;
+		this.hue = 200;
+		this.grow = 1 + (Math.random() * 3);
 
 		this.hasDiverged = false;
 		this.canUpdate = true;
@@ -96,13 +96,12 @@ class Box {
 		const corners = this.corners;
 
 		ctx.beginPath();
-		ctx.fillStyle = `hsl(${this.hue}, 50%, 50%)`;
-		ctx.strokeStyle = '#000';
+		ctx.fillStyle = `hsl(${this.hue}, 75%, 50%)`;
+		ctx.strokeStyle = '#fff';
 		ctx.lineWidth = 0.5;
 		// tranform origin: center center
 		ctx.rect(corners.left, corners.top, this.dimension, this.dimension);
 		ctx.fill();
-		ctx.stroke();
 		ctx.closePath();
 	}
 }
@@ -126,7 +125,10 @@ const addBox = () => {
 	}
 
 	if (!collides) {
-		box.hue = 180 + Math.abs(180 * Math.sin((box.y * 0.009)));
+		// box.hue = 180 + Math.abs(180 * Math.sin((box.x * 0.009)));
+		const a = Math.atan2(box.y, box.x) / (Math.PI / 2);
+
+		box.hue = 180 + (180 * a);
 		boxes.push(box);
 	}
 };

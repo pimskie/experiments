@@ -1,13 +1,10 @@
 
 /**
  * http://www.complexification.net/gallery/machines/boxFitting
- * http://www.complexification.net/gallery/machines/boxFitting/appletm/BoxFitting_m.pde
  *
  * A region of space is filled through exhaustive placement of slowly expanding boxes.
  * Each box begins very small (2 x 2 pixels) and increases in size until an obstacle
  * (surface border or other box) is encountered.
- *
- * This probably isn't the fastest way to fill a region, but it is certainly interesting to watch.
  */
 
 const q = (sel) => document.querySelector(sel);
@@ -62,14 +59,10 @@ class Box {
 		}
 
 		const corners = this.corners;
+		const isColliding = this.isColliding(otherBoxes);
+		const isOutOfBounds = corners.left < 0 || corners.right > this.sw || corners.top < 0 || corners.bottom > this.sh;
 
-		if (corners.left < 0 || corners.right > this.sw || corners.top < 0 || corners.bottom > this.sh) {
-			this.canUpdate = false;
-
-			return false;
-		}
-
-		if (this.isColliding(otherBoxes)) {
+		if (isColliding || isOutOfBounds) {
 			this.canUpdate = false;
 
 			return false;
@@ -118,7 +111,6 @@ const boxes = [];
 const maxBoxes = 2000;
 
 const addBox = () => {
-
 	let box = new Box(width, height, 2);
 	let collides = box.isColliding(boxes);
 
@@ -133,9 +125,7 @@ const addBox = () => {
 		}
 	}
 
-	if (collides) {
-		box = null;
-	} else {
+	if (!collides) {
 		box.hue = 180 + Math.abs(180 * Math.sin((box.y * 0.009)));
 		boxes.push(box);
 	}
@@ -149,7 +139,6 @@ for (let i = 0; i < 3; i++) {
 const loop = () => {
 	boxes.forEach((box) => {
 		const others = boxes.filter(b => b !== box);
-
 		const wasUpdated = box.update(others);
 
 		if (!wasUpdated && !box.hasDiverged && boxes.length < maxBoxes) {

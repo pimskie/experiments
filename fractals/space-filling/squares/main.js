@@ -73,7 +73,6 @@ class Box {
 		return true;
 	}
 
-	// https://stackoverflow.com/questions/2752349/fast-rectangle-to-rectangle-intersection
 	isColliding(boxes) {
 		const corners = this.corners;
 
@@ -99,6 +98,7 @@ class Box {
 		ctx.fillStyle = `hsl(${this.hue}, 75%, 50%)`;
 		ctx.strokeStyle = '#fff';
 		ctx.lineWidth = 0.5;
+
 		// tranform origin: center center
 		ctx.rect(corners.left, corners.top, this.dimension, this.dimension);
 		ctx.fill();

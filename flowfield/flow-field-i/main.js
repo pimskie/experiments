@@ -44,8 +44,8 @@ for (let i = 0; i < height; i += 10) {
 
 
 const a = 1.2 * Math.random();
-const b = 1.8;
-const c = 1.6;
+const b = 4 * Math.random();
+const c = 2 * Math.random() - 4;
 const d = 0.2;
 
 const getValue = (x, y) => {
@@ -74,7 +74,7 @@ const render = (ctx, p, phase) => {
 
 	ctx.save();
 	ctx.lineWidth = 0.25;
-	ctx.strokeStyle = `hsl(${hue}, 75%, ${p.pct}%)`;
+	ctx.strokeStyle = `hsl(${hue}, 75%, 50%)`;
 
 	ctx.beginPath();
 	ctx.moveTo(p.x, p.y);
@@ -106,18 +106,14 @@ const reset = () => {
 };
 
 const clear = () => {
-	// ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-	// ctx.globalCompositeOperation = 'destination-out';
-	ctx.fillStyle = 'hsla(0, 0%, 100%, 0.006)';
+	ctx.fillStyle = 'hsla(0, 0%, 100%, 0.009)';
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-	// ctx.globalCompositeOperation = 'lighter';
 };
 
 let phase = Math.random() * Math.PI;
 
 const run = () => {
-	clear();
+	// clear();
 
 	particles.forEach(p => render(ctx, p, phase));
 

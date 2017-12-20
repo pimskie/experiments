@@ -13,7 +13,6 @@ let height = window.innerHeight;
 canvas.width = width;
 canvas.height = height;
 
-let rafId;
 let particles = [];
 let phase = Math.random() * Math.PI;
 
@@ -26,8 +25,8 @@ const getValue = (x, y) => {
 
 	// clifford
 	// http://paulbourke.net/fractals/clifford/
-	// const x1 = Math.sina * y) + c * Math.cosa * x));
-	// const y1 = Math.sinb * x) + d * Math.cosa * y));
+	// const x1 = Math.sin(a * y) + c * Math.cos(a * x);
+	// const y1 = Math.sin(b * x) + d * Math.cos(a * y);
 
 	// peter de jong
 	// http://paulbourke.net/fractals/peterdejong/
@@ -60,8 +59,6 @@ const render = (ctx, p, phase) => {
 };
 
 const reset = () => {
-	cancelAnimationFrame(rafId);
-
 	width = window.innerWidth;
 	height = window.innerHeight;
 
@@ -95,8 +92,6 @@ const reset = () => {
 	}
 
 	phase = Math.random() * Math.PI;
-
-	run();
 };
 
 const clear = () => {
@@ -110,7 +105,8 @@ const run = () => {
 	particles.forEach(p => render(ctx, p, phase));
 
 	phase += 0.001;
-	rafId = requestAnimationFrame(run);
+
+	requestAnimationFrame(run);
 };
 
 
@@ -133,3 +129,4 @@ gui.close();
 
 window.addEventListener('resize', reset);
 reset();
+run();

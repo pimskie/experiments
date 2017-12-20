@@ -35,14 +35,13 @@ const getValue = (x, y) => {
 	const x1 = Math.sin(a * y) - Math.cos(b * x);
 	const y1 = Math.sin(c * x) - Math.cos(d * y);
 
-	// find angle from old to new. that's the value.
 	return Math.atan2(y1 - y, x1 - x);
 };
 
 const render = (ctx, p, phase) => {
 	const value = getValue(p.x, p.y);
 
-	const hue = 180 + (90 * Math.sin(phase));
+	const hue = 180 + (180 * Math.sin(phase));
 	const a = particles.length / (p.index + 1);
 
 	ctx.save();
@@ -52,7 +51,7 @@ const render = (ctx, p, phase) => {
 	ctx.beginPath();
 	ctx.moveTo(p.x, p.y);
 
-	p.update(value, width, height);
+	p.update(value);
 
 	ctx.lineTo(p.x, p.y);
 	ctx.stroke();
@@ -68,14 +67,14 @@ const reset = () => {
 
 	particles = [];
 
-	for (let i = 0; i < height; i += 1) {
+	for (let i = 0; i < height; i += 2) {
 		particles.push({
 			x: 0,
 			y: i,
 			vx: 0,
 			vy: 0,
 			index: i,
-			update(noiseValue, width, height) {
+			update(noiseValue) {
 				this.vx += Math.cos(noiseValue) * 0.3;
 				this.vy += Math.sin(noiseValue) * 0.3;
 
@@ -84,22 +83,6 @@ const reset = () => {
 
 				this.vx *= 0.99;
 				this.vy *= 0.99;
-
-				if (this.x > width) {
-					this.x = 0;
-				}
-
-				if (this.y > height) {
-					this.y = 0;
-				}
-
-				if (this.x < 0) {
-					this.x = width;
-				}
-
-				if (this.y < 0) {
-					this.y = height;
-				}
 			},
 		});
 	}
@@ -110,7 +93,7 @@ const reset = () => {
 };
 
 const clear = () => {
-	ctx.fillStyle = 'hsla(0, 0%, 100%, 0.02)';
+	ctx.fillStyle = 'hsla(0, 0%, 100%, 0.09)';
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
@@ -119,7 +102,7 @@ const run = () => {
 
 	particles.forEach(p => render(ctx, p, phase));
 
-	// phase += 0.001;
+	phase += 0.005;
 	rafId = requestAnimationFrame(run);
 };
 
@@ -139,5 +122,6 @@ gui.add(settings, 'c', -3, 3).step(0.01).onChange(reset);
 gui.add(settings, 'd', -3, 3).step(0.01).onChange(reset);
 gui.add(settings, 'reset');
 
+gui.close();
 
 reset();

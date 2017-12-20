@@ -45,7 +45,7 @@ const render = (ctx, p, phase) => {
 
 	ctx.save();
 	ctx.lineWidth = 0.25;
-	ctx.strokeStyle = `hsla(${hue}, 90%, 50%, ${a})`;
+	ctx.strokeStyle = `hsla(${hue}, 50%, 50%, ${a})`;
 
 	ctx.beginPath();
 	ctx.moveTo(p.x, p.y);
@@ -100,7 +100,7 @@ const reset = () => {
 };
 
 const clear = () => {
-	ctx.fillStyle = 'hsla(0, 0%, 100%, 0.09)';
+	ctx.fillStyle = 'hsla(0, 0%, 100%, 0.009)';
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
@@ -109,7 +109,7 @@ const run = () => {
 
 	particles.forEach(p => render(ctx, p, phase));
 
-	phase += 0.005;
+	phase += 0.001;
 	rafId = requestAnimationFrame(run);
 };
 

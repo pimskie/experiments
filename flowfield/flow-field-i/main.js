@@ -6,8 +6,9 @@ const q = (sel) => document.querySelector(sel);
 
 const canvas = q('canvas');
 const ctx = canvas.getContext('2d');
-const width = window.innerWidth;
-const height = window.innerHeight;
+
+let width = window.innerWidth;
+let height = window.innerHeight;
 
 canvas.width = width;
 canvas.height = height;
@@ -61,14 +62,22 @@ const render = (ctx, p, phase) => {
 const reset = () => {
 	cancelAnimationFrame(rafId);
 
+	width = window.innerWidth;
+	height = window.innerHeight;
+
+	canvas.width = width;
+	canvas.height = height;
+
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	particles = [];
 
-	for (let i = 0; i < height; i += 2) {
+	let y = height * 0.125;
+
+	for (let i = 0; i < height * 0.75; i += 2) {
 		particles.push({
 			x: 0,
-			y: i,
+			y: y + i,
 			vx: 0,
 			vy: 0,
 			index: i,
@@ -122,4 +131,5 @@ gui.add(settings, 'reset');
 
 gui.close();
 
+window.addEventListener('resize', reset);
 reset();

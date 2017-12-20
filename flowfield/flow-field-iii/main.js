@@ -124,7 +124,7 @@ const getForceColor = (rgb) => {
 	const sum = rgb.reduce((acc, val) => acc + val);
 	const avg = sum / 3;
 
-	return 1 - (avg / 255);
+	return avg / 255;
 };
 
 const getForceNoise = (x, y, phase) => {
@@ -154,7 +154,7 @@ const reset = () => {
 const settings = {
 	color: true,
 	lineLength: 3,
-	perlin: 0.2,
+	perlin: 0.5,
 	fill: 0,
 	reset,
 };
@@ -210,7 +210,7 @@ canvas.addEventListener('mouseup', () => bitmap.toggle(false));
 const gui = new dat.GUI();
 gui.add(settings, 'color').onChange(reset);
 gui.add(settings, 'perlin', 0, 1).step(0.01).onChange(reset);
-gui.add(settings, 'lineLength', 0.1, 3).step(0.1).onChange(reset);
+gui.add(settings, 'lineLength', 0.1, 50).step(0.1).onChange(reset);
 gui.add(settings, 'fill', 0, 1).step(0.01);
 gui.add(settings, 'reset');
 

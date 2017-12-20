@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Field 3</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+		}
+
+        canvas {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .canvas-painting {
+            z-index: 10;
+        }
+
+        .canvas-reference {
+            display: none;
+        }
+
+        .canvas-reference.is-on {
+            display: inline-block;
+        }
+
+		.container {
+			width: 100vw;
+			height: 100vh;
+
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+	</style>
+</head>
+<body>
+
+<canvas class="canvas canvas-painting js-canvas" width="500" height="500"></canvas>
+<div class="container">
+</div>
+
+<script src="../../_vendor/dat.gui.min.js"></script>
+<script src="../../_vendor/perlin.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>

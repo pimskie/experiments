@@ -1,4 +1,4 @@
-/* global noise: false, dat: false */
+/* global noise: false */
 
 // https://www.bit-101.com/blog/2017/10/28/flow-fields-part-ii/
 

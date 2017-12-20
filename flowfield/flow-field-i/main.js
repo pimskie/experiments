@@ -1,8 +1,6 @@
-/* global noise: false, dat: false */
+/* global dat: false */
 
 // https://www.bit-101.com/blog/2017/10/23/flow-fields-part-i/
-
-noise.seed(Math.random());
 
 const q = (sel) => document.querySelector(sel);
 

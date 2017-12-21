@@ -16,7 +16,7 @@ let height = window.innerHeight;
 canvas.width = width;
 canvas.height = height;
 
-const numParticles = 1000;
+const numParticles = 2000;
 let particles = [];
 let phase = Math.random() * Math.PI;
 
@@ -25,6 +25,7 @@ class Bitmap {
 		this.imageData = null;
 
 		this.img = new Image();
+		this.img.crossOrigin = 'Anonymous';
 		this.img.addEventListener('load', (e) => this.onImageLoaded(e));
 
 		const canvas = document.createElement('canvas');
@@ -48,7 +49,7 @@ class Bitmap {
 	}
 
 	onLoad() {
-		//
+	//
 	}
 
 	onImageLoaded(e) {
@@ -69,9 +70,9 @@ class Bitmap {
 		const { data } = this.imageData;
 
 		return [
-			data[index],
-			data[index + 1],
-			data[index + 2],
+	  data[index],
+	  data[index + 1],
+	  data[index + 2],
 		];
 	}
 
@@ -106,25 +107,30 @@ class Particle {
 
 	checkBounds(width, height) {
 		if (this.x <= 0) {
-			this.x = width;
+	  this.x = width;
 		} else if (this.x >= width) {
-			this.x = 0;
+	  this.x = 0;
 		}
 
 		if (this.y <= 0) {
-			this.y = height;
+	  this.y = height;
 		} else if (this.y >= height) {
-			this.y = 0;
+	  this.y = 0;
 		}
 	}
 }
 
 
-const getForceColor = (rgb) => {
+const getForceColor = (rgb, inverse = true) => {
 	const sum = rgb.reduce((acc, val) => acc + val);
 	const avg = sum / 3;
+	const val = avg / 255;
 
-	return avg / 255;
+	if (inverse) {
+		return 1 - val;
+	}
+
+	return val;
 };
 
 const getForceNoise = (x, y, phase) => {
@@ -151,16 +157,8 @@ const reset = () => {
 	}
 };
 
-const settings = {
-	color: true,
-	lineLength: 3,
-	perlin: 0.5,
-	fill: 0,
-	reset,
-};
-
 const clear = () => {
-	ctx.fillStyle = `hsla(0, 0%, 100%, ${settings.fill})`;
+	ctx.fillStyle = `hsla(0, 0%, 100%, 0.002)`;
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
@@ -169,14 +167,16 @@ const run = () => {
 
 	particles.forEach((p) => {
 		const rgb = bitmap.getRgb(p.x, p.y);
-		const forceColor = getForceColor(rgb, phase) * (1 - settings.perlin);
+		rgb.push(0.3);
+
+		const forceColor = getForceColor(rgb, settings.inverse) * (1 - settings.perlin);
 		const forceNoise = getForceNoise(p.x, p.y, phase) * settings.perlin;
 
 		const force = (forceColor + forceNoise) * PI2;
 
 		ctx.beginPath();
-		ctx.lineWidth = 0.25;
-		ctx.strokeStyle = settings.color ? `rgb(${rgb.join(', ')})` : 'black';
+		ctx.lineWidth = settings.lineWidth;
+		ctx.strokeStyle = settings.color ? `rgba(${rgb.join(', ')})` : 'black';
 
 		ctx.moveTo(p.x, p.y);
 
@@ -196,22 +196,44 @@ const run = () => {
 	requestAnimationFrame(run);
 };
 
-run();
+const imageMap = {
+	iceland: 'https://res.cloudinary.com/da7lts5bq/image/upload/c_scale,q_73,w_800/v1513845611/iceland_j75nck.jpg',
+	einstein: 'https://res.cloudinary.com/da7lts5bq/image/upload/q_69/v1513845611/einstein_nqlmdl.jpg',
+	tiger: 'https://res.cloudinary.com/da7lts5bq/image/upload/v1513845611/tiger_edplr6.jpg',
+};
+
+const settings = {
+	color: false,
+	inverse: true,
+	lineLength: 3,
+	lineWidth: 0.1,
+	perlin: 0.1,
+	image: 'einstein',
+	reset,
+};
+
+const loadImage = () => {
+	bitmap.load(imageMap[settings.image]);
+};
 
 const bitmap = new Bitmap();
 bitmap.onLoad = reset;
 
-bitmap.load('einstein.jpg');
+loadImage();
+run();
 
 canvas.addEventListener('mousedown', () => bitmap.toggle(true));
 canvas.addEventListener('mouseup', () => bitmap.toggle(false));
 
-
-const gui = new dat.GUI();
+const gui = new dat.GUI({ autoPlace: false });
 gui.add(settings, 'color').onChange(reset);
+gui.add(settings, 'inverse').onChange(reset);
 gui.add(settings, 'perlin', 0, 1).step(0.01).onChange(reset);
-gui.add(settings, 'lineLength', 0.1, 50).step(0.1).onChange(reset);
-gui.add(settings, 'fill', 0, 1).step(0.01);
+gui.add(settings, 'lineLength', 0.1, 20).step(0.1).onChange(reset);
+gui.add(settings, 'lineWidth', 0.1, 5).step(0.01).onChange(reset);
+gui.add(settings, 'image', [ 'einstein', 'iceland', 'tiger' ]).onChange(() => {
+	loadImage();
+});
 gui.add(settings, 'reset');
 
-// gui.close();
+q('.js-ui').appendChild(gui.domElement);

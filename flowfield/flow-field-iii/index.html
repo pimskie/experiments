@@ -31,21 +31,18 @@
             display: inline-block;
         }
 
-		.container {
-			width: 100vw;
-			height: 100vh;
+		.ui {
+            position: absolute;
+            right: 0;
+            z-index: 100;
+        }
 
-			display: flex;
-			justify-content: center;
-			align-items: center;
-		}
 	</style>
 </head>
 <body>
 
 <canvas class="canvas canvas-painting js-canvas" width="500" height="500"></canvas>
-<div class="container">
-</div>
+<div class="ui js-ui"></div>
 
 <script src="../../_vendor/dat.gui.min.js"></script>
 <script src="../../_vendor/perlin.js"></script>

@@ -1,0 +1,24 @@
+{
+  "name": "experiments",
+  "version": "1.0.0",
+  "description": "experiments",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://pimskie@bitbucket.org/pimskie/experiments.git"
+  },
+  "keywords": [
+    "experiments",
+    "code",
+    "canvas"
+  ],
+  "author": "Pimskie",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/pimskie/experiments#readme",
+  "dependencies": {
+    "three": "^0.89.0"
+  }
+}

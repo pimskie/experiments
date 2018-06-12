@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Template</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            background:#000;
+        }
+
+        .canvas--trail {
+            z-index: 10;
+        }
+
+        .canvas--image {
+            background: transparent;
+        }
+	</style>
+</head>
+<body>
+
+<div class="container">
+    <canvas class="canvas canvas--image js-canvas-image" width="500" height="500"></canvas>
+    <canvas class="canvas canvas--trail js-canvas-trail" width="500" height="500"></canvas>
+</div>
+<!-- <script src="https://rawgit.com/josephg/noisejs/master/perlin.js"></script> -->
+<script src="https://rawgit.com/jwagner/simplex-noise.js/master/simplex-noise.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>

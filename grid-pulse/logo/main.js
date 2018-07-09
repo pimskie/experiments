@@ -1,6 +1,6 @@
 const simplex = new SimplexNoise();
 
-const IMG_PATH = 'http://res.cloudinary.com/da7lts5bq/image/upload/v1528718386/af-logo-black-small_kmu2nl.png';
+const IMG_PATH = './af-logo-black-small.png';
 
 const q = (sel) => document.querySelector(sel);
 

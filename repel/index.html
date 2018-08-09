@@ -7,17 +7,83 @@
     <title>Document</title>
 
     <style>
+        .canvas-container {
+            position: relative;
+        }
+
         .canvas {
-            border: 1px solid black;
+            top: 0;
+            left: 0;
+        }
+
+        .canvas--compute {
+            display: none;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <canvas class="canvas js-canvas"></canvas>
+       <div class="canvas-container">
+            <canvas class="canvas canvas--compute js-canvas"></canvas>
+            <canvas class="canvas canvas--draw js-canvas-draw"></canvas>
+       </div>
+
+        <div>
+            <select class="js-operation-before">
+                <option value="source-over" selected>source-over</option>
+                <option value="source-in">source-in</option>
+                <option value="source-out">source-out</option>
+                <option value="source-atop">source-atop</option>
+                <option value="destination-in">destination-in</option>
+                <option value="destination-out">destination-out</option>
+                <option value="destination-atop">destination-atop</option>
+                <option value="lighter">lighter</option>
+                <option value="copy">copy</option>
+                <option value="xor">xor</option>
+                <option value="multiply">multiply</option>
+                <option value="screen">screen</option>
+                <option value="overlay">overlay</option>
+                <option value="darken">darken</option>
+                <option value="lighten">lighten</option>
+                <option value="color-dodge">color-dodge</option>
+                <option value="difference">difference</option>
+                <option value="hue">hue</option>
+                <option value="saturation">saturation</option>
+                <option value="color">color</option>
+                <option value="luminosity">luminosity</option>
+            </select>
+
+            <select class="js-operation-after">
+                <option value="source-over">source-over</option>
+                <option value="source-in" selected>source-in</option>
+                <option value="source-out">source-out</option>
+                <option value="source-atop">source-atop</option>
+                <option value="destination-in">destination-in</option>
+                <option value="destination-out">destination-out</option>
+                <option value="destination-atop">destination-atop</option>
+                <option value="lighter">lighter</option>
+                <option value="copy">copy</option>
+                <option value="xor">xor</option>
+                <option value="multiply">multiply</option>
+                <option value="screen">screen</option>
+                <option value="overlay">overlay</option>
+                <option value="darken">darken</option>
+                <option value="lighten">lighten</option>
+                <option value="color-dodge">color-dodge</option>
+                <option value="difference">difference</option>
+                <option value="hue">hue</option>
+                <option value="saturation">saturation</option>
+                <option value="color">color</option>
+                <option value="luminosity">luminosity</option>
+            </select>
+
+            <input type="range" class="js-opacity" min="0" max="1" value="1" step="0.01">
+        </div>
     </div>
 
+    <script src="https://rawgit.com/josephg/noisejs/master/perlin.js"></script>
+    <script src="https://rawgit.com/jwagner/simplex-noise.js/master/simplex-noise.js"></script>
     <script src="https://rawgit.com/pimskie/vector/master/vector.js"></script>
     <script src="main.js"></script>
 </body>

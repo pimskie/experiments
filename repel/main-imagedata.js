@@ -13,8 +13,9 @@ const HYPO = Math.hypot(W, H);
 const R = HYPO / 2;
 const MID = new Vector(W / 2, H / 2);
 
-const NUM_PARTICLES = 1000;
+const NUM_PARTICLES = 10000;
 
+const simplex = new SimplexNoise();
 noise.seed(Math.random());
 
 const particles = [];
@@ -33,16 +34,15 @@ for (let i = 0; i < NUM_PARTICLES; i++) {
 		explodeAngle: 0,
 		explodeForce: 0,
 		pos: new Vector(x, y),
-		acc: new Vector(0, 0),
+		force: new Vector(),
+		acc:  new Vector(0, 0),
 		vel: new Vector(0, 0),
-		life: 0,
-		age: 0,
-		aging: Math.random() * 0.05,
 	};
 
 	particles.push(p);
 }
 
+const pixelIndex = (x, y, imageData) => (~~x + ~~y * imageData.width) * 4;
 const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec1.y);
 const angleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
 const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
@@ -52,25 +52,30 @@ const clearStage = () => {
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-const update = (particle) => {
-	const { pos, acc, vel, trail, life } = particle;
+const clear = (particle) => {
+	const { pos } = particle;
+	const index = pixelIndex(pos.x, pos.y, imageData);
+
+	imageData.data[index + 3] = 0;
+};
+
+const update = (particle, index) => {
+	const { pos, acc, vel, force } = particle;
 
 	const noiseScale = 0.005;
 	const strength = 1;
 
-	const distanceFromMouse = distanceBetween(mouse, pos);
-	const forceStrength = 1 - clamp(distanceFromMouse / falloff, 0, 1);
+	const distance = distanceBetween(mouse, pos);
+	const forceStrength = 1 - clamp(distance / falloff, 0, 1);
 	const angle = angleBetween(mouse, pos);
 
 	const explodeForce = new Vector(
 		Math.cos(particle.explodeAngle) * particle.explodeForce,
 		Math.sin(particle.explodeAngle) * particle.explodeForce
-	);
+	)
 
-	const force = new Vector(
-		Math.cos(angle) * forceStrength * strength,
-		Math.sin(angle) * forceStrength * strength
-	);
+	force.x = Math.cos(angle) * forceStrength * strength;
+	force.y = Math.sin(angle) * forceStrength * strength;
 
 	acc.addSelf(force);
 	acc.addSelf(explodeForce);
@@ -89,63 +94,50 @@ const update = (particle) => {
 
 	particle.explodeForce *= 0.9;
 
-	const distance = clamp(1 - (distanceFromMouse / (falloff * 3)), 0, 1);
-	particle.color = `rgba(${255 * distance}, 0, 0, ${life})`;
+	particle.distance = clamp(1 - (distance / (falloff * 3)), 0, 1);
 
-	particle.life = Math.sin(particle.age);
-
-	particle.age += particle.aging;
-
-	if (pos.x > W) {
-		pos.x = 0;
-	} else if (pos.x < 0) {
-		pos.x = W;
-	}
-
-	if (pos.y > H) {
-		pos.y = 0;
-	} else if (pos.y < 0) {
-		pos.y = H;
-	}
-
-	// ded
-	if (particle.life > 0 && particle.life < 0.01) {
-		particle.aging = Math.random() * 0.05;
-		particle.life = 0;
+	if (pos.x < 0 || pos.x > W || pos.y < 0 || pos.y > H) {
 		pos.x = Math.random() * W;
 		pos.y = Math.random() * H;
+
 	}
 };
 
-const draw = (particle, ctx) => {
-	const { color, pos } = particle;
+const draw = (particle) => {
+	const { distance, pos } = particle;
 
-	ctx.beginPath();
-	ctx.fillStyle = color;
-	ctx.arc(pos.x, pos.y, 1, 0, TAU, false);
-	ctx.fill();
-	ctx.closePath();
+	const index = pixelIndex(pos.x, pos.y, imageData);
+
+	imageData.data[index] = distance * 255;
+	imageData.data[index + 1] = 0;
+	imageData.data[index + 2] = 0;
+	imageData.data[index + 3] = 100 + (distance * 155);
 };
 
 let phase = 0;
 let isExploding = false;
 
 const loop = () => {
-	ctxDraw.globalCompositeOperation = qs('.js-operation-before').value;
-	ctxDraw.fillStyle = `rgba(255, 255, 255, ${qs('.js-opacity').value})`;
-	ctxDraw.fillRect(0, 0, ctxDraw.canvas.width, ctxDraw.canvas.height);
+	particles.forEach((p, i) => {
+		clear(p);
 
-	particles.forEach((p) => {
 		if (isExploding) {
 			p.explodeAngle = angleBetween(mouse, p.pos);
 			p.explodeForce = (HYPO - distanceBetween(p.pos, mouse)) * 0.001;
 		}
-
-		update(p);
-		draw(p, ctxDraw);
+		update(p, i);
+		draw(p);
 	});
 
+
+	ctx.putImageData(imageData, 0, 0);
+
+	ctxDraw.globalCompositeOperation = qs('.js-operation-before').value;
+	ctxDraw.fillStyle = `rgba(255, 255, 255, ${qs('.js-opacity').value})`;
+	ctxDraw.fillRect(0, 0, ctxDraw.canvas.width, ctxDraw.canvas.height);
 	ctxDraw.globalCompositeOperation = qs('.js-operation-after').value;
+
+	ctxDraw.drawImage(c, 0, 0);
 
 	phase += 0.01;
 	isExploding = false;

@@ -78,7 +78,7 @@ const update = (particle) => {
 	vel.addSelf(acc);
 	pos.addSelf(vel);
 	vel.limit(1);
-	vel.multiplySelf(0.9);
+	vel.multiplySelf(0.98);
 
 	const noiseValue = noise.perlin3(pos.x * noiseScale, pos.y * noiseScale, phase);
 

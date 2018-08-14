@@ -1,9 +1,6 @@
 // https://www.youtube.com/watch?v=5R9eywArFTE
 // http://www.tylerlhobbs.com/writings/watercolor
 // https://sighack.com/post/generative-watercolor-in-processing
-// https://www.meredithdodge.com/2012/05/30/a-great-little-javascript-function-for-generating-random-gaussiannormalbell-curve-numbers/
-// https://filosophy.org/code/normal-distributed-random-values-in-javascript-using-the-ziggurat-algorithm/
-// https://p5js.org/reference/#/p5/randomGaussian
 
 // https://p5js.org/reference/#/p5/randomGaussian
 // https://github.com/processing/p5.js/blob/master/src/math/random.js#L166
@@ -34,19 +31,20 @@ const randomGaussian = (mean = 0, sd = 1) => {
 
 const randomBetween = (min, max) => (Math.random() * (max - min + 1)) + min;
 
-const c = document.querySelector('.js-canvas');
-const ctx = c.getContext('2d');
+const ctx = document
+  .querySelector('.js-canvas')
+  .getContext('2d');
 
 const ctxStitch = document
 	.querySelector('.js-canvas-stitch')
 	.getContext('2d');
 
-const stitchWidth = 3;
+const stitchWidth = 5;
 
 ctxStitch.canvas.width = stitchWidth;
 ctxStitch.canvas.height = stitchWidth;
 
-ctxStitch.strokeStyle = `rgba(255, 255, 255, 0.1)`;
+ctxStitch.strokeStyle = `rgba(220, 220, 220, 0.1)`;
 
 ctxStitch.beginPath();
 ctxStitch.moveTo(0, 0);
@@ -81,8 +79,20 @@ const COLORS = [
 	`hsla(0, 100%, 50%, ${ALPHA})`,
 ];
 
-c.width = W;
-c.height = H;
+const INTERLEAVE = 5;
+
+const VARIANCE_DEFAULT = 20;
+const NUM_POLIES = 200;
+const DEPTH = 4;
+const NUM_SPOTS = 3;
+const ANGLE_STEP = TAU / NUM_SPOTS;
+
+let polyCount = 0;
+let rafId;
+
+ctx.globalCompositeOperation = 'multiply';
+ctx.canvas.width = W;
+ctx.canvas.height = H;
 
 const getPoly = (midX, midY, r, edges) => {
 	const vertices = [];
@@ -124,32 +134,6 @@ const deformPoly = (vertices, depth, variance, varianceDecrease) => {
 	return deformedVertices;
 };
 
-const VARIANCE_DEFAULT = 20;
-const NUM_POLIES = 200;
-const DEPTH = 4;
-const NUM_SPOTS = 3;
-
-const angleStep = TAU / NUM_SPOTS;
-
-const polies = new Array(NUM_SPOTS).fill().map((_, i) => {
-	const poly = getPoly(
-		Math.cos(angleStep * i) * (R * 0.5) * randomGaussian(1),
-		Math.sin(angleStep * i) * (R * 0.5) * randomGaussian(1),
-		R + randomBetween(-15, 15),
-		EDGES
-	);
-
-	return deformPoly(poly, DEPTH, VARIANCE_DEFAULT, 2);
-});
-
-const drawSpot = (vertex, r, color) => {
-	ctx.beginPath();
-	ctx.fillStyle = color;
-	ctx.arc(vertex.x, vertex.y, r, 0, TAU, false);
-	ctx.fill();
-	ctx.closePath();
-};
-
 const drawPoly = (vertices, color) => {
 	const [firstVertex] = vertices;
 
@@ -170,12 +154,8 @@ const drawPoly = (vertices, color) => {
 	ctx.restore();
 };
 
-
-let polyCount = 0;
-const interleave = 5;
-
 const drawLayer = (poly, polyIndex) => {
-	for (let i = 0; i < interleave; i++) {
+	for (let i = 0; i < INTERLEAVE; i++) {
 		requestAnimationFrame(() => {
 			const deformed = deformPoly(poly, DEPTH, VARIANCE_DEFAULT + randomBetween(20, 15), 4);
 
@@ -184,19 +164,44 @@ const drawLayer = (poly, polyIndex) => {
 	}
 };
 
-ctx.fillStyle = stitchPattern;
-ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+const reset = () => {
+	polyCount = 0;
 
-const draw = () => {
-	polies.forEach(drawLayer);
+	cancelAnimationFrame(rafId);
 
-	polyCount += interleave;
-
-	if (polyCount < NUM_POLIES) {
-		requestAnimationFrame(draw);
-	}
+	ctx.clearRect(0, 0, ctx.canvas.width,ctx.canvas.height);
 };
 
-ctx.globalCompositeOperation = 'multiply';
+const generate = () => {
+	reset();
 
-draw();
+	const polies = new Array(NUM_SPOTS).fill().map((_, i) => {
+		const poly = getPoly(
+			Math.cos(ANGLE_STEP * i) * (R * 0.5) * randomGaussian(1,),
+			Math.sin(ANGLE_STEP * i) * (R * 0.5) * randomGaussian(1,),
+			R + randomBetween(-15, 15),
+			EDGES
+		);
+
+		return deformPoly(poly, DEPTH, VARIANCE_DEFAULT, 2);
+	});
+
+	ctx.fillStyle = stitchPattern;
+	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+	const draw = () => {
+		polies.forEach(drawLayer);
+
+		polyCount += INTERLEAVE;
+
+		if (polyCount < NUM_POLIES) {
+			rafId = requestAnimationFrame(draw);
+		}
+	};
+
+	draw();
+};
+
+
+generate();
+document.body.addEventListener('click', generate);

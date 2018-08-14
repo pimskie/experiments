@@ -32,12 +32,36 @@ const randomGaussian = (mean = 0, sd = 1) => {
 	return y1 * sd + mean;
 };
 
-const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
-const angleBetween = (p1, p2) => Math.atan2(p2.y - p1.y, p2.x - p1.x);
 const randomBetween = (min, max) => (Math.random() * (max - min + 1)) + min;
 
 const c = document.querySelector('.js-canvas');
 const ctx = c.getContext('2d');
+
+const ctxStitch = document
+	.querySelector('.js-canvas-stitch')
+	.getContext('2d');
+
+const stitchWidth = 3;
+
+ctxStitch.canvas.width = stitchWidth;
+ctxStitch.canvas.height = stitchWidth;
+
+ctxStitch.strokeStyle = `rgba(255, 255, 255, 0.1)`;
+
+ctxStitch.beginPath();
+ctxStitch.moveTo(0, 0);
+ctxStitch.lineTo(stitchWidth, stitchWidth);
+ctxStitch.stroke();
+ctxStitch.closePath();
+
+ctxStitch.beginPath();
+ctxStitch.moveTo(0, stitchWidth);
+ctxStitch.lineTo(stitchWidth, 0);
+ctxStitch.stroke();
+ctxStitch.closePath();
+
+const stitchPattern = ctx.createPattern(ctxStitch.canvas, 'repeat');
+
 
 const W = window.innerWidth;
 const H = window.innerHeight;
@@ -83,10 +107,6 @@ const deformPoly = (vertices, depth, variance, varianceDecrease) => {
 
 		const midX = (from.x + to.x) * 0.5;
 		const midY = (from.y + to.y) * 0.5;
-		const angle = angleBetween(
-			{ x: 0, y: 0 },
-			{ x: midX, y: midY },
-		);
 
 		const newX = midX + randomGaussian() * variance;
 		const newY = midY + randomGaussian() * variance;
@@ -104,16 +124,17 @@ const deformPoly = (vertices, depth, variance, varianceDecrease) => {
 	return deformedVertices;
 };
 
-const VARIANCE_DEFAULT = R / 15;
-const NUM_POLIES = 100;
+const VARIANCE_DEFAULT = 20;
+const NUM_POLIES = 200;
+const DEPTH = 4;
 const NUM_SPOTS = 3;
-const DEPTH = 5;
-const DISPLACEMENT = R / 1.5;
+
+const angleStep = TAU / NUM_SPOTS;
 
 const polies = new Array(NUM_SPOTS).fill().map((_, i) => {
 	const poly = getPoly(
-		randomBetween(-DISPLACEMENT, DISPLACEMENT),
-		randomBetween(-DISPLACEMENT, DISPLACEMENT),
+		Math.cos(angleStep * i) * (R * 0.5) * randomGaussian(1),
+		Math.sin(angleStep * i) * (R * 0.5) * randomGaussian(1),
 		R + randomBetween(-15, 15),
 		EDGES
 	);
@@ -156,23 +177,26 @@ const interleave = 5;
 const drawLayer = (poly, polyIndex) => {
 	for (let i = 0; i < interleave; i++) {
 		requestAnimationFrame(() => {
-			const deformed = deformPoly(poly, DEPTH, VARIANCE_DEFAULT + randomBetween(5, 15), 4);
+			const deformed = deformPoly(poly, DEPTH, VARIANCE_DEFAULT + randomBetween(20, 15), 4);
 
 			drawPoly(deformed, COLORS[polyIndex]);
 		});
 	}
 };
 
+ctx.fillStyle = stitchPattern;
+ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
 const draw = () => {
 	polies.forEach(drawLayer);
 
 	polyCount += interleave;
 
-	if (polyCount < 200) {
+	if (polyCount < NUM_POLIES) {
 		requestAnimationFrame(draw);
 	}
 };
 
-ctx.globalCompositeOperation = 'overlay';
+ctx.globalCompositeOperation = 'multiply';
 
 draw();

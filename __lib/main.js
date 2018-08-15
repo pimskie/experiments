@@ -1,16 +1,15 @@
-const q = (sel) => document.querySelector(sel);
+const q = sel => document.querySelector(sel);
 
-const canvas = q('canvas');
-const ctx = canvas.getContext('2d');
-const PI2 = Math.PI * 2;
+const ctx = q('canvas').getContext('2d');
+const TAU = Math.PI * 2;
 
-const width = 500;
-const height = 500;
-const widthHalf = width * 0.5;
-const heightHalf = height * 0.5;
+const W = 500;
+const H = 500;
+const MID_X = W * 0.5;
+const MID_Y = H * 0.5;
 
-canvas.width = width;
-canvas.height = height;
+ctx.canvas.width = W;
+ctx.canvas.height = H;
 
 
 const clear = () => {

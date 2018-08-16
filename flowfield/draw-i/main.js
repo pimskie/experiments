@@ -10,25 +10,57 @@ const H = 500;
 const MID_X = W >> 1;
 const MID_Y = H >> 1;
 
-
 const PALETTES = [
-	'https://coolors.co/app/05668d-028090-00a896-02c39a-f0f3bd',
-	'https://coolors.co/264653-2a9d8f-e9c46a-f4a261-e76f51',
-
-	// red, yellow,blue pale
-	'https://coolors.co/app/247ba0-70c1b3-b2dbbf-f3ffbd-ff1654',
-	// 'https://coolors.co/app/9c89b8-f0a6ca-efc3e6-f0e6ef-b8bedd',
-
-	// space
-	'https://coolors.co/app/f2d7ee-d3bcc0-a5668b-69306d-0e103d',
-
-	// bright
-	'https://coolors.co/app/6699cc-fff275-ff8c42-ff3c38-a23e48',
+	'https://coolors.co/app/05668d-028090-00a896-02c39a-f0f3bd', // sea weed
+	'https://coolors.co/264653-2a9d8f-e9c46a-f4a261-e76f51', // flame
+	'https://coolors.co/app/247ba0-70c1b3-b2dbbf-f3ffbd-ff1654', // red, yellow,blue pale
+	'https://coolors.co/app/f2d7ee-d3bcc0-a5668b-69306d-0e103d', // space
+	'https://coolors.co/app/6699cc-fff275-ff8c42-ff3c38-a23e48', // bright
 ];
 
-const NOISE_SCALE = 0.005;
-const ANGLE_SCALE = 0.01;
-const NUM_POINTS = 250;
+
+const options = {
+	noiseScale: 0.09,
+	noiseMultiplier: 1,
+	noiseFunction: 'perlin2',
+	formula1: 'astroid',
+	formula2: 'cycloid',
+	timeUpdate: 0.001,
+};
+
+// http://www.wolframalpha.com/widgets/view.jsp?id=4e37f43fcbe8be03c20f977f32e20d15
+const formulas = {
+	none: () => new Vector(0, 0),
+
+	astroid: (x, y) => {
+		const xt = Math.pow(Math.cos(x), 3);
+		const yt = Math.pow(Math.sin(y), 3);
+
+		return new Vector(xt, yt);
+	},
+
+	maltese: (x, y) => {
+		const xt = 2 * Math.cos(x) / Math.sqrt(Math.sin(4 * x));
+		const yt = 2 * Math.sin(y) / Math.sqrt(Math.sin(4 * y));
+
+		return new Vector(xt, yt);
+	},
+
+	// cycloid of Ceva
+	cycloid: (x, y) => {
+		const xt = Math.cos(x) * (2 * Math.cos(2 * x) + 1);
+		const yt = Math.sin(y) * (2 * Math.cos(2 * y) + 1);
+
+		return new Vector(xt, yt);
+	},
+
+	tschirnhausen: (x, y) => {
+		const xt = 1 - (3 * Math.pow(x, 2));
+		const yt = 3 - Math.pow(y, 2);
+
+		return new Vector(xt, yt);
+	},
+};
 
 let colors = [];
 let points = [];
@@ -43,8 +75,6 @@ const getColors = () => Utils.randomArrayValue(PALETTES)
 	.splice(1)
 	.map(hex => `#${hex}`);
 
-// const getColors = () => ['red', 'pink', 'yellow', 'blue', 'green'];
-
 const drawPoint = (ctx, point, color) => {
 	ctx.beginPath();
 	ctx.gloa
@@ -54,10 +84,6 @@ const drawPoint = (ctx, point, color) => {
 	ctx.closePath();
 };
 
-const applyLove = (point1, points, vel) => {
-
-};
-
 const clear = () => {
 	ctx.fillStyle = '#000';
 	ctx.globalAlpha = 1;
@@ -65,29 +91,54 @@ const clear = () => {
 };
 
 const draw = () => {
-	points.forEach((point, index) => {
+	let { noiseScale, noiseMultiplier, timeUpdate, noiseFunction, formula1, formula2 } = options;
+	const hasFormula1 = formula1 !== 'none';
+	const hasFormula2 = formula2 !== 'none';
+	const hasFormula =  hasFormula1 || hasFormula2;
+
+	noiseScale *= 0.1;
+
+	points.forEach((point) => {
 		const { pos, color } = point;
 
-		// const noiseValue = noise.perlin2(pos.x * ANGLE_SCALE, pos.y * ANGLE_SCALE, time);
-		// const angle = TAU * noiseValue;
-		// const acc = new Vector(Math.cos(angle), Math.sin(angle));
+		const noiseValue = noise[noiseFunction](pos.x * noiseScale, pos.y * noiseScale, time) * noiseMultiplier;
+		let acc = new Vector();
 
-		// http://www.wolframalpha.com/widgets/view.jsp?id=4e37f43fcbe8be03c20f977f32e20d15
-		const noiseValue = noise.perlin2(pos.x * ANGLE_SCALE, pos.y * ANGLE_SCALE) * 6;
+		if (hasFormula) {
+			const formulaVector1 = formulas[formula1](noiseValue, noiseValue);
+			const formulaVector2 = formulas[formula2](noiseValue, noiseValue);
 
-		const cosNoise = Math.cos(noiseValue);
-		const sinNoise = Math.sin(noiseValue);
+			const formulaNoise1 = noise.perlin2(formulaVector1.x, formulaVector1.y);
+			const formulaNoise2 = noise.perlin2(formulaVector2.x, formulaVector2.y);
 
-		// cycloid of Ceva
-		// const xt = Math.cos(noiseValue) * (2 * Math.cos(2 * noiseValue) + 1);
-		// const yt = Math.sin(noiseValue) * (2 * Math.cos(2 * noiseValue) + 1);
+			acc.addSelf(new Vector(
+				Math.cos(TAU * formulaNoise1),
+				Math.sin(TAU * formulaNoise1))
+			);
 
-		// Kampyle of Eudoxus
-		const sec = 1 / Math.sin(noiseValue);
-		const xt = sec;
-		const yt = Math.tan(noiseValue) * sec;
+			acc.addSelf(new Vector(
+				Math.cos(TAU * formulaNoise2),
+				Math.sin(TAU * formulaNoise2))
+			);
 
-		const acc = new Vector(xt, yt);
+		} else {
+			const angle = TAU * noiseValue;
+
+			acc = new Vector(Math.cos(angle), Math.sin(angle));
+		}
+
+
+		// if (formula1 === 'none') {
+		// 	const angle = TAU * noiseValue;
+
+		// 	acc = new Vector(Math.cos(angle), Math.sin(angle));
+		// } else {
+		// 	const formulaVector = formulas[formula1](noiseValue, noiseValue);
+		// 	const noise2 = noise.perlin2(formulaVector.x, formulaVector.y);
+
+		// 	acc = new Vector(Math.cos(TAU * noise2), Math.sin(TAU * noise2));
+		// }
+
 		pos.addSelf(acc);
 
 		drawPoint(ctx, pos, color);
@@ -98,7 +149,7 @@ const draw = () => {
 		}
 	});
 
-	time += 0.001;
+	time += timeUpdate * 0.01;
 };
 
 const loop = () => {
@@ -112,19 +163,17 @@ const run = () => {
 	cancelAnimationFrame(rafId);
 
 	noise.seed(Math.random());
-	// noise.seed(1337);
 
 	colors = getColors();
 	ctx.globalAlpha = 0.1;
 
 	points = [];
 
-	const zeroVector = new Vector();
-	const SPACING = 10;
-	const hypo = Utils.distanceBetween(zeroVector, new Vector(W, H));
+	const spacing = W / 50;
+	const hypo =  Math.hypot(W, H);
 
-	for (let x = 0; x < W; x += SPACING) {
-		for (let y = 0; y < H; y += SPACING) {
+	for (let x = 0; x < W; x += spacing) {
+		for (let y = 0; y < H; y += spacing) {
 			const pos = new Vector(
 				x + (Utils.randomGaussian(1) * 10),
 				y + (Utils.randomGaussian(1) * 10),
@@ -134,24 +183,27 @@ const run = () => {
 			const colorIndex = Math.round(colors.length * (dist / hypo));
 			const color = colors[colorIndex];
 
-			// const noiseValue = noise.perlin2(x * 0.01, y * 0.01) * 5;
-			// const colorIndex = Math.floor(Utils.map(noiseValue, -100, 100, 0, colors.length + 3));
-			// const color = colors[colorIndex];
-
 			const mass = Utils.randomBetween(1, 2);
 
-			points.push({
-				pos,
-				mass,
-				color,
-				colorIndex,
-			});
+			points.push({ pos, mass, color, colorIndex });
 		}
 	}
 
 	loop();
 };
 
+const gui = new dat.GUI();
+
+gui.add(options, 'noiseScale').step(0.01).min(0.01).max(0.5).onFinishChange(run);
+gui.add(options, 'noiseMultiplier', [1, 5, 10, 30, 50, 100, 300]).onFinishChange(run);
+gui.add(options, 'noiseFunction', [
+	'perlin2',
+	'perlin3',
+	'simplex2',
+	'simplex3',
+]).onFinishChange(run);
+gui.add(options, 'formula1', ['none', ...Object.keys(formulas)]).onFinishChange(run);
+gui.add(options, 'formula2', ['none', ...Object.keys(formulas)]).onFinishChange(run);
 
 ctx.canvas.addEventListener('click', run);
 run();

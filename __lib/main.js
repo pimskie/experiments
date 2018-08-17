@@ -22,4 +22,4 @@ const loop = () => {
 	requestAnimationFrame(loop);
 };
 
-loop();
+// loop();

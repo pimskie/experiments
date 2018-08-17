@@ -9,6 +9,7 @@ const W = 500;
 const H = 500;
 const MID_X = W >> 1;
 const MID_Y = H >> 1;
+const HYPO = Math.hypot(W, H);
 
 const PALETTES = [
 	'https://coolors.co/app/05668d-028090-00a896-02c39a-f0f3bd', // sea weed
@@ -18,16 +19,24 @@ const PALETTES = [
 	'https://coolors.co/app/6699cc-fff275-ff8c42-ff3c38-a23e48', // bright
 ];
 
-
 const options = {
 	noiseScale: 0.09,
-	noiseMultiplier: 1,
-	noiseFunction: 'perlin2',
-	formula1: 'astroid',
-	formula2: 'cycloid',
-	timeUpdate: 0.001,
+	noiseMultiplier: 5,
+	noiseFunction: 'perlin3',
+	formula1: 'none',
+	formula2: 'none',
+	timeUpdate: 0.1,
 };
 
+const hexToRgb = (hex) => {
+	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+	return result ? [
+		parseInt(result[1], 16),
+		parseInt(result[2], 16),
+		parseInt(result[3], 16)
+	] : null;
+}
 // http://www.wolframalpha.com/widgets/view.jsp?id=4e37f43fcbe8be03c20f977f32e20d15
 const formulas = {
 	none: () => new Vector(0, 0),
@@ -62,6 +71,7 @@ const formulas = {
 	},
 };
 
+let imagedata = null;
 let colors = [];
 let points = [];
 let time = 0;
@@ -73,12 +83,19 @@ ctx.canvas.height = H;
 const getColors = () => Utils.randomArrayValue(PALETTES)
 	.split('-')
 	.splice(1)
-	.map(hex => `#${hex}`);
+	.map(hex => hexToRgb(`#${hex}`));
 
-const drawPoint = (ctx, point, color) => {
+const getPointColor = (pos) => {
+	const dist = Utils.distanceBetween(new Vector(), pos);
+	const colorIndex = Math.round((colors.length - 1) * (dist / HYPO));
+	const rgb = colors[colorIndex];
+
+	return rgb;
+};
+
+const drawPoint = (ctx, point, rgb) => {
 	ctx.beginPath();
-	ctx.gloa
-	ctx.fillStyle = color;
+	ctx.fillStyle = `rgb(${rgb.join(', ')})`;
 	ctx.arc(point.x, point.y, 0.66, 0, TAU, false);
 	ctx.fill();
 	ctx.closePath();
@@ -94,12 +111,12 @@ const draw = () => {
 	let { noiseScale, noiseMultiplier, timeUpdate, noiseFunction, formula1, formula2 } = options;
 	const hasFormula1 = formula1 !== 'none';
 	const hasFormula2 = formula2 !== 'none';
-	const hasFormula =  hasFormula1 || hasFormula2;
+	const hasFormula = hasFormula1 || hasFormula2;
 
 	noiseScale *= 0.1;
 
 	points.forEach((point) => {
-		const { pos, color } = point;
+		const { pos, rgb } = point;
 
 		const noiseValue = noise[noiseFunction](pos.x * noiseScale, pos.y * noiseScale, time) * noiseMultiplier;
 		let acc = new Vector();
@@ -127,25 +144,16 @@ const draw = () => {
 			acc = new Vector(Math.cos(angle), Math.sin(angle));
 		}
 
-
-		// if (formula1 === 'none') {
-		// 	const angle = TAU * noiseValue;
-
-		// 	acc = new Vector(Math.cos(angle), Math.sin(angle));
-		// } else {
-		// 	const formulaVector = formulas[formula1](noiseValue, noiseValue);
-		// 	const noise2 = noise.perlin2(formulaVector.x, formulaVector.y);
-
-		// 	acc = new Vector(Math.cos(TAU * noise2), Math.sin(TAU * noise2));
-		// }
-
 		pos.addSelf(acc);
 
-		drawPoint(ctx, pos, color);
+		drawPoint(ctx, pos, rgb);
 
 		if (pos.x > W || pos.x < 0 || pos.Y > H || pos.y < 0) {
-			pos.x = Utils.randomGaussian() * W;
-			pos.y = Utils.randomGaussian() * H;
+			pos.x = Math.random() * W;
+			pos.y = Math.random() * H;
+
+			point.rgb = getPointColor(pos);
+
 		}
 	});
 
@@ -164,13 +172,14 @@ const run = () => {
 
 	noise.seed(Math.random());
 
+	imagedata = ctx.getImageData(0, 0, W, H);
+
 	colors = getColors();
 	ctx.globalAlpha = 0.1;
 
 	points = [];
 
 	const spacing = W / 50;
-	const hypo =  Math.hypot(W, H);
 
 	for (let x = 0; x < W; x += spacing) {
 		for (let y = 0; y < H; y += spacing) {
@@ -179,13 +188,9 @@ const run = () => {
 				y + (Utils.randomGaussian(1) * 10),
 			);
 
-			const dist = Utils.distanceBetween(new Vector(), pos);
-			const colorIndex = Math.round(colors.length * (dist / hypo));
-			const color = colors[colorIndex];
+			const rgb = getPointColor(pos);
 
-			const mass = Utils.randomBetween(1, 2);
-
-			points.push({ pos, mass, color, colorIndex });
+			points.push({ pos, rgb });
 		}
 	}
 
@@ -202,8 +207,11 @@ gui.add(options, 'noiseFunction', [
 	'simplex2',
 	'simplex3',
 ]).onFinishChange(run);
+const c = gui.add(options, 'timeUpdate').min(0.1).max(1).step(0.1).onFinishChange(run);
 gui.add(options, 'formula1', ['none', ...Object.keys(formulas)]).onFinishChange(run);
 gui.add(options, 'formula2', ['none', ...Object.keys(formulas)]).onFinishChange(run);
+
+c.disabled = true;
 
 ctx.canvas.addEventListener('click', run);
 run();

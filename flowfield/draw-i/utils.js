@@ -2,6 +2,7 @@
 const qs = sel => document.querySelector(sel);
 const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 
+const pixelIndex = (x, y, imageData) => (~~x + ~~y * imageData.width) * 4;
 const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec1.y);
 const angleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
 const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -49,6 +50,7 @@ const wrappBBox = (vec, w, h) => {
 export {
 	qs,
 	map,
+	pixelIndex,
   distanceBetween,
   angleBetween,
   randomArrayValue,

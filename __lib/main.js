@@ -1,6 +1,6 @@
-const q = sel => document.querySelector(sel);
+import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
 
-const ctx = q('canvas').getContext('2d');
+const ctx = Utils.qs('canvas').getContext('2d');
 const TAU = Math.PI * 2;
 
 const W = 500;

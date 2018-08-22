@@ -1,13 +1,10 @@
-// https://www.youtube.com/watch?v=7t54saw9I8k
-// https://www.youtube.com/watch?v=7t54saw9I8
-
-// https://www.youtube.com/watch?v=hbgDqyy8bIw
+// https://www.youtube.com/watch?v=sEKNoWyKUA0 - Coding Math: Episode 45 - Kinematics Part III
+// https://www.youtube.com/watch?v=7t54saw9I8k - Coding Math: Episode 46 - Kinematics Part IV
 
 // import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
 import * as Utils from './utils.js';
 
 const ctx = Utils.qs('canvas').getContext('2d');
-const TAU = Math.PI * 2;
 
 const W = 500;
 const H = 500;
@@ -37,7 +34,7 @@ class Segment {
 		return this._end;
 	}
 
-	follow(target) {
+	drag(target) {
 		const dir = target.subtract(this.start);
 
 		this.angle = dir.angle;
@@ -45,7 +42,7 @@ class Segment {
 		this.start.y = target.y - Math.sin(this.angle) * this.length;
 
 		if (this.parent) {
-			this.parent.follow(this.start);
+			this.parent.drag(this.start);
 		}
 	}
 
@@ -60,18 +57,19 @@ class Segment {
 	}
 }
 
-const segments = [];
-let start = new Vector(MID_X, MID_Y);
+const arms = [];
+const vectorMid = new Vector(MID_X, MID_Y);
+let start = vectorMid.clone();
 let parent = null;
 
-for (let i = 0; i < 3; i++)  {
-	segments.push(new Segment(start, 0, 50, parent));
+for (let i = 0; i < 10; i++)  {
+	arms.push(new Segment(start, 0, 10, parent));
 
-	start = segments[i].end.clone();
-	parent = segments[i];
+	start = arms[i].end.clone();
+	parent = arms[i];
 }
 
-const mouse = new Vector(MID_X, MID_Y);
+const mouse = vectorMid.clone();
 
 const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -80,10 +78,19 @@ const clear = () => {
 const loop = () => {
 	clear();
 
-	segments[segments.length - 1].follow(mouse);
+	const lastArm = arms[arms.length - 1];
 
-	segments.forEach((segment) => {
-		segment.draw(ctx);
+	lastArm.drag(mouse);
+
+	arms.forEach((arm) => {
+		if (arm.parent) {
+			arm.start = arm.parent.end.clone();
+		} else {
+			arm.start.x = MID_X;
+			arm.start.y = MID_Y;
+		}
+
+		arm.draw(ctx);
 	});
 
 	requestAnimationFrame(loop);

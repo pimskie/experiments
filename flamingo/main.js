@@ -1,8 +1,8 @@
-// https://www.youtube.com/watch?v=sEKNoWyKUA0 - Coding Math: Episode 45 - Kinematics Part III
-// https://www.youtube.com/watch?v=7t54saw9I8k - Coding Math: Episode 46 - Kinematics Part IV
+// https://stackoverflow.com/questions/25875972/how-to-get-volume-level-of-mp3-at-specific-point-of-playback-using-javascript
+// https://github.com/cwilso/volume-meter/blob/master/volume-meter.js
 
-// import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
-import * as Utils from './utils.js';
+import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
+import IKSystem from 'https://rawgit.com/pimskie/ik-system/master/ik-system.js';
 
 const ctx = Utils.qs('canvas').getContext('2d');
 
@@ -10,91 +10,178 @@ const W = 500;
 const H = 500;
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
+const MID = new Vector(MID_X, MID_Y);
+const TAU = Math.PI * 2;
 
 ctx.canvas.width = W;
 ctx.canvas.height = H;
 
-class Segment {
-	constructor(start, angle, length, parent = null) {
-		this.start = start;
-		this.angle = angle;
-		this.length = length;
-		this.parent = parent;
+ctx.lineCap = 'round';
 
-		this._end = new Vector();
-	}
+const bp = () => ctx.beginPath();
+const cp = () => ctx.closePath();
+const mt = (vec) => ctx.moveTo(vec.x, vec.y);
+const lt = (vec) => ctx.lineTo(vec.x, vec.y);
+const st = () => ctx.stroke();
 
-	get end() {
-		const x = this.start.x + Math.cos(this.angle) * this.length;
-		const y = this.start.y + Math.sin(this.angle) * this.length;
+// p5.Sound
+const frequencies = {
+	bass: [20, 140],
+	lowMid: [140, 400],
+	mid: [400, 2600],
+	highMid: [2600, 5200],
+	trebble: [5200, 14000],
+};
 
-		this._end.x = x;
-		this._end.y = y;
+const audioContext = new AudioContext();
+const source = audioContext.createMediaElementSource(Utils.qs('.js-audio'));
 
-		return this._end;
-	}
+const gain = audioContext.createGain();
 
-	drag(target) {
-		const dir = target.subtract(this.start);
+const lowpass = audioContext.createBiquadFilter();
+lowpass.type = 'lowpass';
+lowpass.frequency.setValueAtTime(50, audioContext.currentTime);
 
-		this.angle = dir.angle;
-		this.start.x = target.x - Math.cos(this.angle) * this.length;
-		this.start.y = target.y - Math.sin(this.angle) * this.length;
+const highpass = audioContext.createBiquadFilter();
+highpass.type = 'highpass';
+highpass.frequency.setValueAtTime(30, audioContext.currentTime);
 
-		if (this.parent) {
-			this.parent.drag(this.start);
-		}
-	}
+const analyser = audioContext.createAnalyser();
+analyser.smoothingTimeConstant = 0.3;
+analyser.fftSize = 2048;
 
-	draw(ctx) {
-		const {start, end } = this;
+const bufferLength = analyser.fftSize;
+const waveData = new Uint8Array(bufferLength);
+const frequencyData = new Uint8Array(bufferLength);
 
-		ctx.beginPath();
-		ctx.moveTo(start.x, start.y);
-		ctx.lineTo(end.x, end.y);
-		ctx.stroke();
-		ctx.closePath();
-	}
+const anchor = new Vector(MID.x, H);
+const ik = new IKSystem(anchor);
+
+const numArms = 10;
+const armLength = 30;
+const ikLength = numArms * armLength;
+
+for (let i = 0; i < numArms; i++) {
+	ik.addArm(new Vector(), 0, armLength);
 }
 
-const arms = [];
-const vectorMid = new Vector(MID_X, MID_Y);
-let start = vectorMid.clone();
-let parent = null;
+let mouse = new Vector(MID_X + 50, MID_Y - 50);
+let target = mouse.clone();
 
-for (let i = 0; i < 10; i++)  {
-	arms.push(new Segment(start, 0, 10, parent));
+// P5.Sound
+const getEnergy = (frequency1, frequency2, sampleRate, binCount) => {
+	if (frequency1 > frequency2) {
+		[frequency2, frequency1] = [frequency1, frequency2];
+	}
 
-	start = arms[i].end.clone();
-	parent = arms[i];
-}
+	const nyquist = sampleRate / 2;
+	const lowIndex = Math.round(frequency1 / nyquist * binCount);
+	const highIndex = Math.round(frequency2 / nyquist * binCount);
 
-const mouse = vectorMid.clone();
+	let total = 0;
+
+	for (let i = lowIndex; i <= highIndex; i++) {
+		total += frequencyData[i] / 255;
+	}
+
+	return total / (highIndex - lowIndex);
+};
+
+const drawArms = (arms, width = 15) => {
+	ctx.strokeStyle = '#000';
+	ctx.lineWidth = width;
+
+	arms.forEach((arm) => {
+		bp();
+		mt(arm.start);
+		lt(arm.end);
+		st();
+		cp();
+	});
+};
 
 const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
+let angle = -Math.PI;
+let oldRadius = 0;
+
 const loop = () => {
 	clear();
 
-	const lastArm = arms[arms.length - 1];
+	const sliderValue = parseInt(Utils.qs('.js-slider').value, 10);
+	const { frequencyBinCount, context: { sampleRate } } = analyser;
 
-	lastArm.drag(mouse);
+	analyser.getByteTimeDomainData(waveData);
+	analyser.getByteFrequencyData(frequencyData);
 
-	arms.forEach((arm) => {
-		if (arm.parent) {
-			arm.start = arm.parent.end.clone();
-		} else {
-			arm.start.x = MID_X;
-			arm.start.y = MID_Y;
-		}
+	let high = getEnergy(10000, 11000, sampleRate, frequencyBinCount);
+	let mid = getEnergy(6000, 9000, sampleRate, frequencyBinCount);
+	const low = getEnergy(100, 200, sampleRate, frequencyBinCount);
 
-		arm.draw(ctx);
-	});
+	let verticalAmplitude = low * ikLength * 1;
+	const thickness = 10 + (low * 35);
+	let boom = 0;
+
+	const numBars = 500;
+	const barWidth = ctx.canvas.width / numBars;
+	const waveStep = Math.floor(waveData.length / numBars);
+	let barX = 0;
+
+	ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+
+	for (let i = 0; i < numBars; i++) {
+		const value = waveData[i * waveStep] / 128;
+		const barHeight = value * 50;
+
+		ctx.beginPath();
+		ctx.fillRect(barX, MID_Y - barHeight, barWidth, barHeight);
+		ctx.closePath();
+
+		barX += barWidth;
+
+		boom += value;
+	}
+
+
+	let radius = mid * 250;
+	const radiusDiff = radius - oldRadius;
+
+	if (radiusDiff > 40) {
+		angle += Math.PI;
+		verticalAmplitude = ikLength;
+	}
+
+	oldRadius = radius;
+
+	mouse.x = MID_X + (Math.cos(angle) * radius);
+	mouse.y = H - verticalAmplitude;
+
+	ik.update(target);
+	drawArms(ik.arms, thickness);
+
+	const smoothness = 3;
+
+	target.x += (mouse.x - target.x) / smoothness;
+	target.y += (mouse.y - target.y) / smoothness;
+
+	angle += 0.01;
 
 	requestAnimationFrame(loop);
 };
+
+const init = () => {
+	gain.gain.setValueAtTime(1, audioContext.currentTime);
+
+	source.connect(gain);
+	source.connect(analyser);
+
+	gain.connect(audioContext.destination);
+
+	loop();
+};
+
 
 const onPointerMove = (e) => {
 	const event = (e.touches && e.touches.length) ? e.touches[0] : e;
@@ -103,12 +190,12 @@ const onPointerMove = (e) => {
 	const x = pointerX - target.offsetLeft;
 	const y = pointerY - target.offsetTop;
 
-	mouse.x = x;
-	mouse.y = y;
+	// mouse.x = x;
+	// mouse.y = y;
 };
 
 
 ctx.canvas.addEventListener('mousemove', onPointerMove);
 ctx.canvas.addEventListener('touchmove', onPointerMove);
 
-loop();
+init();

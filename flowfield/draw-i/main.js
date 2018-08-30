@@ -153,7 +153,6 @@ const draw = () => {
 			pos.y = Math.random() * H;
 
 			point.rgb = getPointColor(pos);
-
 		}
 	});
 

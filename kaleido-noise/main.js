@@ -52,12 +52,12 @@ const updateParticle = (particle) => {
 };
 
 const drawParticle = (pos, ctx) => {
-	const noiseValue = noise.perlin2(pos.x * NOISE_SCALE, pos.y * NOISE_SCALE) * 0.1;
+	const noiseValue = noise.perlin2(pos.x * NOISE_SCALE, pos.y * NOISE_SCALE) * 0.5;
 	const h = 100 * noiseValue;
 	const r = 0.5;
 
 	ctx.beginPath();
-	ctx.fillStyle = `hsla(${h}, 100%, 50%, 0.2)`;
+	ctx.fillStyle = `hsla(${h}, 100%, 0%, 0.5)`;
 	ctx.arc(pos.x - r, pos.y - r, r, 0, TAU, false);
 	ctx.fill();
 	ctx.closePath();
@@ -124,7 +124,7 @@ const toggle = () => {
 };
 
 document.body.appendChild(canvasInput);
-document.body.appendChild(canvasKaleido);
+container.appendChild(canvasKaleido);
 
 document.body.addEventListener('click', toggle);
 

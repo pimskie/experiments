@@ -21,6 +21,8 @@ let phase = 0;
 canvasInput.width = canvasOutput.width = W;
 canvasInput.height = canvasOutput.height = H;
 
+const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+
 const init = (options) => {
 	const { numTrails, iterations, chaos } = options;
 
@@ -33,7 +35,6 @@ const init = (options) => {
 
 	options.noiseScale = chaos * 0.01;
 
-	console.log(options.noiseScale)
 	particles = [];
 
 	for (let index = 0; index < numTrails; index++) {
@@ -50,17 +51,19 @@ const updateParticle = (particle, { trailSpread, noiseScale } = {}) => {
 
 	const spread = index * trailSpread;
 	const noiseValue = noise.perlin2((pos.x + spread) * noiseScale, (pos.y + spread) * noiseScale);
-
 	const angle = noiseValue * TAU;
 
 	pos.x += Math.cos(angle);
 	pos.y += Math.sin(angle);
 };
 
-const drawParticle = (ctx, { pos } = particle) => {
-	const h = 0;
+const drawParticle = (ctx, { pos, index } = {}, { noiseScale, colors } = {}) => {
+	const noiseValue = noise.perlin3(phase + (index * noiseScale), phase + (index * noiseScale), phase) * 100;
+	const noiseValueMapped = map(noiseValue, -100, 100, 0, 1);
+
+	const h = 50 * noiseValueMapped;
 	const s = 100;
-	const l = 0;
+	const l = colors ? 50 : 0;
 
 	const r = 0.75;
 
@@ -71,8 +74,9 @@ const drawParticle = (ctx, { pos } = particle) => {
 	ctx.closePath();
 };
 
-const drawDuplicates = ({ numSlices } = {}) => {
+const drawDuplicates = ({ numSlices, rotate } = {}) => {
 	const angleInc = TAU / numSlices;
+	const autoRotate = rotate ? phase * 0.1 : 0;
 
 	for (let i = 0; i < numSlices; i++) {
 		const scale = i % 2 === 0 ? 1 : -1;
@@ -80,7 +84,7 @@ const drawDuplicates = ({ numSlices } = {}) => {
 		ctxOutput.save();
 		ctxOutput.translate(MID_X, MID_Y);
 		ctxOutput.scale(1, scale);
-		ctxOutput.rotate((i * angleInc) + (phase * 0.1));
+		ctxOutput.rotate(i * angleInc + autoRotate);
 		ctxOutput.drawImage(ctxInput.canvas, -W / 2, -H / 2);
 		ctxOutput.restore();
 	}
@@ -132,23 +136,23 @@ const loop = () => {
 }
 
 
-container.appendChild(canvasOutput);
-
 const reset = () => {
 	init(options);
 };
 
-const chaos = 0.3;
+const chaos = 1;
 
 const options = {
-	numSlices: 10,
+	numSlices: 20,
 
 	numTrails: 5,
 	iterations: 10,
-	trailSpread: 3,
+	trailSpread: 2,
 
 	chaos,
 
+	colors: false,
+	rotate: false,
 	pause: false,
 	reset,
 };
@@ -158,10 +162,16 @@ gui.add(options, 'numSlices').step(2).min(2).max(40).onFinishChange(reset);
 gui.add(options, 'numTrails').step(1).min(1).max(20).onFinishChange(reset);
 gui.add(options, 'iterations').step(1).min(1).max(20).onFinishChange(reset);
 gui.add(options, 'trailSpread').step(1).min(1).max(10).onFinishChange(reset);
-gui.add(options, 'chaos').step(0.01).min(0.1).max(1.5).onFinishChange(reset);
+gui.add(options, 'chaos').step(0.01).min(0.1).max(3).onFinishChange(reset);
+gui.add(options, 'colors').onChange(reset);
+gui.add(options, 'rotate');
 gui.add(options, 'pause');
 gui.add(options, 'reset');
 gui.close();
+
+container.appendChild(canvasOutput);
+
+canvasOutput.addEventListener('click', reset);
 
 reset();
 

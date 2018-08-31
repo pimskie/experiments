@@ -8,9 +8,6 @@
 	html,
 	body {
 		margin: 0;
-		padding: 0;
-
-		overflow: hidden;
 	}
 
     .container {
@@ -22,12 +19,7 @@
         align-items: center;
     }
 
-    .canvas-container {
-        width: 400px;
-        height: 400px;
-
-        overflow: hidden;
-
+    .frame {
         position: relative;
         padding: 40px;
 
@@ -35,17 +27,28 @@
         box-shadow: inset 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
     }
 
-    canvas {
+    .frame__inner {
+        width: 400px;
+        height: 400px;
+
+        overflow: hidden;
+
         box-shadow: inset 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
+
     }
 
-
+    canvas {
+        margin-top: -75px;
+        margin-left: -75px;
+    }
 	</style>
 </head>
 <body>
 
 <div class="container">
-    <div class="canvas-container js-canvas-container"></div>
+    <div class="frame">
+        <div class="frame__inner js-canvas-container"></div>
+    </div>
 </div>
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.2/dat.gui.min.js"></script>

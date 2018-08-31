@@ -1,34 +1,19 @@
-noise.seed(Math.random());
-
 const container = document.querySelector('.js-canvas-container');
 
 const canvasInput = document.createElement('canvas');
 const ctxInput = canvasInput.getContext('2d');
-canvasInput.classList.add('slice');
 
 const canvasKaleido = document.createElement('canvas');
 const ctxKaleido = canvasKaleido.getContext('2d');
 
 const TAU = Math.PI * 2;
-const NUM_SLICES = 20;
-
 const W = 400;
 const H = 400;
 
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
 
-const NOISE_SCALE = 0.01;
-const PARTICLE_DISPLACEMENT = 2;
-
-const NUM_PARTICLES = 5;
-const particles = [];
-
-for (let index = 0; index < NUM_PARTICLES; index++) {
-	const pos = new Vector(MID_X, MID_Y);
-
-	particles.push({ pos, index });
-}
+let particles = [];
 
 let isPlaying = false;
 let rafId = null;
@@ -39,20 +24,39 @@ let phase = 0;
 	c.height = H;
 });
 
-const updateParticle = (particle) => {
-	const { pos, index } = particle;
+const init = ({ numTrails, iterations } = options) => {
+	cancelAnimationFrame(rafId);
 
-	const spread = index * PARTICLE_DISPLACEMENT;
-	const noiseValue = noise.simplex2((pos.x + spread) * NOISE_SCALE, (pos.y + spread) * NOISE_SCALE);
+	clear(ctxInput);
+	clear(ctxKaleido);
 
-	const angle = noiseValue * TAU;
-	const acc = new Vector(Math.cos(angle), Math.sin(angle));
+	noise.seed(Math.random());
 
-	pos.addSelf(acc);
+	particles = [];
+
+	for (let index = 0; index < numTrails; index++) {
+		const pos = { x: MID_X, y: MID_Y };
+
+		particles.push({ pos, iterations, index });
+	}
+
+	rafId = requestAnimationFrame(loop);
 };
 
-const drawParticle = (pos, ctx) => {
-	const noiseValue = noise.perlin2(pos.x * NOISE_SCALE, pos.y * NOISE_SCALE) * 0.5;
+const updateParticle = (particle, { trailSpread, noiseScale } = {}) => {
+	const { pos, index } = particle;
+
+	const spread = index * trailSpread;
+	const noiseValue = noise.simplex2((pos.x + spread) * noiseScale, (pos.y + spread) * noiseScale);
+
+	const angle = noiseValue * TAU;
+
+	pos.x += Math.cos(angle);
+	pos.y += Math.sin(angle);
+};
+
+const drawParticle = (ctx, { pos } = particle, { noiseScale } = options) => {
+	const noiseValue = noise.perlin2(pos.x * noiseScale, pos.y * noiseScale) * 0.5;
 	const h = 100 * noiseValue;
 	const r = 0.5;
 
@@ -63,18 +67,14 @@ const drawParticle = (pos, ctx) => {
 	ctx.closePath();
 };
 
-const clear = (ctx, alpha = 1) => {
-	ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-	ctx.beginPath();
-	ctx.fillRect(0, 0, W, H);
-	ctx.fill();
-	ctx.closePath();
+const clear = (ctx) => {
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-const drawDuplicates = () => {
-	const angleInc = TAU / NUM_SLICES;
+const drawDuplicates = ({ numSlices } = {}) => {
+	const angleInc = TAU / numSlices;
 
-	for (let i = 0; i < NUM_SLICES; i++) {
+	for (let i = 0; i < numSlices; i++) {
 		const scale = i % 2 === 0 ? 1 : -1;
 
 		ctxKaleido.save();
@@ -90,43 +90,64 @@ const iterate = () => {
 	particles.forEach((particle) => {
 		const { pos } = particle;
 
-		updateParticle(particle);
-		drawParticle(pos, ctxInput);
+		updateParticle(particle, options);
+		drawParticle(ctxInput, particle, options);
 
 		if (pos.x >= W || pos.x <= 0 || pos.Y >= H || pos.y <= 0) {
 			pos.x = MID_X;
 			pos.y = MID_Y;
 
+			// half of the trails overlap
 			particle.index += particles.length / 2;
+
+			particle.iterations -= 1;
 		}
 	});
+
+	particles = particles.filter(p => p.iterations > 0);
 
 };
 
 const loop = () => {
+	const { generate } = options;
 	clear(ctxKaleido);
 
-	if (isPlaying) {
-		for (let i = 0; i < 1; i++) {
+	if (generate) {
+		for (let i = 0; i < 3; i++) {
 			iterate();
 		};
 	}
 
-	drawDuplicates();
+	drawDuplicates(options);
 
 	phase += 0.01;
-
 	rafId = requestAnimationFrame(loop);
 }
 
-const toggle = () => {
-	isPlaying = !isPlaying;
-};
 
-document.body.appendChild(canvasInput);
 container.appendChild(canvasKaleido);
 
-document.body.addEventListener('click', toggle);
+const reset = () => {
+	init(options);
+};
 
-toggle();
-loop();
+const options = {
+	numSlices: 10,
+
+	numTrails: 5,
+	trailSpread: 2,
+	iterations: 5,
+
+	noiseScale: 0.01,
+	generate: true,
+	reset,
+};
+
+reset();
+
+const gui = new dat.GUI();
+gui.add(options, 'numSlices').step(2).min(2).max(40).onFinishChange(reset);
+gui.add(options, 'numTrails').step(1).min(1).max(20).onFinishChange(reset);
+gui.add(options, 'iterations').step(1).min(1).max(20).onFinishChange(reset);
+gui.add(options, 'trailSpread').step(1).min(1).max(10).onFinishChange(reset);
+gui.add(options, 'reset');

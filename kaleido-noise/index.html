@@ -13,42 +13,43 @@
 		overflow: hidden;
 	}
 
-     canvas,
-    .canvas-container {
-        border-radius: 50%;
+    .container {
+        width: 100vw;
+        height: 100vh;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .canvas-container {
+        width: 400px;
+        height: 400px;
+
+        overflow: hidden;
+
         position: relative;
+        padding: 40px;
 
-        display: inline-block;
-        line-height: 0;
+        border: 20px solid black;
+        box-shadow: inset 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
     }
 
-    .canvas-container:before {
-        position: absolute;
-        z-index: 10;
-
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-
-        border-radius: 50%;
-
-        background: radial-gradient(circle, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 70%);
-
-        content: '';
+    canvas {
+        box-shadow: inset 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
     }
+
 
 	</style>
 </head>
 <body>
 
-<div class="canvas-container js-canvas-container"></div>
+<div class="container">
+    <div class="canvas-container js-canvas-container"></div>
+</div>
 
+<script src="//cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.2/dat.gui.min.js"></script>
 <script src="//rawgit.com/josephg/noisejs/master/perlin.js"></script>
-<script src="//rawgit.com/pimskie/vector/master/vector.js"></script>
 
 <script src="main.js" type="module"></script>
 </body>

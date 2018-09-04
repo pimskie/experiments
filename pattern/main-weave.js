@@ -1,4 +1,6 @@
-const ctx = document.querySelector('canvas').getContext('2d');
+import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
+
+const ctx = Utils.qs('canvas').getContext('2d');
 
 const PI = Math.PI;
 const QUART = PI / 2; // lol
@@ -7,32 +9,41 @@ const TAU = PI * 2;
 const W = 500;
 const H = 500;
 
+const MID_X = W >> 1;
+const MID_Y = H >> 1;
+
 ctx.canvas.width = W;
 ctx.canvas.height = H;
 
 const LINE_WIDTH = 10;
-const R = 20;
+const R = 10;
 const R2 = R * 2;
 
 let trails = [];
+let frame = 0;
 let rafId = null;
 
+const shuffleArray = arie => arie
+	.map(a => [Math.random(), a])
+	.sort((a, b) => a[0] - b[0])
+	.map(a => a[1]);
+
 class Trail {
-	constructor(x, y, colors, angleInc) {
+	constructor(x, y, colors, angleInc, startAngle = PI) {
 		this.x = x;
 		this.y = y;
 
 		this.colors = colors;
 		this.angleInc = angleInc;
 
-		this.startAngle = 0;
+		this.startAngle = startAngle;
 		this.endAngle = this.startAngle + this.angleInc;
 
 		this.antiClockwise = false;
 	}
 
-	iterate() {
-		const changeDirection = Math.random() > 0.5;
+	update(change) {
+		const changeDirection = change;
 
 		if (changeDirection) {
 			this.acw = !this.acw;
@@ -115,50 +126,50 @@ const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-// man man man....
-const getPosition = (dimension) => {
-	const rand = dimension * Math.random();
-	const multipleOf = rand - (rand % R2);
-
-	return multipleOf;
-};
-
 const init = () => {
-	cancelAnimationFrame(rafId);
-
 	clear();
 
-	drawGrid(W, H, R * 2);
+	drawGrid(W, H, R);
 
 	trails = [];
+	frame = 0;
 
-	const t1 = new Trail(getPosition(W), getPosition(H), ['#6E8898', '#9FB1BC'], QUART);
-	const t2 = new Trail(getPosition(W), getPosition(H), ['#1A535C', '#F7FFF7'], QUART);
-	const t3 = new Trail(getPosition(W), getPosition(H), ['#A23E48', '#FF3C38'], QUART);
+	cancelAnimationFrame(rafId);
 
-	trails.push(t1);
-	trails.push(t2);
-	trails.push(t3);
+	for (let i = 0; i < 1; i++) {
+		const t1 = new Trail(-R, R, ['#6E8898', '#9FB1BC'], PI, PI);
+		trails.push(t1);
+
+		const t2 = new Trail(W + R, R, ['red', 'green'], PI, TAU);
+		trails.push(t2);
+
+		const t3 = new Trail(-R, R * 3, ['#6E8898', '#9FB1BC'], PI, PI);
+		trails.push(t3);
+
+		const t4 = new Trail(W + R, R * 3, ['red', 'green'], PI, TAU);
+		trails.push(t4);
+	}
 
 	loop();
 };
 
 const loop = () => {
-	trails.forEach((trail) => {
-		if (trail.x < -R || trail.x > W + R || trail.y < -R || trail.y > H + R) {
-			trail.x = (W >> 1) - R;
-			trail.y = (H >> 1) - R;
-		}
+	const cols = Math.floor(W / R) / 2;
+	const change = frame === 0 || (frame % cols !== 0);
 
-		trail.iterate();
-		trail.draw();
+	trails.forEach((trail) => {
+		trail.update(change);
 	});
 
-	rafId = requestAnimationFrame(loop);
+	shuffleArray(trails);
+
+	if (frame < cols - 1) {
+		frame++;
+		rafId = requestAnimationFrame(loop);
+	}
 };
 
 
 ctx.canvas.addEventListener('click', init);
 
 init();
-loop();

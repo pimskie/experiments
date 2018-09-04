@@ -1,38 +1,51 @@
-const ctx = document.querySelector('canvas').getContext('2d');
+import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
+
+const ctx = Utils.qs('canvas').getContext('2d');
 
 const PI = Math.PI;
 const QUART = PI / 2; // lol
 const TAU = PI * 2;
 
-const W = 500;
-const H = 500;
+const W = window.innerWidth;
+const H = window.innerHeight;
+
+const MID_X = W >> 1;
+const MID_Y = H >> 1;
 
 ctx.canvas.width = W;
 ctx.canvas.height = H;
 
-const LINE_WIDTH = 10;
+const LINE_WIDTH = 30;
 const R = 20;
 const R2 = R * 2;
+
+const COLS = Math.floor(W / R) / 2;
+const ROWS = Math.floor(H / R) / 2;
 
 let trails = [];
 let rafId = null;
 
+const shuffleArray = arie => arie
+	.map(a => [Math.random(), a])
+	.sort((a, b) => a[0] - b[0])
+	.map(a => a[1]);
+
 class Trail {
-	constructor(x, y, colors, angleInc) {
+	constructor(x, y, colors, angleInc, startAngle = PI) {
 		this.x = x;
 		this.y = y;
 
 		this.colors = colors;
 		this.angleInc = angleInc;
 
-		this.startAngle = 0;
+		this.startAngle = startAngle;
 		this.endAngle = this.startAngle + this.angleInc;
 
 		this.antiClockwise = false;
 	}
 
-	iterate() {
-		const changeDirection = Math.random() > 0.5;
+	update(change) {
+		const changeDirection = change;
 
 		if (changeDirection) {
 			this.acw = !this.acw;
@@ -115,44 +128,33 @@ const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-// man man man....
-const getPosition = (dimension) => {
-	const rand = dimension * Math.random();
-	const multipleOf = rand - (rand % R2);
-
-	return multipleOf;
-};
-
 const init = () => {
-	cancelAnimationFrame(rafId);
-
 	clear();
 
-	drawGrid(W, H, R * 2);
+	drawGrid(W, H, R);
 
 	trails = [];
 
-	const t1 = new Trail(getPosition(W), getPosition(H), ['#6E8898', '#9FB1BC'], QUART);
-	const t2 = new Trail(getPosition(W), getPosition(H), ['#1A535C', '#F7FFF7'], QUART);
-	const t3 = new Trail(getPosition(W), getPosition(H), ['#A23E48', '#FF3C38'], QUART);
+	cancelAnimationFrame(rafId);
 
-	trails.push(t1);
-	trails.push(t2);
-	trails.push(t3);
+	for (let i = 0; i < ROWS; i++) {
+		const trail1 = new Trail(-R, R * (i * 3), ['#6E8898', '#9FB1BC'], PI, PI);
+		const trail2 = new Trail(-R2, R * (i * 3), ['#9FB1BC', '#6E8898'], PI, PI);
+
+		trails.push(trail1);
+		trails.push(trail2);
+	}
 
 	loop();
 };
 
-const loop = () => {
-	trails.forEach((trail) => {
-		if (trail.x < -R || trail.x > W + R || trail.y < -R || trail.y > H + R) {
-			trail.x = (W >> 1) - R;
-			trail.y = (H >> 1) - R;
-		}
 
-		trail.iterate();
-		trail.draw();
-	});
+const loop = () => {
+	const [trail] = trails;
+	trail.update(true);
+	// trails.forEach(t => t.update(true));
+
+	trails = shuffleArray(trails);
 
 	rafId = requestAnimationFrame(loop);
 };
@@ -161,4 +163,3 @@ const loop = () => {
 ctx.canvas.addEventListener('click', init);
 
 init();
-loop();

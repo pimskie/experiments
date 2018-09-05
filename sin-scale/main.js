@@ -1,18 +1,12 @@
-import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
+noise.seed(Math.random());
 
 const ctx = document.querySelector('canvas').getContext('2d');
 
-const PI = Math.PI;
-const TAU = PI * 2;
+const TAU = Math.PI * 2;
+const R = 250;
 
-const W = 500;
-const H = 500;
-const MID_X = W * 0.5;
-const MID_Y = H * 0.5;
-const R = MID_X;
-
-ctx.canvas.width = W;
-ctx.canvas.height = H;
+ctx.canvas.width = 500;
+ctx.canvas.height = 500;
 
 const NUM_SHAPES = 30;
 const ANGLE_STEP = TAU / NUM_SHAPES;
@@ -28,93 +22,53 @@ const shapes = new Array(NUM_SHAPES).fill().map((_, i) => {
 });
 
 let phase = 0;
-
-const clear = () => {
-	ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-
-	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-};
-
-const drawCircle = (ctx, x, y, r = 2) => {
-	ctx.beginPath();
-	ctx.arc(x, y, r, 0, TAU, false);
-	ctx.fill();
-	ctx.closePath();
-}
-
-const drawLine = (ctx, from, to, alpha = 1) => {
-	ctx.lineWidth = 0.25;
-	ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
-	ctx.beginPath();
-	ctx.moveTo(from.x, from.y);
-	ctx.lineTo(to.x, to.y);
-	ctx.stroke();
-	ctx.closePath();
-};
-
-const drawShape = (ctx, shape, alpha) => {
+const drawShape = (ctx, shape, phase, index) => {
 	const { rotation } = shape;
 
-	ctx.beginPath();
-	ctx.lineWidth = 0.5;
-	ctx.fillStyle = `rgba(0, 0, 0, 0.05)`;
-	ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
-	ctx.ellipse(0, 0, R, R, 0, 0, TAU, false);
-	ctx.stroke();
-	// ctx.fill();
-	ctx.closePath();
-
-	const numLines = 2;
-	const lineAngleStep = PI / numLines;
-
-	for (let i = 0; i < numLines; i++) {
-		const from = {
-			x: Math.cos(rotation + (i * lineAngleStep)) * R,
-			y: Math.sin(rotation + (i * lineAngleStep)) * R,
-		};
-
-		const to = {
-			x: Math.cos(rotation + PI + (i * lineAngleStep)) * R,
-			y: Math.sin(rotation + PI + (i * lineAngleStep)) * R,
-		};
-
-		// drawLine(ctx, from, to);
-	}
-
-	const numPoints = 4;
+	const numPoints = 75;
 	const pointAngleStep = TAU / numPoints;
+	const noiseIndex1 = index * 0.01;
+
+	ctx.fillStyle = `hsla(0, 70%, 50%, 0.09)`;
+	ctx.strokeStyle = `hsla(0, 70%, 50%, 0.1)`;
+	ctx.beginPath();
 
 	for (let i = 0; i < numPoints; i++) {
-		const x = Math.cos(rotation + (i * pointAngleStep)) * R;
-		const y = Math.sin(rotation + (i * pointAngleStep)) * R;
+		const noiseIndex2 = i * 0.1;
+		const noiseIndex3 = phase + noiseIndex1 + noiseIndex2;
+		const noiseValue = noise.perlin3(noiseIndex3, noiseIndex3, noiseIndex3) * 50;
 
-		drawCircle(ctx, x, y, 1);
+		const angle = (i * pointAngleStep);
+		const r = R + noiseValue;
+
+		const x = Math.cos(rotation + angle) * r;
+		const y = Math.sin(rotation + angle) * r;
+
+		if (i === 0) {
+			ctx.moveTo(x, y);
+		} else {
+			ctx.lineTo(x, y);
+		}
 	}
+
+	ctx.closePath();
+	ctx.stroke();
+	ctx.fill();
 };
 
 const loop = () => {
-	clear();
-
-	const scaleSpeed = phase;
-
-	const scaleX = Math.cos(scaleSpeed);
-	const scaleY = Math.sin(scaleSpeed);
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	shapes.forEach((shape, i) => {
-		let shapeScaleX =  Math.cos(scaleSpeed + (i * 0.01)); //  * (i / NUM_SHAPES);
-		let shapeScaleY =  Math.sin(scaleSpeed + (i * 0.01)); //  * (i / NUM_SHAPES);
-
-		// shapeScaleX *= atan;
-		// shapeScaleY *= atan;
-
-		const shapeAlpha = 1;
+		const shapeScaleX = 0.5 + (noise.perlin3(i * 0.1, i * 0.1, phase) * 0.5);
+		const shapeScaleY = 0.5 + (noise.perlin3(phase, i * 0.1, i * 0.1) * 0.5);
 
 		ctx.save();
-		ctx.translate(MID_X, MID_Y);
-		// ctx.rotate(shape.rotation + phase);
+		ctx.translate(250, 250);
+		ctx.rotate(shape.rotation + phase);
 		ctx.scale(shapeScaleX, shapeScaleY);
 
-		drawShape(ctx, shape, shapeAlpha);
+		drawShape(ctx, shape, phase, i);
 
 		ctx.restore();
 	});

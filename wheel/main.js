@@ -5,14 +5,14 @@ const ctxTrail = Utils.qs('.js-canvas-trail').getContext('2d');
 
 const TAU = Math.PI * 2;
 
-const W = 500; // window.innerWidth;
-const H = 500; // window.innerHeight;
+const W = window.innerWidth;
+const H = window.innerHeight;
 
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
 
-ctx.canvas.width = W;
-ctx.canvas.height = H;
+ctx.canvas.width = ctxTrail.canvas.width = W;
+ctx.canvas.height = ctxTrail.canvas.height = H;
 
 class Wheel {
 	constructor(position, r = 50, angle = 0, speed = 0.04) {
@@ -85,6 +85,10 @@ class Wheel {
 		ctxTrail.lineTo(this.anchor.x, this.anchor.y);
 		ctxTrail.stroke();
 		ctxTrail.closePath();
+
+
+		console.log(this.anchor.previousX, this.anchor.x)
+
 	}
 }
 
@@ -97,24 +101,22 @@ class Arm {
 			throw Error('Arm: either angle or anchor should be specified');
 		}
 
-		this.angle = angle;
+		this._angle = angle;
 		this.anchor = anchor;
 
 		this.wheels = [];
 
 		// TODO: refactor
+		this.to = {};
 		this.previous = {};
 	}
 
-	get to() {
-		const angle = this.angle !== null
-			? this.angle
+	get angle() {
+		const angle = this._angle !== null
+			? this._angle
 			: Utils.angleBetween(this.from, this.anchor);
 
-		return {
-			x: this.from.x + (Math.cos(angle) * this.length),
-			y: this.from.y + (Math.sin(angle) * this.length),
-		};
+		return angle;
 	}
 
 	addWheels(wheels) {
@@ -129,6 +131,9 @@ class Arm {
 		// TODO: rename
 		this.previous.x = this.to.x;
 		this.previous.y = this.to.y;
+
+		this.to.x = this.from.x + (Math.cos(this.angle) * this.length);
+		this.to.y = this.from.y + (Math.sin(this.angle) * this.length);
 
 		this.wheels.forEach(wheel => wheel.update(this.to));
 	}
@@ -169,8 +174,6 @@ class Arm {
 			return;
 		}
 
-		console.log(this.previous.x, this.to.x);
-
 		ctxTrail.strokeStyle = 'rgba(255, 100, 0, 1)';
 		ctxTrail.lineWidth = 2;
 		ctxTrail.beginPath();
@@ -181,11 +184,6 @@ class Arm {
 	}
 }
 
-// const wheel = new Wheel({ x: MID_X, y: MID_Y }, 50, -Math.PI / 2);
-// const armR = new Arm(wheel.anchor, 150, null, { x: MID_X + 50, y: MID_Y - 75 });
-
-// wheel.addArms(armR);
-// armR.addWheel(new Wheel({}, 50, 0));
 
 const wheel = new Wheel({ x: MID_X - 100, y: MID_Y }, 50, -Math.PI / 2)
 	.addArms([
@@ -193,9 +191,11 @@ const wheel = new Wheel({ x: MID_X - 100, y: MID_Y }, 50, -Math.PI / 2)
 			.addWheels([
 				new Wheel({}, 50, 0)
 					.addArms([
-						new Arm({}, 125, 0)
+						new Arm({}, 125, 0).addWheels([
+							new Wheel({}, 100, 0, 0.08)
+						]),
 					])
-			])
+			]),
 	]);
 
 const loop = () => {

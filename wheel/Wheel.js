@@ -6,6 +6,7 @@ class Wheel {
 
 		this.r = r;
 		this.speed = speed;
+
 		this.angle = angle;
 		this.yoyo = yoyo;
 
@@ -40,14 +41,13 @@ class Wheel {
 		this.to.x = this.position.x + (Math.cos(this.angle) * this.r);
 		this.to.y = this.position.y + (Math.sin(this.angle) * this.r);
 
-		this.angle += this.speed;
-
-		this.iteration++;
-
 		if (this.yoyo && this.iteration > 0 && (this.iteration % this.iterationsFullRound === 0)) {
 			this.iteration = 0;
 			this.speed *= -1;
 		}
+
+		this.angle += this.speed;
+		this.iteration++;
 
 		this.arms.forEach(arm => arm.update(this.to));
 	}
@@ -62,13 +62,27 @@ class Wheel {
 	drawSelf(ctx) {
 		ctx.beginPath();
 		ctx.strokeStyle = 'rgba(0, 0, 0, 1)';
+		ctx.lineWidth = 3;
 		ctx.arc(this.position.x, this.position.y, this.r, 0, TAU, false);
 		ctx.stroke();
 		ctx.closePath();
 
 		ctx.beginPath();
+		ctx.lineWidth = 1;
+		ctx.arc(this.position.x, this.position.y, 4, 0, TAU, false);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
 		ctx.arc(this.to.x, this.to.y, 4, 0, TAU, false);
 		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.strokeStyle = 'rgba(230, 230, 230, 1)';
+		ctx.moveTo(this.position.x, this.position.y);
+		ctx.lineTo(this.to.x, this.to.y);
+		ctx.stroke();
 		ctx.closePath();
 	}
 

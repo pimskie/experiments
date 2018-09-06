@@ -90,7 +90,8 @@ class Arm {
 		};
 
 		ctx.beginPath();
-		ctx.strokeStyle = 'rgba(230, 230, 230, 1)';
+		ctx.strokeStyle = 'rgba(200, 200, 200, 1)';
+		ctx.lineWidth = 1;
 		ctx.moveTo(position.x, position.y);
 		ctx.lineTo(lineTo.x, lineTo.y);
 		ctx.stroke();
@@ -98,6 +99,7 @@ class Arm {
 
 		ctx.beginPath();
 		ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+		ctx.lineWidth = 1;
 		ctx.arc(to.x, to.y, 5, 0, TAU, false);
 		ctx.fill();
 		ctx.closePath();

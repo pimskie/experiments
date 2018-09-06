@@ -10,7 +10,7 @@ class Wheel {
 		this.angle = angle;
 		this.yoyo = yoyo;
 
-		this.arms = [];
+		this.instruments = [];
 		this.iteration = 0;
 		this.iterationsFullRound = Math.ceil(TAU / this.speed);
 
@@ -25,8 +25,8 @@ class Wheel {
 		};
 	}
 
-	addArms(arms) {
-		this.arms = this.arms.concat(arms);
+	addInstruments(instruments) {
+		this.instruments = this.instruments.concat(instruments);
 
 		return this;
 	}
@@ -49,14 +49,14 @@ class Wheel {
 		this.angle += this.speed;
 		this.iteration++;
 
-		this.arms.forEach(arm => arm.update(this.to));
+		this.instruments.forEach(arm => arm.update(this.to));
 	}
 
 	draw(ctx, ctxTrail) {
 		this.drawSelf(ctx);
 		this.drawTrail(ctxTrail);
 
-		this.arms.forEach(arm => arm.draw(ctx, ctxTrail));
+		this.instruments.forEach(arm => arm.draw(ctx, ctxTrail));
 	}
 
 	drawSelf(ctx) {
@@ -87,7 +87,7 @@ class Wheel {
 	}
 
 	drawTrail(ctxTrail) {
-		if (this.arms.length) {
+		if (this.instruments.length) {
 			return;
 		}
 

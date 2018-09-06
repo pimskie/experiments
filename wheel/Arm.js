@@ -24,7 +24,7 @@ class Arm {
 
 		this.tromboneR = this.length * trombone * 0.5;
 
-		this.wheels = [];
+		this.instruments = [];
 
 		this.from = {
 			x: this.position.x,
@@ -45,8 +45,8 @@ class Arm {
 		return angle;
 	}
 
-	addWheels(wheels) {
-		this.wheels = this.wheels.concat(wheels);
+	addInstruments(instruments) {
+		this.instruments = this.instruments.concat(instruments);
 
 		return this;
 	}
@@ -68,7 +68,7 @@ class Arm {
 			this.from.y = this.to.y;
 		}
 
-		this.wheels.forEach(wheel => wheel.update(this.to));
+		this.instruments.forEach(wheel => wheel.update(this.to));
 
 		this.phase += this.speed;
 	}
@@ -77,7 +77,7 @@ class Arm {
 		this.drawSelf(ctx);
 		this.drawTrail(ctxTrail);
 
-		this.wheels.forEach(wheel => wheel.draw(ctx, ctxTrail));
+		this.instruments.forEach(wheel => wheel.draw(ctx, ctxTrail));
 	}
 
 	drawSelf(ctx) {
@@ -118,7 +118,7 @@ class Arm {
 	}
 
 	drawTrail(ctxTrail) {
-		if (this.wheels.length) {
+		if (this.instruments.length) {
 			return;
 		}
 

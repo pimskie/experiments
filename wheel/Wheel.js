@@ -1,14 +1,16 @@
 const TAU = Math.PI * 2;
 
 class Wheel {
-	constructor({ position, r, angle = 0, speed = 0.04, yoyo = false, paintCtx = null } = options) {
+	constructor({ position, r, angle = 0, speed = 0.04, half = false, yoyo = false, paintCtx = null } = options) {
 		this.position = position;
 
 		this.r = r;
 		this.speed = speed;
 
-		this.angle = angle;
 		this.yoyo = yoyo;
+		this.half = half;
+
+		this.angle = angle;
 
 		this.instruments = [];
 		this.iteration = 0;

@@ -16,10 +16,10 @@ class Arm {
 
 		this.position = position;
 		this.speed = speed;
-		this.phase = 0;
 
 		this.length = length;
 		this.anchor = anchor;
+		this.phase = 0;
 		this._angle = angle;
 
 		this.tromboneR = this.length * trombone * 0.5;

@@ -16,7 +16,7 @@ const MID_Y = H * 0.5;
 ctx.canvas.width = ctxTrail.canvas.width = W;
 ctx.canvas.height = ctxTrail.canvas.height = H;
 
-const wheel = new Wheel({ position: { x: 100, y: MID_Y }, r: 50, angle: 0, })
+const wheel = new Wheel({ position: { x: 100, y: MID_Y }, r: 50, angle: 0, speed: 0.04 })
 	.addInstruments([
 		new Arm({ position: {}, length: 300, anchor: { x: 200, y: MID_Y - 150, } }),
 		new Arm({ position: {}, length: 300, anchor: { x: 200, y: MID_Y + 150, } })
@@ -24,8 +24,8 @@ const wheel = new Wheel({ position: { x: 100, y: MID_Y }, r: 50, angle: 0, })
 				new Wheel({ position: {}, r: 30, speed: -0.04, angle: Math.PI / 2, yoyo: false, })
 					.addInstruments([
 						new Arm({ position: {}, length: 200, trombone: 0.25, angle: 0 }).addInstruments([
-							new Arm({ position: {}, length: 100, angle: -Math.PI / 2, trombone: 1 }).addInstruments([
-								new Wheel({ position: {}, r: 90, speed: 0.02 }).addInstruments([
+							new Arm({ position: {}, length: 100, angle: -Math.PI / 2, trombone: 0.75 }).addInstruments([
+								new Wheel({ position: {}, r: 50, speed: 0.06, half: true }).addInstruments([
 									new Arm({ position: {}, length: 250, angle: -Math.PI / 4 })
 								])
 							])

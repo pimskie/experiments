@@ -15,13 +15,16 @@ ctx.canvas.width = ctxTrail.canvas.width = W;
 ctx.canvas.height = ctxTrail.canvas.height = H;
 
 class Wheel {
-	constructor(position, r = 50, angle = 0, speed = 0.04) {
+	constructor(position, r = 50, angle = 0, speed = 0.04, yoyo = false) {
 		this.position = position;
 		this.r = r;
 		this.speed = speed;
 		this.angle = angle;
+		this.yoyo = yoyo;
 
 		this.arms = [];
+		this.iteration = 0;
+		this.iterationsFullRound = Math.ceil(TAU / this.speed);
 
 		this.anchor = {
 			previousX: this.position.x + (Math.cos(this.angle) * this.r),
@@ -49,6 +52,12 @@ class Wheel {
 
 		this.anchor.x = this.position.x + (Math.cos(this.angle) * this.r);
 		this.anchor.y = this.position.y + (Math.sin(this.angle) * this.r);
+
+		this.iteration++;
+
+		if (this.yoyo && this.iteration > 0 && (this.iteration % this.iterationsFullRound === 0)) {
+			this.speed *= -1;
+		}
 
 		this.arms.forEach(arm => arm.update(this.anchor));
 	}
@@ -85,10 +94,6 @@ class Wheel {
 		ctxTrail.lineTo(this.anchor.x, this.anchor.y);
 		ctxTrail.stroke();
 		ctxTrail.closePath();
-
-
-		console.log(this.anchor.previousX, this.anchor.x)
-
 	}
 }
 
@@ -106,7 +111,6 @@ class Arm {
 
 		this.wheels = [];
 
-		// TODO: refactor
 		this.to = {};
 		this.previous = {};
 	}
@@ -128,7 +132,6 @@ class Arm {
 	update(parentPosition = this.from) {
 		this.from = parentPosition;
 
-		// TODO: rename
 		this.previous.x = this.to.x;
 		this.previous.y = this.to.y;
 
@@ -184,15 +187,14 @@ class Arm {
 	}
 }
 
-
 const wheel = new Wheel({ x: MID_X - 100, y: MID_Y }, 50, -Math.PI / 2)
 	.addArms([
 		new Arm({}, 150, null, { x: MID_X + 50, y: MID_Y - 75 })
 			.addWheels([
-				new Wheel({}, 50, 0)
+				new Wheel({}, 50, -Math.PI/ 2, 0.04, false)
 					.addArms([
 						new Arm({}, 125, 0).addWheels([
-							new Wheel({}, 100, 0, 0.08)
+							new Wheel({}, 100, 0, 0.04, true)
 						]),
 					])
 			]),
@@ -202,7 +204,7 @@ const loop = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	ctxTrail.fillStyle = 'rgba(255, 255, 255, 0.01)';
-	ctxTrail.fillRect(0, 0, ctxTrail.canvas.width, ctxTrail.canvas.height);
+	// ctxTrail.fillRect(0, 0, ctxTrail.canvas.width, ctxTrail.canvas.height);
 
 	wheel.update();
 	wheel.draw(ctx, ctxTrail);

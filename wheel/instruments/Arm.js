@@ -1,6 +1,6 @@
 
 
-import * as Utils from './utils.js';
+import * as Utils from '../utils.js';
 
 const TAU = Math.PI * 2;
 

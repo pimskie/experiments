@@ -1,20 +1,25 @@
 const TAU = Math.PI * 2;
 
 class Wheel {
-	constructor({ position, r, angle = 0, speed = 0.04, half = false, yoyo = false, paintCtx = null } = options) {
+	constructor({ position, r, angle = 0, speed = 0.04, half = false, yoyo = false } = options) {
 		this.position = position;
 
 		this.r = r;
 		this.speed = speed;
 
+		if (yoyo && half) {
+			console.warn('Only enable either yoyo or half, chosen for yoyo');
+			half = false;
+		}
+
 		this.yoyo = yoyo;
 		this.half = half;
 
 		this.angle = angle;
+		this.anchorAngle = 0;
 
 		this.instruments = [];
-		this.iteration = 0;
-		this.iterationsFullRound = Math.ceil(TAU / this.speed);
+		this.phase = 0;
 
 		this.from = {
 			x: this.position.x + (Math.cos(this.angle) * this.r),
@@ -43,13 +48,17 @@ class Wheel {
 		this.to.x = this.position.x + (Math.cos(this.angle) * this.r);
 		this.to.y = this.position.y + (Math.sin(this.angle) * this.r);
 
-		if (this.yoyo && this.iteration > 0 && (this.iteration % this.iterationsFullRound === 0)) {
-			this.iteration = 0;
-			this.speed *= -1;
+		if (this.half) {
+			this.angle = Math.sin(this.phase) * (Math.PI / 2);
+		} else if (this.yoyo) {
+			this.angle = Math.sin(this.phase) * (Math.PI);
+		} else {
+			this.angle += this.speed;
 		}
 
-		this.angle += this.speed;
+
 		this.iteration++;
+		this.phase += this.speed;
 
 		this.instruments.forEach(arm => arm.update(this.to));
 	}
@@ -62,10 +71,13 @@ class Wheel {
 	}
 
 	drawSelf(ctx) {
+		const drawAngleFrom = this.half ? this.anchorAngle - (Math.PI / 2) : 0;
+		const drawAngleTo = this.half ? this.anchorAngle + (Math.PI / 2) : Math.PI * 2;
+
 		ctx.beginPath();
 		ctx.strokeStyle = 'rgba(0, 0, 0, 1)';
 		ctx.lineWidth = 3;
-		ctx.arc(this.position.x, this.position.y, this.r, 0, TAU, false);
+		ctx.arc(this.position.x, this.position.y, this.r, drawAngleFrom, drawAngleTo, false);
 		ctx.stroke();
 		ctx.closePath();
 

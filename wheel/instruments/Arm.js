@@ -25,9 +25,9 @@ class Arm extends Instrument {
 		this.phase = 0;
 		this._angle = angle;
 
-		this.speed = trombone != 0 ? speed * 0.5 : 1
+		this.speed = speed;
 
-		this.tromboneR = this.length * trombone * 0.5;
+		this.tromboneR = this.length * trombone;
 
 		this.instruments = [];
 
@@ -37,12 +37,12 @@ class Arm extends Instrument {
 		};
 
 		this.to = {
-			x: this.position.x + (Math.cos(this.angle) * this.length),
-			y: this.position.y + (Math.sin(this.angle) * this.length),
+			x: this.position.x + (Math.cos(this.ownAngle) * this.length),
+			y: this.position.y + (Math.sin(this.ownAngle) * this.length),
 		};
 	}
 
-	get angle() {
+	get ownAngle() {
 		const angle = this._angle !== null
 			? this._angle
 			: Utils.angleBetween(this.position, this.anchor);
@@ -58,6 +58,8 @@ class Arm extends Instrument {
 		this.from.y = this.to.y;
 
 		const r = this.length - this.tromboneR + (Math.sin(this.phase) * this.tromboneR);
+
+		this.angle = parent.angleOut || this.ownAngle;
 
 		this.to.x = this.position.x + (Math.cos(this.angle) * r);
 		this.to.y = this.position.y + (Math.sin(this.angle) * r);

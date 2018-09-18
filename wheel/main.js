@@ -43,7 +43,9 @@ ctx.canvas.height = ctxTrail.canvas.height = H;
 // ]);
 
 const wheel = new Wheel({ position: { x: MID_X, y: MID_Y }, r: 100 }).addInstruments([
-	new Arm({ angle: 0, length: 100 })
+	new Arm({ angle: 0, length: 100, trombone: 0.5, speed: 0.08 }).addInstruments([
+		new Wheel({  r: 100, half: true  })
+	])
 ]);
 
 let frame = 0;

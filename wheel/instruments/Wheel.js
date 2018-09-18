@@ -1,11 +1,16 @@
 const TAU = Math.PI * 2;
 
-class Wheel {
-	constructor({ position, r, angle = 0, speed = 0.04, half = false, yoyo = false } = options) {
+import Instrument from './Instrument.js';
+
+class Wheel extends Instrument {
+	constructor({ position = {}, r, angle = 0, speed = 0.04, paint = false, half = false, yoyo = false } = options) {
+		super();
+
 		this.position = position;
 
 		this.r = r;
 		this.speed = speed;
+		this.paint = paint;
 
 		if (yoyo && half) {
 			console.warn('Only enable either yoyo or half, chosen for yoyo');
@@ -19,7 +24,7 @@ class Wheel {
 		this.anchorAngle = 0;
 
 		this.instruments = [];
-		this.phase = 0;
+		this.phase = angle;
 
 		this.from = {
 			x: this.position.x + (Math.cos(this.angle) * this.r),
@@ -30,12 +35,6 @@ class Wheel {
 			x: this.from.x,
 			y: this.from.y,
 		};
-	}
-
-	addInstruments(instruments) {
-		this.instruments = this.instruments.concat(instruments);
-
-		return this;
 	}
 
 	update(parentPosition = this.position) {
@@ -61,13 +60,6 @@ class Wheel {
 		this.phase += this.speed;
 
 		this.instruments.forEach(arm => arm.update(this.to));
-	}
-
-	draw(ctx, ctxTrail) {
-		this.drawSelf(ctx);
-		this.drawTrail(ctxTrail);
-
-		this.instruments.forEach(arm => arm.draw(ctx, ctxTrail));
 	}
 
 	drawSelf(ctx) {
@@ -98,20 +90,6 @@ class Wheel {
 		ctx.lineTo(this.to.x, this.to.y);
 		ctx.stroke();
 		ctx.closePath();
-	}
-
-	drawTrail(ctxTrail) {
-		if (this.instruments.length) {
-			return;
-		}
-
-		ctxTrail.strokeStyle = 'rgba(100, 100, 100, 1)';
-		ctxTrail.lineWidth = 0.5;
-		ctxTrail.beginPath();
-		ctxTrail.moveTo(this.from.x, this.from.y);
-		ctxTrail.lineTo(this.to.x, this.to.y);
-		ctxTrail.closePath();
-		ctxTrail.stroke();
 	}
 }
 

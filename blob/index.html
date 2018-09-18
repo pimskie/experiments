@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Template</title>
+
+	<style>
+        @import url('https://fonts.googleapis.com/css?family=Indie+Flower');
+
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+
+            font-family: 'Indie Flower', cursive;
+		}
+
+        body {
+            font-size: 1.2rem;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            flex-direction: column;
+        }
+
+        .label {
+            display: inline-block;
+            width: 100px;
+
+            font-weight: bold;
+        }
+
+        .canvas-container {
+            margin-bottom: 2rem;
+            overflow: hidden;
+            border: 1px solid;
+        }
+	</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="canvas-container">
+        <canvas class="canvas js-canvas" width="500" height="500"></canvas>
+    </div>
+
+    <div class="controls">
+        <div class="field">
+            <label class="label" for="blur">Blur</label>
+            <input type="range" id="blur" class="input input--range js-control" data-property="blur" data-unit="px" value="10" min="1" max="50" step="1" />
+        </div>
+
+        <div class="field">
+            <label class="label" for="contrast">Contrast</label>
+            <input type="range" id="contrast" class="input input--range js-control" data-property="contrast" value="11" min="1" max="200" step="1" />
+        </div>
+
+        <div class="field">
+            <label class="label" for="saturate">Saturate</label>
+            <input type="range" id="saturate" class="input input--range js-control" data-property="saturate" data-unit="%" value="100" min="1" max="100" step="1" />
+        </div>
+
+        <div class="field">
+            <label class="label" for="hue-rotate">Hue rotate</label>
+            <input type="range" id="hue-rotate" class="input input--range js-control" data-property="hue-rotate" data-unit="deg" value="220" min="1" max="360" step="1" />
+        </div>
+
+        <div class="field">
+            <label class="label" for="brightness">Brightness</label>
+            <input type="range" id="brightness" class="input input--range js-control" data-property="brightness" data-unit="%" value="100" min="1" max="100" step="1" />
+        </div>
+
+        <div class="field">
+                <label class="label" for="invert">Invert</label>
+                <input type="range" id="invert" class="input input--range js-control" data-property="invert" data-unit="%" value="0" min="0" max="100" step="1" />
+            </div>
+    </div>
+</div>
+<script src="main.js" type="module"></script>
+
+</body>
+</html>

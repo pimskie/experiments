@@ -1,11 +1,14 @@
 
 
 import * as Utils from '../utils.js';
+import Instrument from './Instrument.js';
 
 const TAU = Math.PI * 2;
 
-class Arm {
-	constructor({ position = { x, y }, length, trombone = 0, speed = 0.04, angle = null, anchor = null } = options) {
+class Arm extends Instrument {
+	constructor({ position = { x, y }, length, trombone = 0, speed = 0.04, paint = false, angle = null, anchor = null } = options) {
+		super();
+
 		if (!length) {
 			throw Error('Arm: need a length');
 		}
@@ -17,6 +20,7 @@ class Arm {
 		this.position = position;
 		this.speed = speed;
 
+		this.paint = paint;
 		this.length = length;
 		this.anchor = anchor;
 		this.phase = 0;
@@ -45,12 +49,6 @@ class Arm {
 		return angle;
 	}
 
-	addInstruments(instruments) {
-		this.instruments = this.instruments.concat(instruments);
-
-		return this;
-	}
-
 	update(parentPosition = this.from) {
 		this.position.x = parentPosition.x;
 		this.position.y = parentPosition.y;
@@ -70,14 +68,7 @@ class Arm {
 
 		this.instruments.forEach(wheel => wheel.update(this.to));
 
-		this.phase += this.speed;
-	}
-
-	draw(ctx, ctxTrail) {
-		this.drawSelf(ctx);
-		this.drawTrail(ctxTrail);
-
-		this.instruments.forEach(wheel => wheel.draw(ctx, ctxTrail));
+		this.phase += this.speed * 2;
 	}
 
 	drawSelf(ctx) {
@@ -115,20 +106,6 @@ class Arm {
 		ctx.arc(this.anchor.x, this.anchor.y, 4, 0, TAU, false);
 		ctx.stroke();
 		ctx.closePath();
-	}
-
-	drawTrail(ctxTrail) {
-		if (this.instruments.length) {
-			return;
-		}
-
-		ctxTrail.strokeStyle = 'rgba(100, 100, 100, 1)';
-		ctxTrail.lineWidth = 1;
-		ctxTrail.beginPath();
-		ctxTrail.moveTo(this.from.x, this.from.y);
-		ctxTrail.lineTo(this.to.x, this.to.y);
-		ctxTrail.stroke();
-		ctxTrail.closePath();
 	}
 }
 

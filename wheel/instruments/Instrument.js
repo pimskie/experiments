@@ -17,8 +17,8 @@ class Instrument {
 			return;
 		}
 
-		ctxTrail.strokeStyle = 'rgba(100, 100, 100, 1)';
-		ctxTrail.lineWidth = 0.5;
+		ctxTrail.strokeStyle = 'rgba(0, 0, 0, 1)';
+		ctxTrail.lineWidth = 1;
 		ctxTrail.beginPath();
 		ctxTrail.moveTo(this.from.x, this.from.y);
 		ctxTrail.lineTo(this.to.x, this.to.y);

@@ -9,8 +9,8 @@ const ctxTrail = Utils.qs('.js-canvas-trail').getContext('2d');
 
 const TAU = Math.PI * 2;
 
-const W = window.innerWidth;
-const H = window.innerHeight;
+const W = 750;
+const H = 750;
 
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
@@ -18,55 +18,35 @@ const MID_Y = H * 0.5;
 ctx.canvas.width = ctxTrail.canvas.width = W;
 ctx.canvas.height = ctxTrail.canvas.height = H;
 
-// const wheel = new Wheel({ position: { x: 100, y: MID_Y }, r: 50, angle: 0, speed: 0.04 })
-// 	.addInstruments([
-// 		new Arm({ position: {}, length: 300, anchor: { x: 200, y: MID_Y - 150, } }),
-// 		new Arm({ position: {}, length: 300, anchor: { x: 200, y: MID_Y + 150, } })
-// 			.addInstruments([
-// 				new Wheel({ position: {}, r: 30, speed: -0.04, angle: Math.PI / 2, yoyo: true, })
-// 					.addInstruments([
-// 						new Arm({ position: {}, length: 200, trombone: 0.25, angle: 0 }).addInstruments([
-// 							new Arm({ position: {}, length: 100, angle: -Math.PI / 2, trombone: 0.75 }).addInstruments([
-// 								new Wheel({ position: {}, r: 50, half: false }).addInstruments([
-// 									new Arm({ position: {}, length: 250, angle: -Math.PI / 4 })
+// const wheel = new Wheel({
+// 	position: { x: 52, y: MID_Y }, r: 50,
+// }).addInstruments([
+// 	new Arm({ length: 250, anchor: { x: 200, y: MID_Y + 100 } }).addInstruments([
+// 		new Arm({ length: 100, angle: -Math.PI / 2 }).addInstruments([
+// 			new Wheel({ r: 40, half: false, speed: -0.04 }).addInstruments([
+// 				new Arm({ length: 200, anchor: { x: 250, y: 300 } }).addInstruments([
+// 					new Wheel({ r: 50, half: true }).addInstruments([
+// 						new Arm({ angle: 0, length: 200 }).addInstruments([
+// 							new Arm({ length: 300, trombone: 0.5, anchor: { x: MID_X + 75, y: MID_Y + 50 } }).addInstruments([
+// 								new Wheel({ r: 50, yoyo: true }).addInstruments([
+// 									new Arm({ length: 150, angle: 0 }).addInstruments([
+// 										new Wheel({ r: 20, speed: -0.02 })
+// 									])
 // 								])
 // 							])
 // 						])
 // 					]),
-// 			]),
-// 	]);
-
-// const wheel = new Wheel({
-// 	position: { x: 60, y: MID_Y },
-// 	r: 50,
-// }).addInstruments([
-// 	new Arm({
-// 		position: {},
-// 		length: 300,
-// 		anchor: { x: 200, y: MID_Y },
-// 	}).addInstruments([
-// 		new Wheel({ position: {}, r: 75, half: true }).addInstruments([
-// 			new Arm({ position: {}, length: 250, angle: 1, }).addInstruments([
-// 				new Wheel({ position: {}, r: 125, half: true, angle: -Math.PI / 2, speed: 0.005 }).addInstruments([
-// 					new Arm({ position: {}, length: 400, anchor: { x: MID_X, y: MID_Y }})
-// 				])
-// 			]),
-// 			new Arm({ position: {}, length: 250, angle: -1, }).addInstruments([
-// 				new Wheel({ position: {}, r: 125, half: true, angle: 0 }).addInstruments([
-// 					new Arm({ position: {}, length: 400, anchor: { x: MID_X, y: MID_Y }})
 // 				])
 // 			])
 // 		])
 // 	])
 // ]);
 
-const wheel = new Wheel({ position: { x: 0, y: MID_Y }, r: 200, half: true }).addInstruments([
-	new Arm({ position: {}, anchor: { x: 400, y: MID_Y }, length: 500 }).addInstruments([
-		new Arm({ position: {}, anchor: { x: 900, y: MID_Y }, length: 600 }).addInstruments([
-			new Wheel({ r: 100 })
-		])
-	])
+const wheel = new Wheel({ position: { x: MID_X, y: MID_Y }, r: 100 }).addInstruments([
+	new Arm({ angle: 0, length: 100 })
 ]);
+
+let frame = 0;
 
 const loop = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -75,7 +55,12 @@ const loop = () => {
 	ctxTrail.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	wheel.update();
-	wheel.draw(ctx, ctxTrail);
+
+	if (frame > 0) {
+		wheel.draw(ctx, ctxTrail);
+	}
+
+	frame++;
 
 	requestAnimationFrame(loop);
 };

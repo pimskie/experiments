@@ -6,7 +6,7 @@ import Instrument from './Instrument.js';
 const TAU = Math.PI * 2;
 
 class Arm extends Instrument {
-	constructor({ position = { x, y }, length, trombone = 0, speed = 0.04, paint = false, angle = null, anchor = null } = options) {
+	constructor({ position = { x: 0, y : 0 }, length, trombone = 0, speed = 0.04, paint = false, angle = null, anchor = null } = options) {
 		super();
 
 		if (!length) {
@@ -18,13 +18,14 @@ class Arm extends Instrument {
 		}
 
 		this.position = position;
-		this.speed = speed;
 
 		this.paint = paint;
 		this.length = length;
 		this.anchor = anchor;
 		this.phase = 0;
 		this._angle = angle;
+
+		this.speed = trombone != 0 ? speed * 0.5 : 1
 
 		this.tromboneR = this.length * trombone * 0.5;
 
@@ -49,9 +50,9 @@ class Arm extends Instrument {
 		return angle;
 	}
 
-	update(parentPosition = this.from) {
-		this.position.x = parentPosition.x;
-		this.position.y = parentPosition.y;
+	update(parent) {
+		this.position.x = parent ? parent.to.x : this.from.x;
+		this.position.y = parent ? parent.to.y : this.from.y;
 
 		this.from.x = this.to.x;
 		this.from.y = this.to.y;
@@ -66,9 +67,11 @@ class Arm extends Instrument {
 			this.from.y = this.to.y;
 		}
 
-		this.instruments.forEach(wheel => wheel.update(this.to));
+		this.instruments.forEach(wheel => wheel.update(this));
 
 		this.phase += this.speed * 2;
+
+		this.angleOut = this.angle;
 	}
 
 	drawSelf(ctx) {
@@ -81,7 +84,7 @@ class Arm extends Instrument {
 		};
 
 		ctx.beginPath();
-		ctx.strokeStyle = 'rgba(200, 200, 200, 1)';
+		ctx.strokeStyle = 'rgba(100, 100, 100, 1)';
 		ctx.lineWidth = 1;
 		ctx.moveTo(position.x, position.y);
 		ctx.lineTo(lineTo.x, lineTo.y);

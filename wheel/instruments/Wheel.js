@@ -3,8 +3,12 @@ const TAU = Math.PI * 2;
 import Instrument from './Instrument.js';
 
 class Wheel extends Instrument {
-	constructor({ position = {}, r, angle = 0, speed = 0.04, paint = false, half = false, yoyo = false } = options) {
+	constructor({ position = { x: 0, y : 0 }, r, angle = 0, speed = 0.04, paint = false, half = false, yoyo = false } = options) {
 		super();
+
+		if (!r) {
+			throw Error('Wheel: need a radius (r)');
+		}
 
 		this.position = position;
 
@@ -37,9 +41,9 @@ class Wheel extends Instrument {
 		};
 	}
 
-	update(parentPosition = this.position) {
-		this.position.x = parentPosition.x;
-		this.position.y = parentPosition.y;
+	update(parent) {
+		this.position.x = parent ? parent.to.x : this.position.x;
+		this.position.y = parent ? parent.to.y : this.position.y;
 
 		this.from.x = this.to.x;
 		this.from.y = this.to.y;
@@ -55,11 +59,12 @@ class Wheel extends Instrument {
 			this.angle += this.speed;
 		}
 
-
 		this.iteration++;
 		this.phase += this.speed;
 
-		this.instruments.forEach(arm => arm.update(this.to));
+		this.angleOut = this.angle;
+
+		this.instruments.forEach(arm => arm.update(this));
 	}
 
 	drawSelf(ctx) {

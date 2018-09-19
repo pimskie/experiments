@@ -48,6 +48,8 @@ class Wheel extends Instrument {
 		this.from.x = this.to.x;
 		this.from.y = this.to.y;
 
+		this.anchorAngle = parent && parent.angleOut || 0;
+
 		this.to.x = this.position.x + (Math.cos(this.angle) * this.r);
 		this.to.y = this.position.y + (Math.sin(this.angle) * this.r);
 
@@ -70,6 +72,10 @@ class Wheel extends Instrument {
 	drawSelf(ctx) {
 		const drawAngleFrom = this.half ? this.anchorAngle - (Math.PI / 2) : 0;
 		const drawAngleTo = this.half ? this.anchorAngle + (Math.PI / 2) : Math.PI * 2;
+
+		if (this.half) {
+			console.log(this.anchorAngle);
+		}
 
 		ctx.beginPath();
 		ctx.strokeStyle = 'rgba(0, 0, 0, 1)';

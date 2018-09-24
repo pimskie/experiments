@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SVG filters</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Nanum+Gothic');
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-size: 1rem;
+            font-family: 'Nanum Gothic', sans-serif;
+        }
+
+        svg {
+            display: none;
+        }
+
+        .container {
+            margin-top: 2rem;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            flex-direction: column;
+        }
+
+        .img-container {
+            padding: 1rem;
+            box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        .img {
+            max-width: 500px;
+            filter: url(#matrix);
+        }
+
+        .field {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+
+        .label {
+            flex-grow: 1;
+            margin-right: 0.5rem;
+            font-weight: 700;
+        }
+
+        .input {
+            margin-right: 0.5rem;
+            flex-grow: 2;
+        }
+
+        .input-value {
+            width: 50px;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="container">
+    <div class="img-container">
+            <!-- https://images.unsplash.com/photo-1517963140-f60c9eceb504?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=31d51dc719034c5ee9108b22a89badf2&auto=compress&fit=crop&w=1000&q=80 -->
+        <img src="https://images.unsplash.com/photo-1517484176709-b12a510aaf63?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=5f60e8d3ec6ddb27e0ad7de14b1ed4e3&auto=format&fit=crop&w=1000&q=80" class="img" alt="">
+    </div>
+
+    <div id="app">
+        <svg-filter v-bind="channels"></svg-filter>
+
+        <div class="controls">
+            <div class="field">
+                <select class="input input--select" v-model="channel">
+                    <option v-for="(value, key) in channels" :key="key" :value="key">{{ key }}</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="r" class="label">Red: </label>
+                <input type="range" class="input input--range" id="r" v-on:input="update($event.target.id, $event.target.value)" value="1" min="-1" max="2" value="1" step="0.1" /> <div class="input-value">{{ getChannelValue('r') }}</div>
+            </div>
+
+            <div class="field">
+                <label for="g" class="label">Green: </label>
+                <input type="range" class="input input--range" id="g" v-on:input="update($event.target.id, $event.target.value)" value="1" min="-1" max="2" value="1" step="0.1" /> <div class="input-value">{{ getChannelValue('g') }}</div>
+            </div>
+
+            <div class="field">
+                <label for="b" class="label">Blue: </label>
+                <input type="range" class="input input--range" id="b" v-on:input="update($event.target.id, $event.target.value)" value="1" min="-1" max="2" value="1" step="0.1" /> <div class="input-value">{{ getChannelValue('b') }}</div>
+            </div>
+
+            <div class="field">
+                <label for="a" class="label">Alpha: </label>
+                <input type="range" class="input input--range" id="a" v-on:input="update($event.target.id, $event.target.value)" value="1" min="0" max="1" value="1" step="0.1" /> <div class="input-value">{{ getChannelValue('a') }}</div>
+            </div>
+
+            <div class="field">
+                <label for="m" class="label">Multiplier: </label>
+                <input type="range" class="input input--range" id="m" v-on:input="update($event.target.id, $event.target.value)" value="1" min="0" max="1" value="1" step="0.1" /> <div class="input-value">{{ getChannelValue('m') }}</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/vue@2.5.17/dist/vue.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>

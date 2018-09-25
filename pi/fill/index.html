@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Template</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .canvas {
+            border: 1px solid #000;
+            border-radius: 50%;
+
+            background: #000;
+        }
+	</style>
+</head>
+<body>
+
+<div class="container">
+    <canvas class="canvas js-canvas" width="500" height="500"></canvas>
+</div>
+
+<script src="https://rawgit.com/pimskie/vector/master/vector.js"></script>
+<script src="main.js" type="module"></script>
+
+</body>
+</html>

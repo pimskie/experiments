@@ -2,8 +2,6 @@ import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
 
 const ctx = Utils.qs('canvas').getContext('2d');
 
-ctx.globalCompositeOperation = 'lighter';
-
 const W = 500;
 const H = 500;
 const MID_X = W * 0.5;
@@ -19,13 +17,15 @@ let to = {};
 let distance = {};
 
 const NUM_DECIMALS = 500;
-const ANIM_DURATION = 250;
+const ANIM_DURATION = 100;
 const SEGMENT_ANGLE = Math.PI * 2 / 10;
 
 let iteration = 0;
 let startTime = performance.now();
 
 let decimal = 3;
+
+let points = [];
 
 //https://gist.github.com/gre/1650294
 const easeInOutCubic = t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
@@ -58,9 +58,27 @@ const getAngle = decimal => Math.PI * 2 * (decimal * 0.1);
 		return decimal;
 	};
 
+	const fill = (trianglePoints) => {
+		const [a, b, c] = trianglePoints;
+		const avg = (a.decimal + b.decimal + c.decimal) / 3;
+		const hue = 360 * (avg * 0.1);
+
+		ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.1)`;
+		ctx.strokeStyle = `hsla(${hue}, 100%, 50%, 0.3)`;
+		ctx.beginPath();
+		ctx.moveTo(a.position.x, a.position.y);
+		ctx.lineTo(b.position.x, b.position.y);
+		ctx.lineTo(c.position.x, c.position.y);
+		ctx.closePath();
+		ctx.stroke();
+	}
+
+
 	const loop = () => {
-		ctx.fillStyle = 'rgba(0, 0, 0, 0.01)';
+		ctx.globalCompositeOperation = 'destination-out';
+		ctx.fillStyle = 'hsla(0, 0%, 100%, 0.005)';
 		ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		ctx.globalCompositeOperation = 'lighter';
 
 		const now = performance.now();
 		const percent = easeInOutCubic((now - startTime) / ANIM_DURATION);
@@ -78,10 +96,21 @@ const getAngle = decimal => Math.PI * 2 * (decimal * 0.1);
 		ctx.closePath();
 
 		if (now - startTime >= ANIM_DURATION) {
+			points.push({
+				decimal,
+				position: position.clone(),
+			});
+
 			startTime += ANIM_DURATION;
 			iteration++;
 
 			decimal = next(iteration);
+		}
+
+		if (points.length === 3) {
+			fill(points);
+
+			points = [];
 		}
 
 		requestAnimationFrame(loop);

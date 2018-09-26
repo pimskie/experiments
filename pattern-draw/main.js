@@ -14,77 +14,120 @@ const RADIUS = MID_X * 0.5;
 ctx.canvas.width = W;
 ctx.canvas.height = H;
 
-let phase = 0;
 let paused = false;
 
-const connectionStep = 2;
+class Figure {
+	constructor(minPoints, maxPoints, radius, phase = 0, connectionStep = 2, speed = 0.008) {
+		this.minPoints = minPoints;
+		this.maxPoints = maxPoints;
+		this.radius = radius;
+		this.connectionStep = connectionStep;
 
-const minimumPoints = 4;
-const maxPoints = 10;
-const angleStepMinumum = Math.PI * 2 / minimumPoints;
-const angleStepMaximum = Math.PI * 2 / maxPoints;
-const angleStepDiff = angleStepMaximum - angleStepMinumum;
+		this.angleStepMinumum = Math.PI * 2 / this.minPoints;
+		this.angleStepMaximum = Math.PI * 2 / this.maxPoints;
+		this.angleStepDiff = this.angleStepMaximum - this.angleStepMinumum;
 
-const loop = () => {
+		this.speed = speed;
+		this.phase = phase;
+	}
+
+	update() {
+		this.phase += this.speed;
+
+		const percent = Utils.map(Math.sin(this.phase) * 100, -100, 100, 0, 1);
+
+		this.points = new Array(this.maxPoints + 1)
+			.fill()
+			.map((_, index) => {
+				const angle = (index * this.angleStepMinumum + (this.angleStepDiff * index * percent)) % (Math.PI * 2);
+				const radius = (this.radius - 100) + (100 * percent);
+
+				const x = MID_X + Math.cos(angle) * radius;
+				const y = MID_Y + Math.sin(angle) * radius;
+
+				return { x, y, angle, index };
+			})
+			.sort((a, b) => a.angle > b.angle ? 1 : a.angle < b.angle ? -1 : 0)
+			.splice(1);
+	}
+
+	draw(ctx) {
+		ctx.beginPath();
+		ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+
+		this.points.forEach((point, i) => {
+			const { x, y } = point;
+
+			if (i === 0) {
+				ctx.moveTo(x, y);
+			} else {
+				ctx.lineTo(x, y);
+			}
+		});
+		ctx.closePath();
+		ctx.fill();
+		// ctx.stroke();
+
+		this.points.forEach((point, i) => {
+			const indexTo = (i + this.connectionStep + this.points.length) % this.points.length;;
+			const pointTo = this.points[indexTo];
+
+			const { x, y, index } = point;
+			const { x: xTo, y: yTo } = pointTo;
+
+			const pointAlpha = 0.1 + (0.9 / this.points.length * index);
+
+			ctx.beginPath();
+			ctx.fillStyle = `rgba(0, 0, 0, ${pointAlpha})`;
+			ctx.arc(x, y, 2, 0, Math.PI * 2, false);
+			ctx.fill();
+			ctx.closePath();
+
+			// connection
+			ctx.beginPath();
+			ctx.moveTo(x, y);
+			ctx.lineTo(xTo, yTo);
+			// ctx.stroke();
+			ctx.closePath();
+		});
+	}
+}
+
+const NUM_FIGURES = 1;
+const figures = new Array(NUM_FIGURES).fill().map((_, i) => {
+	const phase = (Math.PI / 2) / NUM_FIGURES * i;
+	const speed = i % 2 === 0 ? 0.008 : -0.008;
+
+	return new Figure(4, 10, RADIUS, phase, 2, speed);
+});
+
+const clear = () => {
 	ctx.fillStyle = 'rgba(255, 255, 255, 1)';
 	ctx.fillRect(0, 0, W, H);
+};
+const loop = () => {
+	clear();
 
-	const percent = Utils.map(Math.sin(phase) * 100, -100, 100, 0, 1);
-
-	const points = new Array(maxPoints + 1)
-		.fill()
-		.map((_, i) => {
-			const angle = (i * angleStepMinumum + (angleStepDiff * i * percent)) % (Math.PI * 2);
-			const radius = (RADIUS - 100) + (100 * percent);
-
-			const x = MID_X + Math.cos(angle) * radius;
-			const y = MID_Y + Math.sin(angle) * radius;
-
-			return { x, y, angle };
-		})
-		.sort((a, b) => a.angle > b.angle ? 1 : a.angle < b.angle ? -1 : 0)
-		.splice(1);
-
-
-	ctx.beginPath();
-	ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-
-	points.forEach((point, i) => {
-		const { x, y } = point;
-
-		if (i === 0) {
-			ctx.moveTo(x, y);
-		} else {
-			ctx.lineTo(x, y);
-		}
-	});
-	ctx.closePath();
-	ctx.stroke();
-
-	points.forEach((point, i) => {
-		const indexTo = (i + connectionStep + points.length) % points.length;;
-		const pointTo = points[indexTo];
-
-		const { x, y } = point;
-		const { x: xTo, y: yTo } = pointTo;
-
-		ctx.beginPath();
-		ctx.fillStyle = '#000';
-		ctx.arc(x, y, 2, 0, Math.PI * 2, false);
-		ctx.fill();
-		ctx.closePath();
-
-		// connection
-		ctx.beginPath();
-		ctx.moveTo(x, y);
-		ctx.lineTo(xTo, yTo);
-		ctx.stroke();
-		ctx.closePath();
+	figures.forEach((f, i) => {
+		f.update();
+		f.draw(ctx);
 	});
 
-	if (!paused) {
-		phase += 0.008;
+	for (let i = 0; i < figures.length - 1; i++) {
+		const { points: pointsFrom } = figures[i];
+		const { points: pointsTo } = figures[i + 1];
+
+		pointsFrom.forEach((pointFrom, i) => {
+			const pointTo = pointsTo[i];
+
+			ctx.beginPath();
+			ctx.moveTo(pointFrom.x, pointFrom.y);
+			ctx.lineTo(pointTo.x, pointTo.y);
+			// ctx.stroke();
+			ctx.closePath();
+		});
 	}
+
 
 	requestAnimationFrame(loop);
 };

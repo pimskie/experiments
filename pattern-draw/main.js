@@ -36,9 +36,9 @@ const easeInOutCubic = t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 
 		const now = performance.now();
 
 		const percent = Utils.map(Math.sin(phase) * 100, -100, 100, 0, 1);
-		const radiusModifier = Utils.map(Math.cos(phase) * 100, -100, 100, -25, 25);
+		const radiusModifier = Utils.map(Math.sin(phase) * 100, -100, 100, -25, 25);
 
-		const points = new Array(maxPoints).fill().map((_, i) => {
+		const points = new Array(maxPoints + 1).fill().map((_, i) => {
 			let angle = (i * angleStepMinumum + (angleStepDiff * i * percent)) % (Math.PI * 2);
 
 			const x = MID_X + Math.cos(angle) * (RADIUS + radiusModifier);
@@ -46,6 +46,8 @@ const easeInOutCubic = t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 
 
 			return { x, y, angle };
 		}).sort((a, b) => a.angle > b.angle ? 1 : a.angle < b.angle ? -1 : 0);
+
+		points.shift();
 
 		ctx.beginPath();
 
@@ -62,13 +64,25 @@ const easeInOutCubic = t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 
 		ctx.closePath();
 		ctx.stroke();
 
+		const connectionStep = 4;
+
 		points.forEach((point, i) => {
+			const indexTo = (i + connectionStep + points.length) % points.length;;
+			const pointTo = points[indexTo];
+
 			const { x, y } = point;
+			const { x: xTo, y: yTo } = pointTo;
 
 			ctx.beginPath();
 			ctx.fillStyle = '#000';
 			ctx.arc(x, y, 2, 0, Math.PI * 2, false);
 			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.moveTo(x, y);
+			ctx.lineTo(xTo, yTo);
+			ctx.stroke();
 			ctx.closePath();
 		});
 
@@ -77,7 +91,7 @@ const easeInOutCubic = t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 
 			startTime += ANIM_DURATION;
 		}
 
-		phase += 0.01;
+		phase += 0.005;
 		requestAnimationFrame(loop);
 	};
 

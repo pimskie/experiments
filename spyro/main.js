@@ -22,6 +22,9 @@ const MAX_SHAPES = 10;
 let steps = MAX_LINES;
 let shapes = MAX_SHAPES;
 
+let percentX = 1;
+let percentY = 1;
+
 let phase = 0;
 
 const drawLine = (from, to) => {
@@ -40,6 +43,7 @@ const clear = (context) => {
 
 const draw = () => {
 	const spacing = wh / steps;
+	const dups = shapes * 4;
 
 	for (let i = 0; i < steps; i++) {
 		// horizontal
@@ -57,19 +61,24 @@ const draw = () => {
 		drawLine(from, to);
 	}
 
-
-	const dups = shapes * 4;
-
 	ctx2.save();
 	ctx2.translate(wh, hh);
 
 	ctx2.rotate(phase);
 
-	for (let i = 0; i <= dups; i++) {
-		const a = (Math.PI * 2) / dups;
+	for (let i = 0; i < shapes; i++) {
+		const angle = ((Math.PI * 2) / shapes) * percentY;
+		const scale = 1 - (1 / shapes);
 
-		ctx2.rotate(a);
-		ctx2.drawImage(canvas, 0, 0, w, h, 0, -hh, w, h);
+		ctx2.rotate(angle);
+		ctx2.scale(scale, scale);
+
+		for (let q = 0; q < 4; q++) {
+			const a = (Math.PI * 2) / 4;
+
+			ctx2.rotate(a);
+			ctx2.drawImage(canvas, 0, 0, w, h, 0, -hh, w, h);
+		}
 	}
 
 	ctx2.restore();
@@ -95,11 +104,11 @@ const onPointerMove = (e) => {
 	const x = clientX - e.target.offsetLeft;
 	const y = clientY - e.target.offsetTop;
 
-	const percentX = x / canvas.width;
-	const percentY = y / canvas.height;
+	percentX = x / canvas.width;
+	percentY = y / canvas.height;
 
 	steps = 2 + Math.ceil((MAX_LINES - 2) * percentX);
-	shapes = 1 + Math.ceil((MAX_SHAPES - 1) * percentY);
+	// shapes = 1 + Math.ceil((MAX_SHAPES - 1) * percentY);
 };
 
 canvas.addEventListener('mousemove', onPointerMove);

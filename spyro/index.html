@@ -23,14 +23,20 @@
         }
 
         .canvas {
-            border: 1px solid;
+            position: absolute;
+            border: 1px solid #bbb;
+        }
+
+        .canvas--shape {
+            z-index: 1;
+            opacity: 0;
         }
 	</style>
 </head>
 <body>
 
 <div class="container">
-    <canvas class="canvas js-canvas" width="500" height="500"></canvas>
+    <canvas class="canvas canvas--shape js-canvas" width="500" height="500"></canvas>
     <canvas class="canvas js-canvas-2" width="500" height="500"></canvas>
 </div>
 <script src="main.js"></script>

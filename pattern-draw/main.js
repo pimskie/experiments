@@ -1,18 +1,16 @@
 import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
 
-const canvas = Utils.qs('canvas');
-const ctx = canvas.getContext('2d');
-
-ctx.globalCompositeOperation = 'lighter';
+const canvasFigure = Utils.qs('.js-canvas-figure');
+const ctxFigure = canvasFigure.getContext('2d');
 
 const W = 500;
 const H = 500;
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
-const RADIUS = MID_X * 0.5;
+const RADIUS = MID_X * 0.95;
 
-ctx.canvas.width = W;
-ctx.canvas.height = H;
+ctxFigure.canvas.width = W;
+ctxFigure.canvas.height =  H;
 
 let paused = false;
 
@@ -40,7 +38,8 @@ class Figure {
 			.fill()
 			.map((_, index) => {
 				const angle = (index * this.angleStepMinumum + (this.angleStepDiff * index * percent)) % (Math.PI * 2);
-				const radius = (this.radius - 100) + (100 * percent);
+				// const radius = (this.radius - 100) + (100 * percent);
+				const radius = 50 + ((this.radius - 50) * percent);
 
 				const x = MID_X + Math.cos(angle) * radius;
 				const y = MID_Y + Math.sin(angle) * radius;
@@ -51,22 +50,22 @@ class Figure {
 			.splice(1);
 	}
 
-	draw(ctx) {
-		ctx.beginPath();
-		ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+	draw(ctx1, ctx2) {
+		ctx1.beginPath();
+		ctx1.strokeStyle = 'rgba(0, 0, 0, 1)';
+
 
 		this.points.forEach((point, i) => {
 			const { x, y } = point;
 
 			if (i === 0) {
-				ctx.moveTo(x, y);
+				ctx1.moveTo(x, y);
 			} else {
-				ctx.lineTo(x, y);
+				ctx1.lineTo(x, y);
 			}
 		});
-		ctx.closePath();
-		ctx.fill();
-		// ctx.stroke();
+		ctx1.closePath();
+		ctx1.stroke();
 
 		this.points.forEach((point, i) => {
 			const indexTo = (i + this.connectionStep + this.points.length) % this.points.length;;
@@ -77,57 +76,37 @@ class Figure {
 
 			const pointAlpha = 0.1 + (0.9 / this.points.length * index);
 
-			ctx.beginPath();
-			ctx.fillStyle = `rgba(0, 0, 0, ${pointAlpha})`;
-			ctx.arc(x, y, 2, 0, Math.PI * 2, false);
-			ctx.fill();
-			ctx.closePath();
+			ctx1.beginPath();
+			ctx1.fillStyle = `rgba(0, 0, 0, ${pointAlpha})`;
+			ctx1.arc(x, y, 2, 0, Math.PI * 2, false);
+			ctx1.fill();
+			ctx1.closePath();
 
-			// connection
-			ctx.beginPath();
-			ctx.moveTo(x, y);
-			ctx.lineTo(xTo, yTo);
-			// ctx.stroke();
-			ctx.closePath();
+			ctx1.beginPath();
+			ctx1.strokeStyle = 'rgba(150, 150, 150, 1)';
+			ctx1.moveTo(x, y);
+			ctx1.lineTo(xTo, yTo);
+			ctx1.stroke();
+			ctx1.closePath();
 		});
 	}
 }
 
-const NUM_FIGURES = 1;
+const NUM_FIGURES = 4;
 const figures = new Array(NUM_FIGURES).fill().map((_, i) => {
-	const phase = (Math.PI / 2) / NUM_FIGURES * i;
-	const speed = i % 2 === 0 ? 0.008 : -0.008;
+	const phase = ((Math.PI * 2) / NUM_FIGURES) * i;
+	const speed = 0.008;i % 2 === 0 ? 0.008 : -0.008;
 
 	return new Figure(4, 10, RADIUS, phase, 2, speed);
 });
 
-const clear = () => {
-	ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-	ctx.fillRect(0, 0, W, H);
-};
 const loop = () => {
-	clear();
+	ctxFigure.clearRect(0, 0, W, H);
 
 	figures.forEach((f, i) => {
 		f.update();
-		f.draw(ctx);
+		f.draw(ctxFigure);
 	});
-
-	for (let i = 0; i < figures.length - 1; i++) {
-		const { points: pointsFrom } = figures[i];
-		const { points: pointsTo } = figures[i + 1];
-
-		pointsFrom.forEach((pointFrom, i) => {
-			const pointTo = pointsTo[i];
-
-			ctx.beginPath();
-			ctx.moveTo(pointFrom.x, pointFrom.y);
-			ctx.lineTo(pointTo.x, pointTo.y);
-			// ctx.stroke();
-			ctx.closePath();
-		});
-	}
-
 
 	requestAnimationFrame(loop);
 };
@@ -141,14 +120,14 @@ const onPointerMove = (e) => {
 	const x = clientX - e.target.offsetLeft;
 	const y = clientY - e.target.offsetTop;
 
-	const percentX = x / canvas.width;
-	const percentY = y / canvas.height;
+	const percentX = x / canvasFigure.width;
+	const percentY = y / canvasFigure.height;
 };
 
 const onPointerDown = () => {
 	paused = !paused;
 };
 
-canvas.addEventListener('mousemove', onPointerMove);
-canvas.addEventListener('touchmove', onPointerMove);
-canvas.addEventListener('mousedown', onPointerDown);
+canvasFigure.addEventListener('mousemove', onPointerMove);
+canvasFigure.addEventListener('touchmove', onPointerMove);
+canvasFigure.addEventListener('mousedown', onPointerDown);

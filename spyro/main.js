@@ -16,7 +16,7 @@ canvas.width = canvas2.width = w;
 canvas.height = canvas2.height = h;
 
 const MAX_LINES = 100;
-const MAX_SHAPES = 10;
+const MAX_SHAPES = 20;
 
 let steps = MAX_LINES;
 let shapes = MAX_SHAPES;
@@ -30,7 +30,7 @@ let autoAnimate = true;
 
 const drawLine = (ctx, color, from, to) => {
 	ctx.beginPath();
-	ctx.lineWidth = 0.5;
+	ctx.lineWidth = 0.25;
 	ctx.strokeStyle = color;
 	ctx.moveTo(from.x, from.y);
 	ctx.lineTo(to.x, to.y);
@@ -43,21 +43,21 @@ const drawShape = (hue = '0', rotation = 0, percent = 1) => {
 	const scale = 0.1 + (0.9 * (1 - percent));
 	const alpha = 0.1 + (0.5 * (1 - percent));
 
-	drawLine(
-		ctx,
-		`hsla(${hue}, 100%, 50%, 0.5)`,
-		{ x: 0, y: hh },
-		{ x: wh, y: hh },
-	);
-
 	for (let i = 0; i < steps; i++) {
-		const lineColor = `hsla(${hue}, 100%, 20%, ${alpha})`;
+		const lineColor = `hsla(${hue}, 100%, 25%, ${alpha})`;
 
 		const from = { x: spacing * i, y: hh };
 		const to = { x: 0, y: i * spacing };
 
 		drawLine(ctx, lineColor, from, to);
 	}
+
+	drawLine(
+		ctx,
+		`hsla(${hue}, 100%, 20%, 0.1)`,
+		{ x: 0, y: 0 },
+		{ x: wh, y: hh },
+	);
 
 	ctx2.save();
 	ctx2.translate(wh, hh);
@@ -96,7 +96,7 @@ const loop = () => {
 
 	if (autoAnimate) {
 		const x = Math.cos(autoSpeed);
-		const y = Math.sin(autoSpeed);
+		const y = Math.sin(Math.PI + autoSpeed);
 
 
 		percentX = map(x, -1, 1, 0, 1);

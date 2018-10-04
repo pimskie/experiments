@@ -137,8 +137,8 @@ const onPointerMove = (e) => {
 	const x = clientX;
 	const y = clientY;
 
-	percentX = x / canvas.width;
-	percentY = y / canvas.height;
+	percentX = x / document.body.offsetWidth;
+	percentY = y / document.body.offsetHeight;
 };
 
 const onPointerOver = () => {

@@ -1,3 +1,4 @@
+const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 const q = sel => document.querySelector(sel);
 
 const canvas = q('.js-canvas');
@@ -23,8 +24,9 @@ let shapes = MAX_SHAPES;
 let percentX = 1;
 let percentY = 1;
 
-let automate = true;
 let phase = 0;
+let autoSpeed = 0;
+let autoAnimate = true;
 
 const drawLine = (ctx, color, from, to) => {
 	ctx.beginPath();
@@ -39,7 +41,7 @@ const drawLine = (ctx, color, from, to) => {
 const drawShape = (hue = '0', rotation = 0, percent = 1) => {
 	const spacing = wh / steps;
 	const scale = 0.1 + (0.9 * (1 - percent));
-	const alpha = 0.1 + (0.9 * (1 - percent));
+	const alpha = 0.1 + (0.5 * (1 - percent));
 
 	drawLine(
 		ctx,
@@ -79,7 +81,6 @@ const clear = (context) => {
 const draw = () => {
 	for (let i = 0; i < shapes; i++) {
 		const rotation = phase + ((Math.PI * 4) / shapes) * i * percentY;
-
 		const percent = i / (shapes - 1);
 		const hue = 210 + (130 * percent);
 
@@ -93,7 +94,18 @@ const loop = () => {
 
 	draw();
 
+	if (autoAnimate) {
+		const x = Math.cos(autoSpeed);
+		const y = Math.sin(autoSpeed);
+
+
+		percentX = map(x, -1, 1, 0, 1);
+		percentY = map(y, -1, 1, 0, 1);
+	}
+
+	steps = 2 + Math.ceil((MAX_LINES - 2) * percentX);
 	phase += 0.002;
+	autoSpeed += 0.005;
 
 	requestAnimationFrame(loop);
 };
@@ -101,18 +113,33 @@ const loop = () => {
 loop();
 
 const onPointerMove = (e) => {
+	if (autoAnimate) {
+		return;
+	}
+
 	const event = (e.touches && e.touches.length) ? e.touches[0] : e;
 	const { clientX, clientY } = event;
 
 	const x = clientX;
 	const y = clientY;
 
-	percentX = x / document.body.offsetWidth;
-	percentY = y / document.body.offsetHeight;
+	percentX = x / canvas.width;
+	percentY = y / canvas.height;
+};
 
-	steps = 2 + Math.ceil((MAX_LINES - 2) * percentX);
+const onPointerOver = () => {
+	autoAnimate = false;
+};
+
+const onPointerLeave = () => {
+	autoAnimate = true;
 };
 
 document.body.addEventListener('mousemove', onPointerMove);
 document.body.addEventListener('touchmove', onPointerMove);
 
+document.addEventListener('mouseenter', onPointerOver);
+document.addEventListener('touchstart', onPointerOver);
+
+document.addEventListener('mouseleave', onPointerLeave);
+document.addEventListener('touchend', onPointerLeave);

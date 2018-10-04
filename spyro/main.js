@@ -28,7 +28,7 @@ let phase = 0;
 let autoSpeed = 0;
 let autoAnimate = true;
 
-const drawLine = (ctx, color, from, to) => {
+const drawLine = (color, from, to) => {
 	ctx.beginPath();
 	ctx.lineWidth = 0.25;
 	ctx.strokeStyle = color;
@@ -43,21 +43,25 @@ const drawShape = (hue = '0', rotation = 0, percent = 1) => {
 	const scale = 0.1 + (0.9 * (1 - percent));
 	const alpha = 0.1 + (0.5 * (1 - percent));
 
+	ctx.beginPath();
+	ctx.strokeStyle = `hsla(${hue}, 100%, 20%, 0.2)`;
+	ctx.fillStyle = `hsla(${hue}, 100%, 20%, 0.01)`;
+
+	ctx.moveTo(0, 0);
+	ctx.lineTo(wh * 0.3, hh * 0.7);
+	ctx.lineTo(wh, hh);
+
+	ctx.stroke();
+	ctx.closePath();
+
 	for (let i = 0; i < steps; i++) {
 		const lineColor = `hsla(${hue}, 100%, 25%, ${alpha})`;
 
 		const from = { x: spacing * i, y: hh };
 		const to = { x: 0, y: i * spacing };
 
-		drawLine(ctx, lineColor, from, to);
+		drawLine(lineColor, from, to);
 	}
-
-	drawLine(
-		ctx,
-		`hsla(${hue}, 100%, 20%, 0.1)`,
-		{ x: 0, y: 0 },
-		{ x: wh, y: hh },
-	);
 
 	ctx2.save();
 	ctx2.translate(wh, hh);
@@ -80,7 +84,7 @@ const clear = (context) => {
 
 const draw = () => {
 	for (let i = 0; i < shapes; i++) {
-		const rotation = phase + ((Math.PI * 4) / shapes) * i * percentY;
+		const rotation = phase + ((Math.PI * 2) / shapes) * i * percentX;
 		const percent = i / (shapes - 1);
 		const hue = 210 + (130 * percent);
 
@@ -103,7 +107,7 @@ const loop = () => {
 		percentY = map(y, -1, 1, 0, 1);
 	}
 
-	steps = 2 + Math.ceil((MAX_LINES - 2) * percentX);
+	steps = 2 + Math.ceil((MAX_LINES - 2) * percentY);
 	phase += 0.002;
 	autoSpeed += 0.005;
 

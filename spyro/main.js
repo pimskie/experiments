@@ -6,8 +6,6 @@ const ctx = canvas.getContext('2d');
 const canvas2 = q('.js-canvas-2');
 const ctx2 = canvas2.getContext('2d');
 
-const PI2 = Math.PI * 2;
-
 const w = 500;
 const h = 500;
 const wh = w * 0.5;
@@ -25,63 +23,68 @@ let shapes = MAX_SHAPES;
 let percentX = 1;
 let percentY = 1;
 
+let automate = true;
 let phase = 0;
 
-const drawLine = (from, to) => {
+const drawLine = (ctx, color, from, to) => {
 	ctx.beginPath();
 	ctx.lineWidth = 0.5;
+	ctx.strokeStyle = color;
 	ctx.moveTo(from.x, from.y);
 	ctx.lineTo(to.x, to.y);
 	ctx.stroke();
 	ctx.closePath();
 };
 
+const drawShape = (hue = '0', rotation = 0, percent = 1) => {
+	const spacing = wh / steps;
+	const scale = 0.1 + (0.9 * (1 - percent));
+	const alpha = 0.1 + (0.9 * (1 - percent));
+
+	drawLine(
+		ctx,
+		`hsla(${hue}, 100%, 50%, 0.5)`,
+		{ x: 0, y: hh },
+		{ x: wh, y: hh },
+	);
+
+	for (let i = 0; i < steps; i++) {
+		const lineColor = `hsla(${hue}, 100%, 20%, ${alpha})`;
+
+		const from = { x: spacing * i, y: hh };
+		const to = { x: 0, y: i * spacing };
+
+		drawLine(ctx, lineColor, from, to);
+	}
+
+	ctx2.save();
+	ctx2.translate(wh, hh);
+	ctx2.rotate(rotation);
+	ctx2.scale(scale, scale);
+
+	const a = (Math.PI * 2) / 4;
+
+	for (let i = 0; i < 4; i++) {
+		ctx2.rotate(a);
+		ctx2.drawImage(canvas, 0, 0, w, h, 0, -hh, w, h);
+	}
+
+	ctx2.restore();
+};
 
 const clear = (context) => {
 	context.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
 const draw = () => {
-	const spacing = wh / steps;
-	const dups = shapes * 4;
-
-	for (let i = 0; i < steps; i++) {
-		// horizontal
-		const from = {
-			x: i * spacing,
-			y: hh,
-		};
-
-		// vertical
-		const to = {
-			x: 0,
-			y: i * spacing,
-		};
-
-		drawLine(from, to);
-	}
-
-	ctx2.save();
-	ctx2.translate(wh, hh);
-
-	ctx2.rotate(phase);
-
 	for (let i = 0; i < shapes; i++) {
-		const angle = ((Math.PI * 2) / shapes) * percentY;
-		const scale = 1 - (1 / shapes);
+		const rotation = phase + ((Math.PI * 4) / shapes) * i * percentY;
 
-		ctx2.rotate(angle);
-		ctx2.scale(scale, scale);
+		const percent = i / (shapes - 1);
+		const hue = 210 + (130 * percent);
 
-		for (let q = 0; q < 4; q++) {
-			const a = (Math.PI * 2) / 4;
-
-			ctx2.rotate(a);
-			ctx2.drawImage(canvas, 0, 0, w, h, 0, -hh, w, h);
-		}
+		drawShape(hue, rotation, percent);
 	}
-
-	ctx2.restore();
 };
 
 const loop = () => {
@@ -101,16 +104,15 @@ const onPointerMove = (e) => {
 	const event = (e.touches && e.touches.length) ? e.touches[0] : e;
 	const { clientX, clientY } = event;
 
-	const x = clientX - e.target.offsetLeft;
-	const y = clientY - e.target.offsetTop;
+	const x = clientX;
+	const y = clientY;
 
-	percentX = x / canvas.width;
-	percentY = y / canvas.height;
+	percentX = x / document.body.offsetWidth;
+	percentY = y / document.body.offsetHeight;
 
 	steps = 2 + Math.ceil((MAX_LINES - 2) * percentX);
-	// shapes = 1 + Math.ceil((MAX_SHAPES - 1) * percentY);
 };
 
-canvas.addEventListener('mousemove', onPointerMove);
-canvas.addEventListener('touchmove', onPointerMove);
+document.body.addEventListener('mousemove', onPointerMove);
+document.body.addEventListener('touchmove', onPointerMove);
 

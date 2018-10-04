@@ -39,7 +39,10 @@ const drawLine = (color, from, to) => {
 };
 
 const drawShape = (hue = '0', rotation = 0, percent = 1) => {
-	const spacing = wh / steps;
+	const padding = 10;
+	const lineWidth = wh - padding;
+	const spacing = lineWidth / steps;
+
 	const scale = 0.1 + (0.9 * (1 - percent));
 	const alpha = 0.1 + (0.5 * (1 - percent));
 
@@ -47,18 +50,25 @@ const drawShape = (hue = '0', rotation = 0, percent = 1) => {
 	ctx.strokeStyle = `hsla(${hue}, 100%, 20%, 0.2)`;
 	ctx.fillStyle = `hsla(${hue}, 100%, 20%, 0.01)`;
 
-	ctx.moveTo(0, 0);
+	ctx.moveTo(0, padding);
 	ctx.lineTo(wh * 0.3, hh * 0.7);
-	ctx.lineTo(wh, hh);
+	ctx.lineTo(wh - padding, hh);
 
 	ctx.stroke();
+	ctx.closePath();
+
+
+	ctx.beginPath();
+	ctx.fillStyle = `hsla(${hue}, 100%, 40%, 0.25)`;
+	ctx.arc(lineWidth, wh, 2, 0, Math.PI * 2, false);
+	ctx.fill();
 	ctx.closePath();
 
 	for (let i = 0; i < steps; i++) {
 		const lineColor = `hsla(${hue}, 100%, 25%, ${alpha})`;
 
 		const from = { x: spacing * i, y: hh };
-		const to = { x: 0, y: i * spacing };
+		const to = { x: 0, y: padding + (spacing * i) };
 
 		drawLine(lineColor, from, to);
 	}

@@ -23,12 +23,28 @@
         }
 
         .canvas {
-            border: 1px solid #000;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+
+            opacity: 0.3;
         }
+
+        .canvas--fade {
+            z-index: 1;
+        }
+
+        .canvas--stage {
+            display: none;
+        }
+
 	</style>
 </head>
 <body>
 
+<canvas class="canvas canvas--stage js-stage"></canvas>
+<canvas class="canvas canvas--fade js-fade"></canvas>
 <script src="main.js" type="module"></script>
 
 </body>

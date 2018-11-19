@@ -1,7 +1,5 @@
-import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
-
-const ctx = Utils.qs('.js-canvas').getContext('2d');
-const ctxInverted = Utils.qs('.js-canvas-inverted').getContext('2d');
+const ctx = document.querySelector('.js-canvas').getContext('2d');
+const ctxInverted = document.querySelector('.js-canvas-inverted').getContext('2d');
 
 const PIPI = Math.PI * 2;
 
@@ -16,28 +14,29 @@ ctx.canvas.height = H;
 ctxInverted.canvas.width = W;
 ctxInverted.canvas.height = H;
 
-const CIRCLE_CENTER_RADIUS = 25;
-const NUM_STROKES = 100;
+const CIRCLE_CENTER_RADIUS = 30;
+const NUM_STROKES = 60;
 
 const drawStrokes = (ctx) => {
-	const FROM_R = MID_X - 10;
-	const SPREAD = 0.25;
-	const ANGLE_DIFF = NUM_STROKES * 0.25;
+	const FROM_R = MID_X - 5;
+
+	const WIDTH = 0.025;
+	const ANGLE_DIFF = 1; //NUM_STROKES;
 
 	for (let i = 0; i < NUM_STROKES; i++) {
 		ctx.beginPath();
 
 		const topLeft = [
-			MID_X + Math.cos((i - SPREAD) * (PIPI / NUM_STROKES)) * FROM_R,
-			MID_Y + Math.sin((i - SPREAD) * (PIPI / NUM_STROKES)) * FROM_R,
+			MID_X + Math.cos(i * (PIPI / NUM_STROKES) - WIDTH) * FROM_R,
+			MID_Y + Math.sin(i * (PIPI / NUM_STROKES) - WIDTH) * FROM_R,
 		];
 
 		const topRight = [
-			MID_X + Math.cos((i + SPREAD) * (PIPI / NUM_STROKES)) * FROM_R,
-			MID_Y + Math.sin((i + SPREAD) * (PIPI / NUM_STROKES)) * FROM_R,
+			MID_X + Math.cos(i * (PIPI / NUM_STROKES) + WIDTH) * FROM_R,
+			MID_Y + Math.sin(i * (PIPI / NUM_STROKES) + WIDTH) * FROM_R,
 		];
 
-		const angleTo = (i + ANGLE_DIFF) * (PIPI / NUM_STROKES);
+		const angleTo = i * (PIPI / NUM_STROKES) + ANGLE_DIFF;
 
 		const to = [
 			MID_X + Math.cos(angleTo) * CIRCLE_CENTER_RADIUS,
@@ -66,3 +65,5 @@ ctxInverted.closePath();
 
 ctxInverted.globalCompositeOperation = 'xor';
 ctxInverted.drawImage(ctx.canvas, 0, 0)
+
+

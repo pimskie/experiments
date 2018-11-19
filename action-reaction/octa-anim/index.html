@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Template</title>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .frame {
+            position: relative;
+            padding: 40px;
+
+            border: 20px solid black;
+            box-shadow: inset 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
+        }
+
+        .frame__inner {
+            overflow: hidden;
+
+            box-shadow: inset 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
+        }
+
+        canvas {
+            width: 100%;
+        }
+	</style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="frame">
+            <div class="frame__inner">
+                <canvas class="canvas js-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="main.js" type="module"></script>
+
+</body>
+
+</html>

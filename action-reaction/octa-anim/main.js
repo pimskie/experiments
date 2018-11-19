@@ -44,7 +44,7 @@ const shapes = new Array(NUM_SHAPES).fill().map((_, i) => {
 
 const draw = (ctx, points, iteration = 0, scale = 1) => {
 	const color = iteration % 2 === 0 ? '#000' : '#fff';
-	const rotation = (iteration + 1) * 90 * (Math.PI / 180);
+	const rotation = (iteration + 1) * 5 * (Math.PI / 180);
 
 	ctx.fillStyle = color;
 

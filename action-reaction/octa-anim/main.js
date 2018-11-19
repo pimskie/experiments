@@ -9,44 +9,34 @@ const H = W;
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
 
-const PIPI = Math.PI * 2;
+const PI = Math.PI;
+const PIPI = PI * 2;
 
-const MAGIC_SCALE_NUMBER = 0.76;
+ctx.canvas.width = ctxGhost.canvas.width = W;
+ctx.canvas.height = ctxGhost.canvas.height = H;
 
-ctx.canvas.width = W;
-ctx.canvas.height = H;
-ctxGhost.canvas.width = W;
-ctxGhost.canvas.height = H;
-
-const NUM_EDGES = 6;
-const NUM_SHAPES = 100;
+const MAGIC_SCALE_NUMBER = 0.85;
+const NUM_EDGES = 8;
+const NUM_SHAPES = 30;
 
 const points = new Array(NUM_EDGES).fill().map((_, i) => {
-	const x = Math.cos(i * (PIPI / NUM_EDGES)) * MID_X;
-	const y = Math.sin(i * (PIPI / NUM_EDGES)) * MID_X;
+	const angle = i * (PIPI / NUM_EDGES);
 
-	return { x, y };
+	return {
+		x: Math.cos(angle) * MID_X,
+		y: Math.sin(angle) * MID_Y,
+	};
 });
 
 const shapes = new Array(NUM_SHAPES).fill().map((_, i) => {
-	const shapeScale = Math.pow(MAGIC_SCALE_NUMBER, i);
-	const rotation = i * 45 * (180 / Math.PI);
-
-	const shape = {
-		points,
-		rotation,
-		scale: shapeScale,
-		scaleOrig: shapeScale,
+	return {
+		rotation: (i / NUM_SHAPES) * PIPI,
+		scale: Math.pow(MAGIC_SCALE_NUMBER, i),
 	};
-
-	return shape;
 });
 
-const draw = (ctx, points, iteration = 0, scale = 1) => {
-	const color = iteration % 2 === 0 ? '#000' : '#fff';
-	const rotation = (iteration + 1) * 5 * (Math.PI / 180);
-
-	ctx.fillStyle = color;
+const draw = (ctx, points, rotation = 0, scale = 1) => {
+	ctx.fillStyle = '#000';
 
 	ctx.save();
 	ctx.translate(MID_X, MID_Y);
@@ -66,42 +56,44 @@ const draw = (ctx, points, iteration = 0, scale = 1) => {
 	ctx.restore();
 };
 
-const clear = (ctx) => {
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-};
+const duplicateCanvas = (ctxFrom, ctxTo, scale = 1, rotation = 0) => {
+	ctxTo.save();
+	ctxTo.translate(MID_X, MID_Y);
 
-// using `xor` to make inner transparent
-draw(ctxGhost, points, 0, 1);
-draw(ctxGhost, points, 1, 0.86);
+	ctxTo.rotate(rotation);
+	ctxTo.scale(scale, scale);
 
-const duplicate = (scale, rotation) => {
-	ctx.save();
-	ctx.translate(MID_X, MID_Y);
-
-	ctx.scale(scale, scale);
-
-	ctx.rotate(rotation);
-	ctx.drawImage(ctxGhost.canvas, -MID_X, -MID_Y);
-
-	ctx.restore();
+	ctxTo.drawImage(ctxFrom.canvas, -MID_X, -MID_Y);
+	ctxTo.restore();
 };
 
 const loop = () => {
-	clear(ctx);
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-	for (let i = 0; i < shapes.length; i++) {
-		const shape = shapes[i];
+	shapes.forEach((shape, i) => {
+		const { scale, rotation } = shape;
+
+		duplicateCanvas(ctxGhost, ctx, scale, rotation);
 
 		shape.scale *= 1.01;
+		// shape.rotation += i % 2 === 0 ? 0.005 : -0.005;
 
-		duplicate(shape.scale, shape.rotation);
-
-		if (shape.scale>= 2) {
+		if (shape.scale >= 2) {
 			shape.scale = Math.pow(MAGIC_SCALE_NUMBER, shapes.length);
 		}
-	}
+	});
 
 	requestAnimationFrame(loop);
 };
+
+// draw shape on hidden canvas
+// using `xor` to make inner of shape transparent
+// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+ctxGhost.globalCompositeOperation = 'xor';
+
+draw(ctxGhost, points, 0, 1);
+draw(ctxGhost, points, 40 * Math.PI / 180, 0.9);
+
+
 
 loop();

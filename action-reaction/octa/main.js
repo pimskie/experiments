@@ -2,8 +2,8 @@ import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
 
 const ctx = Utils.qs('canvas').getContext('2d');
 
-const W = 500;
-const H = 500;
+const W = Utils.clamp(window.innerWidth - 150, 200, 500);
+const H = W;
 
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
@@ -42,8 +42,8 @@ const NUM_SHAPES = 30;
 
 let scale = 1;
 const points = new Array(NUM_EDGES).fill().map((_, i) => {
-	const x = Math.cos(i * (PIPI / NUM_EDGES)) * 253;
-	const y = Math.sin(i * (PIPI / NUM_EDGES)) * 253;
+	const x = Math.cos(i * (PIPI / NUM_EDGES)) * MID_X;
+	const y = Math.sin(i * (PIPI / NUM_EDGES)) * MID_X;
 
 	return { x, y };
 });

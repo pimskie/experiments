@@ -9,13 +9,12 @@ const H = 500;
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
 
-const PIPI = Math.PI * 2;
-
 ctx.canvas.width = W;
 ctx.canvas.height = H;
 
 class Shape {
 	constructor(numPoints, radius) {
+		const PIPI = Math.PI * 2;
 
 		this.points = new Array(numPoints).fill().map((_, i) => {
 			const x = Math.cos(i * (PIPI / numPoints)) * radius;
@@ -24,10 +23,6 @@ class Shape {
 			return { x, y };
 		});
 	}
-};
-
-const clear = () => {
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
 const draw = (shape, iteration = 0, scale = 1) => {
@@ -60,14 +55,8 @@ const NUM_SHAPES = 30;
 
 let scale = 1;
 
-const loop = () => {
-	clear();
+for (let i = 0; i < NUM_SHAPES; i++) {
+	draw(new Shape(NUM_EDGES, MID_X * scale), i);
 
-	for (let i = 0; i < NUM_SHAPES; i++) {
-		draw(new Shape(NUM_EDGES, MID_X * scale), i);
-
-		scale *= 0.87;
-	}
-};
-
-loop();
+	scale *= 0.88;
+}

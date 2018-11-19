@@ -56,19 +56,17 @@ const draw = (shape, iteration = 0, scale = 1) => {
 };
 
 const NUM_EDGES = 6;
-const NUM_SHAPES = 14;
+const NUM_SHAPES = 30;
 
-let scaleDec = 0.13;
+let scale = 1;
 
 const loop = () => {
 	clear();
 
 	for (let i = 0; i < NUM_SHAPES; i++) {
-		const scale = 1 - (i * scaleDec);
-
-		scaleDec *= 0.946;
-
 		draw(new Shape(NUM_EDGES, MID_X * scale), i);
+
+		scale *= 0.87;
 	}
 };
 

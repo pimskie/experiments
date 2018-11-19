@@ -19,7 +19,7 @@ const clear = () => {
 const loop = () => {
 	clear();
 
-	requestAnimationFrame(loop);
+	// requestAnimationFrame(loop);
 };
 
-// loop();
+loop();

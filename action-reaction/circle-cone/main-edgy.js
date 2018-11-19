@@ -14,23 +14,14 @@ ctx.canvas.height = H;
 ctxInverted.canvas.width = W;
 ctxInverted.canvas.height = H;
 
-const CIRCLE_CENTER_RADIUS = 50;
+const CIRCLE_CENTER_RADIUS = 30;
 const NUM_STROKES = 60;
 
-const drawStrokes = (ctx, strokeColor, backgroundColor, angleModifier) => {
+const drawStrokes = (ctx) => {
 	const FROM_R = MID_X - 5;
-	const CENTER_RADIUS = 20;
 
 	const WIDTH = 0.025;
-	const ANGLE_DIFF = 1;
-
-	ctx.fillStyle = backgroundColor;
-	ctx.beginPath();
-	ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height)
-	ctx.fill();
-	ctx.closePath();
-
-	ctx.fillStyle = strokeColor;
+	const ANGLE_DIFF = 1; //NUM_STROKES;
 
 	for (let i = 0; i < NUM_STROKES; i++) {
 		ctx.beginPath();
@@ -48,25 +39,31 @@ const drawStrokes = (ctx, strokeColor, backgroundColor, angleModifier) => {
 		const angleTo = i * (PIPI / NUM_STROKES) + ANGLE_DIFF;
 
 		const to = [
-			MID_X + Math.cos(angleTo) * CENTER_RADIUS,
-			MID_Y + Math.sin(angleTo) * CENTER_RADIUS,
+			MID_X + Math.cos(angleTo) * CIRCLE_CENTER_RADIUS,
+			MID_Y + Math.sin(angleTo) * CIRCLE_CENTER_RADIUS,
 		];
 
 		ctx.moveTo(...topLeft);
 		ctx.lineTo(...topRight);
 		ctx.lineTo(...to);
+		ctx.lineTo(...topLeft);
 
 		ctx.fill();
+
 		ctx.closePath();
 	}
 
-	ctx.fillStyle = backgroundColor;
-	ctx.beginPath();
-	ctx.arc(MID_X, MID_Y, CIRCLE_CENTER_RADIUS, 0, PIPI, false);
-	ctx.fill();
-	ctx.closePath();
-
 };
 
-drawStrokes(ctx, '#000', '#fff', 1);
-drawStrokes(ctxInverted, '#fff', '#000', -1);
+drawStrokes(ctx);
+
+ctxInverted.beginPath();
+ctxInverted.fillStyle = '#000';
+ctxInverted.rect(0, 0, ctxInverted.canvas.width, ctxInverted.canvas.height);
+ctxInverted.fill();
+ctxInverted.closePath();
+
+ctxInverted.globalCompositeOperation = 'xor';
+ctxInverted.drawImage(ctx.canvas, 0, 0)
+
+

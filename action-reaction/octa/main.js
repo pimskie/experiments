@@ -13,7 +13,7 @@ const PIPI = Math.PI * 2;
 ctx.canvas.width = W;
 ctx.canvas.height = H;
 
-const draw = (points, iteration = 0) => {
+const draw = (points, iteration = 0, scale = 1) => {
 	const color = iteration % 2 === 0 ? '#000' : '#fff';
 	const rotation = iteration * 40 * (Math.PI / 180);
 
@@ -21,6 +21,7 @@ const draw = (points, iteration = 0) => {
 
 	ctx.save();
 	ctx.translate(MID_X, MID_Y);
+	ctx.scale(scale, scale);
 	ctx.rotate(rotation);
 
 	ctx.beginPath();
@@ -40,17 +41,15 @@ const NUM_EDGES = 6;
 const NUM_SHAPES = 30;
 
 let scale = 1;
-let points;
+const points = new Array(NUM_EDGES).fill().map((_, i) => {
+	const x = Math.cos(i * (PIPI / NUM_EDGES)) * MID_X;
+	const y = Math.sin(i * (PIPI / NUM_EDGES)) * MID_X;
+
+	return { x, y };
+});
 
 for (let i = 0; i < NUM_SHAPES; i++) {
-	points = new Array(NUM_EDGES).fill().map((_, i) => {
-		const x = Math.cos(i * (PIPI / NUM_EDGES)) * MID_X * scale;
-		const y = Math.sin(i * (PIPI / NUM_EDGES)) * MID_X * scale;
-
-		return { x, y };
-	});
-
-	draw(points, i);
+	draw(points, i, scale);
 
 	scale *= 0.88;
 }

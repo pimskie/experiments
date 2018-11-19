@@ -35,7 +35,10 @@
         }
 
         canvas {
-            width: 100%;
+        }
+
+        .canvas--ghost {
+            display: none;
         }
 	</style>
 </head>
@@ -43,11 +46,8 @@
 <body>
 
     <div class="container">
-        <div class="frame">
-            <div class="frame__inner">
-                <canvas class="canvas js-canvas"></canvas>
-            </div>
-        </div>
+        <canvas class="canvas canvas--ghost js-canvas-ghost"></canvas>
+        <canvas class="canvas js-canvas"></canvas>
     </div>
     <script src="main.js" type="module"></script>
 

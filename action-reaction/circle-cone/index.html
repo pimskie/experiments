@@ -23,14 +23,23 @@
         }
 
         .canvas {
-            border: 1px solid #000;
+            margin: 0 5px;
+            box-shadow:inset 0px 0px 0px 2px #d2d2d2;
         }
+
+        .canvas--inverted {
+            border: none;
+
+            transform: scaleX(-1);
+        }
+
 	</style>
 </head>
 <body>
 
 <div class="container">
-    <canvas class="canvas js-canvas" width="500" height="500"></canvas>
+    <canvas class="canvas js-canvas"></canvas>
+    <canvas class="canvas canvas--inverted js-canvas-inverted"></canvas>
 </div>
 <script src="main.js" type="module"></script>
 

@@ -1,73 +1,68 @@
 import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
 
-const ctx = Utils.qs('canvas').getContext('2d');
+const ctx = Utils.qs('.js-canvas').getContext('2d');
+const ctxInverted = Utils.qs('.js-canvas-inverted').getContext('2d');
+
 const PIPI = Math.PI * 2;
 
-const W = 500;
-const H = 500;
+const W = 400;
+const H = 400;
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
-
-const CIRCLE_CENTER_RADIUS = 50;
-const NUM_STROKES = 20;
 
 ctx.canvas.width = W;
 ctx.canvas.height = H;
 
+ctxInverted.canvas.width = W;
+ctxInverted.canvas.height = H;
 
-const drawCenter = (ctx) => {
-	ctx.save();
-	ctx.translate(MID_X, MID_Y);
+const CIRCLE_CENTER_RADIUS = 25;
+const NUM_STROKES = 100;
 
-	ctx.beginPath();
-	ctx.arc(0, 0, CIRCLE_CENTER_RADIUS, 0, PIPI, false);
-	ctx.stroke();
-	ctx.closePath();
-
-	ctx.restore();
-};
-
-const drawStrokes = () => {
-	const FROM_R = MID_X + 10;
-	const SPREAD = 1;
+const drawStrokes = (ctx) => {
+	const FROM_R = MID_X - 10;
+	const SPREAD = 0.25;
+	const ANGLE_DIFF = NUM_STROKES * 0.25;
 
 	for (let i = 0; i < NUM_STROKES; i++) {
 		ctx.beginPath();
 
-		const angleFrom = i * (PIPI / NUM_STROKES);
-		const angleTo = (i + 3) * (PIPI / NUM_STROKES);
-
-		const from = [
-			MID_X + Math.cos(angleFrom) * FROM_R,
-			MID_Y + Math.sin(angleFrom) * FROM_R,
+		const topLeft = [
+			MID_X + Math.cos((i - SPREAD) * (PIPI / NUM_STROKES)) * FROM_R,
+			MID_Y + Math.sin((i - SPREAD) * (PIPI / NUM_STROKES)) * FROM_R,
 		];
+
+		const topRight = [
+			MID_X + Math.cos((i + SPREAD) * (PIPI / NUM_STROKES)) * FROM_R,
+			MID_Y + Math.sin((i + SPREAD) * (PIPI / NUM_STROKES)) * FROM_R,
+		];
+
+		const angleTo = (i + ANGLE_DIFF) * (PIPI / NUM_STROKES);
 
 		const to = [
 			MID_X + Math.cos(angleTo) * CIRCLE_CENTER_RADIUS,
 			MID_Y + Math.sin(angleTo) * CIRCLE_CENTER_RADIUS,
 		];
 
-		ctx.moveTo(...from);
+		ctx.moveTo(...topLeft);
+		ctx.lineTo(...topRight);
 		ctx.lineTo(...to);
+		ctx.lineTo(...topLeft);
 
-		ctx.stroke();
+		ctx.fill();
 
 		ctx.closePath();
 	}
 
 };
 
-const clear = (ctx) => {
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-};
+drawStrokes(ctx);
 
-const loop = () => {
-	clear(ctx);
+ctxInverted.beginPath();
+ctxInverted.fillStyle = '#000';
+ctxInverted.rect(0, 0, ctxInverted.canvas.width, ctxInverted.canvas.height);
+ctxInverted.fill();
+ctxInverted.closePath();
 
-	drawCenter(ctx);
-	drawStrokes();
-
-	// requestAnimationFrame(loop);
-};
-
-loop();
+ctxInverted.globalCompositeOperation = 'xor';
+ctxInverted.drawImage(ctx.canvas, 0, 0)

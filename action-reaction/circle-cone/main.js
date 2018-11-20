@@ -68,5 +68,10 @@ const drawStrokes = (ctx, strokeColor, backgroundColor, angleModifier) => {
 
 };
 
+/**
+ * Drawing it twice, including the background and center circle
+ * We could also draw only one, copy and invert it onto a other canvas
+ * But to me it didn't look that sharp
+ */
 drawStrokes(ctx, '#000', '#fff', 1);
 drawStrokes(ctxInverted, '#fff', '#000', -1);

@@ -12,34 +12,37 @@ const MID_Y = H * 0.5;
 const PI = Math.PI;
 const PIPI = PI * 2;
 
-ctx.canvas.width = ctxGhost.canvas.width = W;
-ctx.canvas.height = ctxGhost.canvas.height = H;
+ctx.canvas.width = W;
+ctx.canvas.height = H;
+
+ctxGhost.canvas.width = W;
+ctxGhost.canvas.height = H;
 
 const MAGIC_SCALE_NUMBER = 0.85;
 const NUM_EDGES = 8;
-const NUM_SHAPES = 30;
+const NUM_SHAPES = 100;
 
 const points = new Array(NUM_EDGES).fill().map((_, i) => {
 	const angle = i * (PIPI / NUM_EDGES);
+	const r = ctxGhost.canvas.width * 0.45;
 
 	return {
-		x: Math.cos(angle) * MID_X,
-		y: Math.sin(angle) * MID_Y,
+		x: Math.cos(angle) * r,
+		y: Math.sin(angle) * r,
 	};
 });
 
 const shapes = new Array(NUM_SHAPES).fill().map((_, i) => {
 	return {
-		rotation: (i / NUM_SHAPES) * PIPI,
+		rotation: (i / NUM_SHAPES) * PIPI * 1.5,
 		scale: Math.pow(MAGIC_SCALE_NUMBER, i),
 	};
 });
-
 const draw = (ctx, points, rotation = 0, scale = 1) => {
 	ctx.fillStyle = '#000';
 
 	ctx.save();
-	ctx.translate(MID_X, MID_Y);
+	ctx.translate(ctx.canvas.width * 0.5, ctx.canvas.width * 0.5);
 	ctx.scale(scale, scale);
 	ctx.rotate(rotation);
 
@@ -58,10 +61,11 @@ const draw = (ctx, points, rotation = 0, scale = 1) => {
 
 const duplicateCanvas = (ctxFrom, ctxTo, scale = 1, rotation = 0) => {
 	ctxTo.save();
-	ctxTo.translate(MID_X, MID_Y);
+	ctxTo.translate(ctxTo.canvas.width * 0.5, ctxTo.canvas.height * 0.5);
+
 
 	ctxTo.rotate(rotation);
-	ctxTo.scale(scale, scale);
+	ctxTo.scale(scale * 2.5, scale * 2.5);
 
 	ctxTo.drawImage(ctxFrom.canvas, -MID_X, -MID_Y);
 	ctxTo.restore();
@@ -76,9 +80,9 @@ const loop = () => {
 		duplicateCanvas(ctxGhost, ctx, scale, rotation);
 
 		shape.scale *= 1.01;
-		// shape.rotation += i % 2 === 0 ? 0.005 : -0.005;
+		shape.rotation += i % 2 === 0 ? 0.005 : -0.005;
 
-		if (shape.scale >= 2) {
+		if (shape.scale >= 1) {
 			shape.scale = Math.pow(MAGIC_SCALE_NUMBER, shapes.length);
 		}
 	});
@@ -92,8 +96,6 @@ const loop = () => {
 ctxGhost.globalCompositeOperation = 'xor';
 
 draw(ctxGhost, points, 0, 1);
-draw(ctxGhost, points, 40 * Math.PI / 180, 0.9);
-
-
+draw(ctxGhost, points, 10 * Math.PI / 180, 0.9);
 
 loop();

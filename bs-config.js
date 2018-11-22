@@ -13,6 +13,6 @@
  |
  */
 module.exports = {
-	files: ["**/*.js", "**/*.css"],
+	files: ["**/*.js", "**/*.css", "**/*.html"],
 	server: true,
 };

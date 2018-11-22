@@ -13,6 +13,10 @@
 			overflow: hidden;
 		}
 
+        body {
+            background: #000;
+        }
+
         .container {
             width: 100vw;
             height: 100vh;
@@ -22,26 +26,29 @@
             align-items: center;
         }
 
+        .canvas-container {
+            position: relative;
+            overflow: hidden;
+        }
+
         .canvas {
-            margin: 0 3px;
-            border: 2px solid #d2d2d2;
+            border: 1px solid white;
         }
 
-        .canvas--inverted {
-            border-color: #000;
-
-            transform: scaleX(-1);
+        .canvas--ghost {
+            display: none;
         }
-
 	</style>
 </head>
 <body>
 
 <div class="container">
-    <canvas class="canvas js-canvas"></canvas>
-    <canvas class="canvas canvas--inverted js-canvas-inverted"></canvas>
+    <div class="canvas-container">
+        <canvas class="canvas canvas--ghost js-canvas-ghost"></canvas>
+        <canvas class="canvas canvas--draw js-canvas"></canvas>
+    </div>
 </div>
-<script src="main.js" type="module"></script>
+<script src="main-square.js" type="module"></script>
 
 </body>
 </html>

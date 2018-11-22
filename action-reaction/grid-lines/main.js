@@ -1,79 +1,106 @@
 import * as Utils from 'https://rawgit.com/pimskie/utils/master/utils.js';
 
 const ctx = document.querySelector('.js-canvas').getContext('2d');
-const ctxInverted = document.querySelector('.js-canvas-inverted').getContext('2d');
+const ctxGhost = document.querySelector('.js-canvas-ghost').getContext('2d');
 
-const PIPI = Math.PI * 2;
-
-const W = Utils.clamp(window.innerWidth - 100 / 2, 200, 800);
+const W = Utils.clamp(Math.min(window.innerWidth, window.innerHeight) - 100, 200, 800);
 const H = W;
+
+
 const MID_X = W * 0.5;
 const MID_Y = H * 0.5;
+
+const PIPI = Math.PI * 2;
 
 ctx.canvas.width = W;
 ctx.canvas.height = H;
 
-ctxInverted.canvas.width = W;
-ctxInverted.canvas.height = H;
+ctxGhost.canvas.width = W;
+ctxGhost.canvas.height = H;
 
-const CIRCLE_CENTER_RADIUS = 50;
-const NUM_STROKES = 60;
+const SPACING = 30;
 
-const drawStrokes = (ctx, strokeColor, backgroundColor, angleModifier) => {
-	const FROM_R = MID_X - 5;
-	const CENTER_RADIUS = 20;
+const drawLine = (ctx, from, to, lineWidth = 0.25, color = '#000', percent = 1) => {
+	const alpha = 0.1 + (0.9 * percent);
 
-	const WIDTH = 0.025;
-	const ANGLE_DIFF = 1;
+	ctx.lineWidth = lineWidth;
+	ctx.strokeStyle = color;
 
-	ctx.fillStyle = backgroundColor;
 	ctx.beginPath();
-	ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height)
-	ctx.fill();
+	ctx.moveTo(...from);
+	ctx.lineTo(...to);
 	ctx.closePath();
+	ctx.stroke();
 
-	ctx.fillStyle = strokeColor;
-
-	for (let i = 0; i < NUM_STROKES; i++) {
-		ctx.beginPath();
-
-		const topLeft = [
-			MID_X + Math.cos(i * (PIPI / NUM_STROKES) - WIDTH) * FROM_R,
-			MID_Y + Math.sin(i * (PIPI / NUM_STROKES) - WIDTH) * FROM_R,
-		];
-
-		const topRight = [
-			MID_X + Math.cos(i * (PIPI / NUM_STROKES) + WIDTH) * FROM_R,
-			MID_Y + Math.sin(i * (PIPI / NUM_STROKES) + WIDTH) * FROM_R,
-		];
-
-		const angleTo = i * (PIPI / NUM_STROKES) + ANGLE_DIFF;
-
-		const to = [
-			MID_X + Math.cos(angleTo) * CENTER_RADIUS,
-			MID_Y + Math.sin(angleTo) * CENTER_RADIUS,
-		];
-
-		ctx.moveTo(...topLeft);
-		ctx.lineTo(...topRight);
-		ctx.lineTo(...to);
-
-		ctx.fill();
-		ctx.closePath();
-	}
-
-	ctx.fillStyle = backgroundColor;
+	ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
 	ctx.beginPath();
-	ctx.arc(MID_X, MID_Y, CIRCLE_CENTER_RADIUS, 0, PIPI, false);
-	ctx.fill();
+	ctx.arc(from[0] + 100, from[1], 2, 0, PIPI, false);
+	ctx.arc(to[0] - 100, to[1], 2, 0, PIPI, false);
 	ctx.closePath();
-
+	ctx.fill();
 };
 
-/**
- * Drawing it twice, including the background and center circle
- * We could also draw only one, copy and invert it onto a other canvas
- * But to me it didn't look that sharp
- */
-drawStrokes(ctx, '#000', '#fff', 1);
-drawStrokes(ctxInverted, '#fff', '#000', -1);
+const drawGrid = (percent = 1) => {
+	const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+
+	gradient.addColorStop(0.1, 'rgba(0, 0, 0, 0)');
+	gradient.addColorStop(.5, 'rgba(0, 0, 0, 1)');
+	gradient.addColorStop(0.9, 'rgba(0, 0, 0, 0)');
+
+	const lineWidth = 0.25;
+	const color = gradient;
+
+	for (let y = -HH; y < HH; y += SPACING) {
+		const from = [-W, y];
+		const to = [WW, y];
+
+		drawLine(ctx, from, to, lineWidth, color);
+	}
+
+	// for (let y = 0; y < H; y += SPACING) {
+	// 	const from = [0, y];
+	// 	const to = [W, y];
+
+	// 	drawLine(ctx, from, to, lineWidth, color, percent);
+	// }
+};
+
+let phase = PIPI;
+const speed = 0.0002;
+const numLayers = 4;
+
+const loop = () => {
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+	for (let i = 0; i < numLayers; i++) {
+		const percent = i / (numLayers - 1);
+
+		ctx.save();
+
+		ctx.translate(MID_X, MID_Y);
+		ctx.rotate(Math.PI * percent);
+
+
+		drawGrid(percent);
+
+		ctx.restore();
+	}
+
+	// const endRotation = Math.sin(phase) * PIPI;
+
+	// ctx.save();
+	// ctx.translate(MID_X, MID_Y);
+
+	// for (let i = 0; i < numLayers; i++) {
+	// 	ctx.rotate(endRotation);
+	// 	ctx.drawImage(ctxGhost.canvas, -MID_X, -MID_Y);
+	// }
+
+	// ctx.restore();
+
+	// phase += speed;
+
+	// requestAnimationFrame(loop);
+};
+
+loop();

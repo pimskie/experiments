@@ -99,7 +99,21 @@ class Turtle {
 	}
 
 	step() {
+		const p = [];
 
+		const { state: { position, heading }, options: { stepSize } } = this;
+
+		position.x += Math.cos(heading) * stepSize;
+		position.y += Math.sin(heading) * stepSize;
+
+		const point = this.state.position.clone();
+
+		p.push({
+			point,
+			length: Utils.distanceBetween(new Vector(), point)
+		});
+
+		this.paths.push(p);
 	}
 
 	turnLeft() {
@@ -139,12 +153,10 @@ const run = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	let n = sliderN.value;
-	const w = 'F - F - F - F';
-	const p = 'F - F + F + F F - F - F + F';
 
-	// const w = 'F + F + F + F';
-	// const p = 'F + F - F - F + F';
-	// const p2 = 'F + F - F - F + F';
+	const w = 'F+F+F+F';
+	const p = 'F+f-FF+F+FF+Ff+FF-f+FF-F-FF-Ff-FFF';
+	const p2 = 'ffffff';
 
 	turtle.reset();
 	turtle.stepSize = parseInt(sliderStepSize.value, 10);
@@ -153,6 +165,7 @@ const run = () => {
 
 	while (n--) {
 		w1 = w1.replace(/F/g, p);
+		w1 = w1.replace(/f/g, p2);
 	}
 
 	w1.replace(/ /g, '')

@@ -45,13 +45,12 @@ class Turtle {
 			position: position.clone(),
 		};
 
-
 		this.options = {
 			stepSize,
 			angleIncrement,
 		};
 
-		this.path = [];
+		this.paths = [];
 
 		this.instructions = {
 			'F': ctx => this.stepDraw(ctx),
@@ -59,6 +58,16 @@ class Turtle {
 			'+': ctx => this.turnLeft(ctx),
 			'-': ctx => this.turnRight(ctx),
 		};
+	}
+
+	get path() {
+		if (!this.paths.length || !Array.isArray(this.paths[this.paths.length - 1])) {
+			const p = [];
+
+			this.paths.push(p);
+		}
+
+		return this.paths[this.paths.length - 1];
 	}
 
 	set stepSize(s) {
@@ -106,7 +115,7 @@ class Turtle {
 	}
 
 	reset() {
-		this.path = [];
+		this.paths = [];
 		this.state = {
 			heading: this.stateDefault.heading,
 			position: this.stateDefault.position.clone(),
@@ -130,11 +139,12 @@ const run = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	let n = sliderN.value;
-	// const w = 'F - F - F - F';
-	// const p = 'F - F + F + F F - F - F + F';
+	const w = 'F - F - F - F';
+	const p = 'F - F + F + F F - F - F + F';
 
-	const w = '- F';
-	const p = 'F + F - F - F + F';
+	// const w = 'F + F + F + F';
+	// const p = 'F + F - F - F + F';
+	// const p2 = 'F + F - F - F + F';
 
 	turtle.reset();
 	turtle.stepSize = parseInt(sliderStepSize.value, 10);
@@ -149,23 +159,26 @@ const run = () => {
 		.split('')
 		.forEach(instruction => turtle.instruct(instruction, ctx));
 
-	const { path } = turtle;
+	const { paths } = turtle;
 
-	const lengths = path.map(p => p.length);
-	const maxPoint = Math.max(...lengths);
-	const diffHalf = maxPoint * 0.5;
+	// const lengths = path.map(p => p.length);
+	// const maxPoint = Math.max(...lengths);
+	const diffHalf = 0; // maxPoint * 0.5;
 
 	ctx.save();
 	ctx.translate(MID_X, MID_Y);
-	ctx.beginPath();
-	ctx.moveTo(path[0].point.x - diffHalf, path[0].point.y - diffHalf);
 
-	for (let i = 1; i < path.length; i++) {
-		ctx.lineTo(path[i].point.x - diffHalf, path[i].point.y - diffHalf);
-	}
+	paths.forEach((path) => {
+		ctx.beginPath();
+		ctx.moveTo(path[0].point.x - diffHalf, path[0].point.y - diffHalf);
 
-	ctx.closePath();
-	ctx.stroke();
+		for (let i = 1; i < path.length; i++) {
+			ctx.lineTo(path[i].point.x - diffHalf, path[i].point.y - diffHalf);
+		}
+
+		ctx.closePath();
+		ctx.stroke();
+	});
 
 	ctx.restore();
 };

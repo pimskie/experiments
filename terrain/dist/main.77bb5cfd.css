@@ -1,0 +1,21 @@
+.content {
+  padding: 0.25rem;
+}
+
+.grid {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: (1fr)[2];
+      grid-template-columns: repeat(2, 1fr);
+  grid-column-gap: 0.5rem;
+  grid-row-gap: 0.5rem;
+}
+
+.canvas {
+  width: 500px;
+  height: 500px;
+}
+
+.card {
+  border: 1px solid #ccc;
+}

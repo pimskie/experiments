@@ -11,11 +11,6 @@
   grid-row-gap: 0.5rem;
 }
 
-.canvas {
-  width: 500px;
-  height: 500px;
-}
-
 .card {
   border: 1px solid #ccc;
 }

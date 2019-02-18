@@ -606,7 +606,7 @@ class Generator {
       offsetHeight: height
     } = canvas;
     this.ctx = canvas.getContext('2d');
-    this.cellSize = 10;
+    this.cellSize = 1;
     this.cols = Math.ceil(width / this.cellSize);
     this.rows = Math.ceil(height / this.cellSize);
     this.phase = 0;
@@ -614,7 +614,7 @@ class Generator {
 
   update(isFlying = true) {
     const numLoops = this.rows * this.cols;
-    const scale = 0.005;
+    const scale = 0.05;
     let x = 0;
     let y = 0;
     const values = [];
@@ -34614,7 +34614,7 @@ class World {
     this.renderer = new THREE.WebGLRenderer({
       alpha: true
     });
-    this.renderer.setSize(this.el.offsetWidth, this.el.offsetHeight);
+    this.renderer.setSize(500, 500);
     this.controls = new _threeOrbitcontrols.default(this.camera, this.renderer.domElement);
     const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
     const cubeMaterial = new THREE.MeshPhongMaterial({
@@ -34625,39 +34625,61 @@ class World {
     this.cube.castShadow = true;
     this.cube.receiveShadow = true;
     this.scene.add(this.cube);
-    const planeGeometry = new THREE.PlaneGeometry(20, 20, 50, 50);
     const planeMaterial = new THREE.MeshPhongMaterial({
-      color: 0x5bb115,
-      side: THREE.DoubleSide,
-      wireframe: true
+      vertexColors: THREE.VertexColors,
+      wireframe: false,
+      side: THREE.DoubleSide
     });
-    this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    this.plane.rotation.x = -Math.PI / 2;
-    this.plane.castShadow = true;
-    this.plane.receiveShadow = true;
-    this.camera.position.set(0, 4, 5);
-    this.camera.rotation.set(-0.5, 0, 0);
-    window.world = this;
+    this.bufferGeom = new THREE.PlaneBufferGeometry(50, 50, 50, 50);
+    const numLoops = this.bufferGeom.attributes.position.count;
+    const colors = new Array(numLoops * 3).fill(0);
+    this.bufferGeom.rotateX(-Math.PI * 0.5);
+
+    for (let i = 0; i < numLoops; i++) {
+      colors.push(0, 0, 0);
+    }
+
+    this.bufferGeom.addAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
+    this.bufferGeom.computeVertexNormals();
+    this.bufferGeom.dynamic = true;
+    this.plane = new THREE.Mesh(this.bufferGeom, planeMaterial);
     this.scene.add(this.plane);
+    this.camera.position.set(0, 10, 0); // this.camera.rotation.set(-Math.PI / 2, 0, 0);
+
     const light = new THREE.DirectionalLight(0xffffff, 2, 10);
     light.castShadow = true;
     this.scene.add(light);
     this.el.appendChild(this.renderer.domElement);
+    window.world = this;
   }
 
   generate(noiseValues) {
-    const vertices = this.plane.geometry.vertices;
+    const position = this.bufferGeom.getAttribute('position');
+    const {
+      array: positionArray,
+      count,
+      itemSize
+    } = position;
+    const color = this.bufferGeom.getAttribute('color');
+    const {
+      array: colorArray
+    } = color;
 
-    for (let i = 0; i < noiseValues.length; i++) {
-      const value = noiseValues[i];
-      const vertex = vertices[i];
-      vertex.setZ(value);
+    for (let i = 0; i < count; i++) {
+      const attributeIndex = i * itemSize;
+      const noiseValue = noiseValues[i];
+      positionArray[attributeIndex + 1] = noiseValue * 2;
+      colorArray[attributeIndex] = noiseValue * -1;
+      colorArray[attributeIndex + 1] = noiseValue * -1;
+      colorArray[attributeIndex + 2] = noiseValue * -1;
     }
 
-    this.plane.geometry.verticesNeedUpdate = true;
+    this.bufferGeom.attributes.position.needsUpdate = true;
   }
 
   render() {
+    this.bufferGeom.attributes.position.needsUpdate = true;
+    this.bufferGeom.attributes.color.needsUpdate = true;
     this.cube.rotation.x += 0.01;
     this.cube.rotation.y += 0.01;
     this.renderer.render(this.scene, this.camera);
@@ -34731,7 +34753,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49337" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50058" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

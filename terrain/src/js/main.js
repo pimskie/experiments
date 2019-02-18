@@ -15,6 +15,7 @@ const fly = () => {
 	world.render();
 
 	world.render();
+
 	requestAnimationFrame(() => fly());
 };
 

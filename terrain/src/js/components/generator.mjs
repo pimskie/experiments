@@ -12,17 +12,17 @@ class Generator {
 		const { offsetWidth: width, offsetHeight: height } = canvas;
 
 		this.ctx = canvas.getContext('2d');
-		this.cellSize = 10;
+		this.cellSize = 1;
 
 		this.cols = Math.ceil(width / this.cellSize);
-		this.rows = Math.ceil(height / this.cellSize);
+        this.rows = Math.ceil(height / this.cellSize);
 
 		this.phase = 0;
 	}
 
 	update(isFlying = true) {
 		const numLoops = this.rows * this.cols;
-		const scale = 0.005;
+		const scale = 0.05;
 
 		let x = 0;
 		let y = 0;

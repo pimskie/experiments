@@ -104,7 +104,103 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({"../node_modules/simplex-noise/simplex-noise.js":[function(require,module,exports) {
+})({"js/vendor/utils.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.wrappBBox = exports.randomGaussian = exports.randomBetween = exports.randomArrayValue = exports.angleBetween = exports.distanceBetween = exports.pixelIndex = exports.toDegrees = exports.toRadian = exports.clamp = exports.map = exports.qsa = exports.qs = void 0;
+
+const qs = sel => document.querySelector(sel);
+
+exports.qs = qs;
+
+const qsa = sel => Array.from(document.querySelectorAll(sel));
+
+exports.qsa = qsa;
+
+const map = (value, start1, stop1, start2, stop2) => (value - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+
+exports.map = map;
+
+const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
+
+exports.clamp = clamp;
+
+const toRadian = degrees => degrees * Math.PI / 180;
+
+exports.toRadian = toRadian;
+
+const toDegrees = radians => radians * 180 / Math.PI;
+
+exports.toDegrees = toDegrees;
+
+const pixelIndex = (x, y, imageData) => (~~x + ~~y * imageData.width) * 4;
+
+exports.pixelIndex = pixelIndex;
+
+const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec1.y);
+
+exports.distanceBetween = distanceBetween;
+
+const angleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
+
+exports.angleBetween = angleBetween;
+
+const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
+
+exports.randomArrayValue = randomArrayValue;
+
+const randomBetween = (min, max) => Math.random() * (max - min + 1) + min;
+
+exports.randomBetween = randomBetween;
+
+const randomGaussian = (mean = 0, sd = 1) => {
+  let y1;
+  let y2;
+  let x1;
+  let x2;
+  let w;
+  let previous;
+
+  if (previous) {
+    y1 = y2;
+    previous = false;
+  } else {
+    do {
+      x1 = Math.random() * 2 - 1;
+      x2 = Math.random() * 2 - 1;
+      w = x1 * x1 + x2 * x2;
+    } while (w >= 1);
+
+    w = Math.sqrt(-2 * Math.log(w) / w);
+    y1 = x1 * w;
+    y2 = x2 * w;
+    previous = true;
+  }
+
+  return y1 * sd + mean;
+};
+
+exports.randomGaussian = randomGaussian;
+
+const wrappBBox = (vec, w, h) => {
+  if (vec.x < 0) {
+    vec.x = w;
+  } else if (vec.x > w) {
+    vec.x = 0;
+  }
+
+  if (vec.y < 0) {
+    vec.y = h;
+  } else if (vec.y > h) {
+    vec.y = 0;
+  }
+};
+
+exports.wrappBBox = wrappBBox;
+},{}],"../node_modules/simplex-noise/simplex-noise.js":[function(require,module,exports) {
 var define;
 /*
  * A fast javascript implementation of simplex noise by Jonas Wagner
@@ -586,7 +682,7 @@ Better rank ordering method by Stefan Gustavson in 2012.
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.SIZE = exports.default = void 0;
 
 var _simplexNoise = _interopRequireDefault(require("simplex-noise"));
 
@@ -596,23 +692,28 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const norm = (val, min, max) => (val - min) / (max - min);
 
 const simplex = new _simplexNoise.default(Math.random());
+const SIZE = 100;
+exports.SIZE = SIZE;
 
 class Generator {
   constructor(el) {
     this.el = el;
     const canvas = this.el.querySelector('[data-ref=canvas]');
-    const {
-      offsetWidth: width,
-      offsetHeight: height
-    } = canvas;
+    const width = SIZE;
+    const height = SIZE;
+    canvas.width = width;
+    canvas.height = height;
     this.ctx = canvas.getContext('2d');
     this.cellSize = 1;
     this.cols = Math.ceil(width / this.cellSize);
     this.rows = Math.ceil(height / this.cellSize);
     this.phase = 0;
+    this.phaseX = 0;
+    this.phaseY = 0;
+    this.speed = 0.05;
   }
 
-  update(isFlying = true) {
+  update(isFlying = true, angle = 0) {
     const numLoops = this.rows * this.cols;
     const scale = 0.05;
     let x = 0;
@@ -622,8 +723,7 @@ class Generator {
     for (let i = 0; i < numLoops; i++) {
       const noiseX = x * scale;
       const noiseY = y * scale;
-      let noiseValue;
-      noiseValue = simplex.noise2D(noiseX, noiseY - this.phase);
+      const noiseValue = simplex.noise2D(noiseX - this.phaseX, noiseY - this.phaseY);
       const color = 255 * norm(noiseValue, -1, 1);
       this.ctx.fillStyle = `rgb(${color}, ${color}, ${color})`;
       this.ctx.beginPath();
@@ -641,7 +741,9 @@ class Generator {
     }
 
     if (isFlying) {
-      this.phase += 0.02;
+      this.phase += this.speed;
+      this.phaseX += Math.cos(angle) * this.speed;
+      this.phaseY += Math.sin(angle) * this.speed;
     }
 
     return values;
@@ -34606,10 +34708,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // https://medium.com/@crazypixel/geometry-manipulation-in-three-js-twisting-c53782c38bb
 // https://github.com/mrdoob/three.js/issues/1003
 // https://stackoverflow.com/questions/50426159/color-based-on-mesh-height-three-js
+// https://threejs.org/examples/#webgl_geometry_terrain
 class World {
-  constructor(el) {
+  constructor(el, mapSize = 100) {
     this.el = el;
     this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    this.camera.position.set(3, 4, 25);
+    this.camera.rotation.set(-Math.PI / 2, 0, 0);
+    this.cameraDirection = new THREE.Vector3();
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({
       alpha: true
@@ -34630,7 +34736,7 @@ class World {
       wireframe: false,
       side: THREE.DoubleSide
     });
-    this.bufferGeom = new THREE.PlaneBufferGeometry(50, 50, 50, 50);
+    this.bufferGeom = new THREE.PlaneBufferGeometry(50, 50, mapSize - 1, mapSize - 1);
     const numLoops = this.bufferGeom.attributes.position.count;
     const colors = new Array(numLoops * 3).fill(0);
     this.bufferGeom.rotateX(-Math.PI * 0.5);
@@ -34641,11 +34747,10 @@ class World {
 
     this.bufferGeom.addAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
     this.bufferGeom.computeVertexNormals();
+    this.bufferGeom.computeBoundingSphere();
     this.bufferGeom.dynamic = true;
     this.plane = new THREE.Mesh(this.bufferGeom, planeMaterial);
     this.scene.add(this.plane);
-    this.camera.position.set(0, 10, 0); // this.camera.rotation.set(-Math.PI / 2, 0, 0);
-
     const light = new THREE.DirectionalLight(0xffffff, 2, 10);
     light.castShadow = true;
     this.scene.add(light);
@@ -34682,6 +34787,7 @@ class World {
     this.bufferGeom.attributes.color.needsUpdate = true;
     this.cube.rotation.x += 0.01;
     this.cube.rotation.y += 0.01;
+    this.camera.getWorldDirection(this.cameraDirection);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -34692,19 +34798,26 @@ exports.default = _default;
 },{"three":"../node_modules/three/build/three.module.js","three-orbitcontrols":"../node_modules/three-orbitcontrols/OrbitControls.js"}],"js/main.js":[function(require,module,exports) {
 "use strict";
 
-var _generator = _interopRequireDefault(require("./components/generator.mjs"));
+var _utils = require("./vendor/utils");
+
+var _generator = _interopRequireWildcard(require("./components/generator.mjs"));
 
 var _world = _interopRequireDefault(require("./components/world.mjs"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
 console.log('terrain jow');
 const generator = new _generator.default(document.querySelector('[data-ref=generator]'));
-const world = new _world.default(document.querySelector('[data-ref=world]'));
+const world = new _world.default(document.querySelector('[data-ref=world]'), _generator.SIZE);
 let isFlying = false;
 
 const fly = () => {
-  const noiseValues = generator.update(isFlying);
+  const cameraDirection = world.cameraDirection;
+  const theta = Math.atan2(cameraDirection.x, cameraDirection.z * -1) + Math.PI / 2;
+  const noiseAngle = theta;
+  const noiseValues = generator.update(isFlying, noiseAngle);
   world.generate(noiseValues);
   world.render();
   world.render();
@@ -34726,7 +34839,7 @@ const onKeyUp = e => {
 document.addEventListener('keydown', onKeyDown);
 document.addEventListener('keyup', onKeyUp);
 fly();
-},{"./components/generator.mjs":"js/components/generator.mjs","./components/world.mjs":"js/components/world.mjs"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./vendor/utils":"js/vendor/utils.js","./components/generator.mjs":"js/components/generator.mjs","./components/world.mjs":"js/components/world.mjs"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -34753,7 +34866,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50058" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55923" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

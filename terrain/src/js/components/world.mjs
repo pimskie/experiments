@@ -1,15 +1,20 @@
 // https://medium.com/@crazypixel/geometry-manipulation-in-three-js-twisting-c53782c38bb
 // https://github.com/mrdoob/three.js/issues/1003
 // https://stackoverflow.com/questions/50426159/color-based-on-mesh-height-three-js
+// https://threejs.org/examples/#webgl_geometry_terrain
 
 import * as THREE from 'three';
 import OrbitControls from 'three-orbitcontrols';
 
 class World {
-	constructor(el) {
+	constructor(el,mapSize = 100) {
 		this.el = el;
 
 		this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+		this.camera.position.set(3, 4, 25);
+		this.camera.rotation.set(-Math.PI / 2, 0, 0);
+
+		this.cameraDirection = new THREE.Vector3();
 
 		this.scene = new THREE.Scene();
 
@@ -34,7 +39,7 @@ class World {
 			side: THREE.DoubleSide
 		});
 
-		this.bufferGeom = new THREE.PlaneBufferGeometry(50, 50, 50, 50);
+		this.bufferGeom = new THREE.PlaneBufferGeometry(50, 50, mapSize - 1, mapSize - 1);
 		const numLoops = this.bufferGeom.attributes.position.count;
 		const colors = new Array(numLoops * 3).fill(0);
 
@@ -46,14 +51,13 @@ class World {
 
 		this.bufferGeom.addAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
 		this.bufferGeom.computeVertexNormals();
+		this.bufferGeom.computeBoundingSphere();
+
 		this.bufferGeom.dynamic = true;
 
 		this.plane = new THREE.Mesh(this.bufferGeom, planeMaterial);
 
 		this.scene.add(this.plane);
-
-		this.camera.position.set(0, 10, 0);
-		// this.camera.rotation.set(-Math.PI / 2, 0, 0);
 
 		const light = new THREE.DirectionalLight(0xffffff, 2, 10);
 		light.castShadow = true;
@@ -91,6 +95,8 @@ class World {
 
 		this.cube.rotation.x += 0.01;
 		this.cube.rotation.y += 0.01;
+
+		this.camera.getWorldDirection(this.cameraDirection);
 
 		this.renderer.render(this.scene, this.camera);
 	}

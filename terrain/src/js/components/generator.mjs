@@ -4,23 +4,34 @@ import SimplexNoise from 'simplex-noise';
 const norm = (val, min, max) => (val - min) / (max - min);
 const simplex = new SimplexNoise(Math.random());
 
+const SIZE = 100;
+
 class Generator {
 	constructor(el) {
 		this.el = el;
 
 		const canvas = this.el.querySelector('[data-ref=canvas]');
-		const { offsetWidth: width, offsetHeight: height } = canvas;
+
+		const width = SIZE;
+		const height = SIZE;
+
+		canvas.width = width;
+		canvas.height = height;
 
 		this.ctx = canvas.getContext('2d');
 		this.cellSize = 1;
 
 		this.cols = Math.ceil(width / this.cellSize);
-        this.rows = Math.ceil(height / this.cellSize);
+		this.rows = Math.ceil(height / this.cellSize);
 
 		this.phase = 0;
+		this.phaseX = 0;
+		this.phaseY = 0;
+
+		this.speed = 0.05;
 	}
 
-	update(isFlying = true) {
+	update(isFlying = true, angle = 0) {
 		const numLoops = this.rows * this.cols;
 		const scale = 0.05;
 
@@ -33,9 +44,7 @@ class Generator {
 			const noiseX = x * scale;
 			const noiseY = y * scale;
 
-			let noiseValue;
-
-			noiseValue = simplex.noise2D(noiseX, noiseY - this.phase);
+			const noiseValue = simplex.noise2D(noiseX - this.phaseX, noiseY - this.phaseY);
 
 			const color = 255 * (norm(noiseValue, -1, 1));
 
@@ -56,7 +65,10 @@ class Generator {
 		}
 
 		if (isFlying) {
-			this.phase += 0.02;
+			this.phase += this.speed;
+
+			this.phaseX += Math.cos(angle) * this.speed;
+			this.phaseY += Math.sin(angle) * this.speed;
 		}
 
 		return values;
@@ -64,3 +76,4 @@ class Generator {
 }
 
 export default Generator;
+export { SIZE };

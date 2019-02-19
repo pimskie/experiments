@@ -37552,7 +37552,7 @@ class World {
       wireframe: false,
       side: THREE.DoubleSide
     });
-    this.bufferGeom = new THREE.PlaneBufferGeometry(100, 100, mapSize - 1, mapSize - 1);
+    this.bufferGeom = new THREE.PlaneBufferGeometry(300, 300, mapSize - 1, mapSize - 1);
     const numLoops = this.bufferGeom.attributes.position.count;
     const colors = new Array(numLoops * 3).fill(0);
     this.bufferGeom.rotateX(-Math.PI * 0.5);
@@ -37565,8 +37565,7 @@ class World {
     this.bufferGeom.dynamic = true;
     this.plane = new THREE.Mesh(this.bufferGeom, planeMaterial);
     this.scene.add(this.plane);
-    const light = new THREE.DirectionalLight(0xffffff, 2, 10);
-    light.castShadow = true;
+    const light = new THREE.DirectionalLight(0xffffff, 1, 10);
     this.scene.add(light);
     this.el.appendChild(this.renderer.domElement);
     window.world = this;
@@ -37588,13 +37587,19 @@ class World {
     for (let i = 0; i < count; i++) {
       const attributeIndex = i * itemSize;
       const noiseValue = noiseValues[i];
-      positionArray[attributeIndex + 1] = noiseValue * 4;
+      positionArray[attributeIndex + 1] = Math.pow(noiseValue * 2, 3);
       colorArray[attributeIndex] = noiseValue;
       colorArray[attributeIndex + 1] = noiseValue;
       colorArray[attributeIndex + 2] = noiseValue;
     }
 
     this.bufferGeom.attributes.position.needsUpdate = true;
+    const midIndex = Math.round(positionArray.length / 2);
+    const midIndexZero = midIndex - midIndex % 3; // WTF..?!
+    // TODO
+
+    const midY = positionArray[midIndexZero + 250 * 3 + 1] + 1;
+    this.cube.position.setY(midY);
   }
 
   render() {

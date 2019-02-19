@@ -33,7 +33,7 @@ class Generator {
 
 	update(isFlying = true, angle = 0) {
 		const numLoops = this.rows * this.cols;
-		const scale = 0.05;
+		const scale = 0.01;
 
 		let x = 0;
 		let y = 0;

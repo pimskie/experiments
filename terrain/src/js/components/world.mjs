@@ -10,16 +10,18 @@ class World {
 	constructor(el,mapSize = 100) {
 		this.el = el;
 
-		this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-		this.camera.position.set(3, 4, 25);
-		this.camera.rotation.set(-Math.PI / 2, 0, 0);
-
-		this.cameraDirection = new THREE.Vector3();
+		const width = this.el.offsetWidth;
+		const height = width / 1.777;
 
 		this.scene = new THREE.Scene();
 
+		this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+		this.camera.position.set(3, 4, 25);
+		this.camera.rotation.set(-Math.PI / 2, 0, 0);
+		this.cameraDirection = new THREE.Vector3();
+
 		this.renderer = new THREE.WebGLRenderer({ alpha: true });
-		this.renderer.setSize(500, 500);
+		this.renderer.setSize(width, height);
 
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
@@ -39,7 +41,7 @@ class World {
 			side: THREE.DoubleSide
 		});
 
-		this.bufferGeom = new THREE.PlaneBufferGeometry(50, 50, mapSize - 1, mapSize - 1);
+		this.bufferGeom = new THREE.PlaneBufferGeometry(100, 100, mapSize - 1, mapSize - 1);
 		const numLoops = this.bufferGeom.attributes.position.count;
 		const colors = new Array(numLoops * 3).fill(0);
 
@@ -81,9 +83,9 @@ class World {
 			const noiseValue = noiseValues[i];
 
 			positionArray[attributeIndex + 1] = noiseValue * 2;
-			colorArray[attributeIndex] = noiseValue * -1;
-			colorArray[attributeIndex + 1] = noiseValue * -1;
-			colorArray[attributeIndex + 2] = noiseValue * -1;
+			colorArray[attributeIndex] = noiseValue;
+			colorArray[attributeIndex + 1] = noiseValue;
+			colorArray[attributeIndex + 2] = noiseValue;
 		}
 
 		this.bufferGeom.attributes.position.needsUpdate = true;

@@ -1,5 +1,3 @@
-console.log('terrain jow');
-
 import * as dat from 'dat.gui';
 import Generator, { SIZE as mapSize } from './components/generator.mjs';
 import World from './components/world.mjs';

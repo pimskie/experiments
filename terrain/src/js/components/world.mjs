@@ -6,9 +6,12 @@
 import * as THREE from 'three';
 import OrbitControls from 'three-orbitcontrols';
 
+const angleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
+
 class World {
 	constructor(el, mapSize = 100) {
 		this.el = el;
+		this.segments = mapSize - 1;
 
 		const width = this.el.offsetWidth;
 		const height = width / 1.777;
@@ -23,15 +26,18 @@ class World {
 		this.renderer = new THREE.WebGLRenderer({ alpha: true });
 		this.renderer.setSize(width, height);
 
+		const fog = new THREE.Fog(0xffffff, 0.1, 100);
+		this.scene.fog = fog;
+
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-		const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+		const cubeGeometry = new THREE.BoxGeometry(1, 0.5, 2);
 		const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
 
 		this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 		this.cube.position.set(0, 1, 0);
-		this.cube.castShadow = true;
-		this.cube.receiveShadow = true;
+		// this.cube.castShadow = true;
+		// this.cube.receiveShadow = true;
 
 		this.scene.add(this.cube);
 
@@ -41,7 +47,7 @@ class World {
 			side: THREE.DoubleSide
 		});
 
-		this.bufferGeom = new THREE.PlaneBufferGeometry(300, 300, mapSize - 1, mapSize - 1);
+		this.bufferGeom = new THREE.PlaneBufferGeometry(200, 200, this.segments, this.segments);
 		const numLoops = this.bufferGeom.attributes.position.count;
 		const colors = new Array(numLoops * 3).fill(0);
 
@@ -88,26 +94,39 @@ class World {
 			colorArray[attributeIndex + 2] = noiseValue;
 		}
 
-		this.bufferGeom.attributes.position.needsUpdate = true;
-
-		const midIndex = Math.round(positionArray.length / 2);
-		const midIndexZero = midIndex - (midIndex % 3);
-
 		// WTF..?!
 		// TODO
-		const midY = positionArray[midIndexZero + (250 * 3) + 1] + 1;
+		let midIndex = Math.round(positionArray.length / 2);
+		midIndex += (250 * 3) + 1;
+
+		const midY = positionArray[midIndex] + 1;
+
+		const nextIndex = midIndex - (((this.segments + 1) * 2) * 3);
+		const nextY = positionArray[nextIndex];
+
+		colorArray[midIndex] = 0;
+		colorArray[midIndex + 1] = 1;
+		colorArray[midIndex + 2] = 0;
+
+		colorArray[nextIndex] = 1;
+		colorArray[nextIndex + 1] = 0;
+		colorArray[nextIndex + 2] = 0;
 
 		this.cube.position.setY(midY);
+
+		this.bufferGeom.attributes.position.needsUpdate = true;
 	}
 
 	render() {
-		this.bufferGeom.attributes.position.needsUpdate = true;
-		this.bufferGeom.attributes.color.needsUpdate = true;
-
-		this.cube.rotation.x += 0.01;
-		this.cube.rotation.y += 0.01;
-
 		this.camera.getWorldDirection(this.cameraDirection);
+
+		this.bufferGeom.attributes.color.needsUpdate = true;
+		this.bufferGeom.attributes.position.needsUpdate = true;
+
+		const theta = Math.atan2(this.cameraDirection.x, this.cameraDirection.z);
+
+		console.log(this.cameraDirection);
+		this.cube.rotation.y = theta;
 
 		this.renderer.render(this.scene, this.camera);
 	}

@@ -4,7 +4,7 @@ import SimplexNoise from 'simplex-noise';
 const norm = (val, min, max) => (val - min) / (max - min);
 const simplex = new SimplexNoise(Math.random());
 
-const SIZE = 100;
+const SIZE = 500;
 
 class Generator {
 	constructor(el) {
@@ -29,11 +29,21 @@ class Generator {
 		this.phaseY = 0;
 
 		this.speed = 0.05;
+		this.scale = 0.01;
+	}
+
+	setOptions(options = {}) {
+		Object.keys(options).forEach((option) => {
+			if (this[option]) {
+				console.log('settiing');
+
+				this[option] = options[option];
+			}
+		});
 	}
 
 	update(isFlying = true, angle = 0) {
 		const numLoops = this.rows * this.cols;
-		const scale = 0.01;
 
 		let x = 0;
 		let y = 0;
@@ -41,18 +51,18 @@ class Generator {
 		const values = [];
 
 		for (let i = 0; i < numLoops; i++) {
-			const noiseX = x * scale;
-			const noiseY = y * scale;
+			const noiseX = x * this.scale;
+			const noiseY = y * this.scale;
 
 			const noiseValue = simplex.noise2D(noiseX - this.phaseX, noiseY - this.phaseY);
 
-			const color = 255 * (norm(noiseValue, -1, 1));
+			// const color = 255 * (norm(noiseValue, -1, 1));
 
-			this.ctx.fillStyle = `rgb(${color}, ${color}, ${color})`;
-			this.ctx.beginPath();
-			this.ctx.rect(x, y, this.cellSize, this.cellSize);
-			this.ctx.fill();
-			this.ctx.closePath();
+			// this.ctx.fillStyle = `rgb(${color}, ${color}, ${color})`;
+			// this.ctx.beginPath();
+			// this.ctx.rect(x, y, this.cellSize, this.cellSize);
+			// this.ctx.fill();
+			// this.ctx.closePath();
 
 			x += this.cellSize;
 

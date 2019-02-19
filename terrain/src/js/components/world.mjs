@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import OrbitControls from 'three-orbitcontrols';
 
 class World {
-	constructor(el,mapSize = 100) {
+	constructor(el, mapSize = 100) {
 		this.el = el;
 
 		const width = this.el.offsetWidth;
@@ -52,8 +52,6 @@ class World {
 		}
 
 		this.bufferGeom.addAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
-		this.bufferGeom.computeVertexNormals();
-		this.bufferGeom.computeBoundingSphere();
 
 		this.bufferGeom.dynamic = true;
 
@@ -69,6 +67,8 @@ class World {
 		this.el.appendChild(this.renderer.domElement);
 
 		window.world = this;
+
+		window.addEventListener('resize', (e) => this.onWindowResize(e));
 	}
 
 	generate(noiseValues) {
@@ -82,7 +82,8 @@ class World {
 			const attributeIndex = i * itemSize;
 			const noiseValue = noiseValues[i];
 
-			positionArray[attributeIndex + 1] = noiseValue * 2;
+			positionArray[attributeIndex + 1] = noiseValue * 4;
+
 			colorArray[attributeIndex] = noiseValue;
 			colorArray[attributeIndex + 1] = noiseValue;
 			colorArray[attributeIndex + 2] = noiseValue;
@@ -101,6 +102,15 @@ class World {
 		this.camera.getWorldDirection(this.cameraDirection);
 
 		this.renderer.render(this.scene, this.camera);
+	}
+
+	onWindowResize() {
+		const width = this.el.offsetWidth;
+		const height = width / 1.777;
+
+		this.camera.aspect = width / height;
+		this.camera.updateProjectionMatrix();
+		this.renderer.setSize(width, height);
 	}
 }
 

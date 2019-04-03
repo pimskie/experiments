@@ -5,12 +5,10 @@ const canvasPaint = document.querySelector('.js-canvas-paint');
 const ctxPaint = canvasPaint.getContext('2d');
 
 let drops = [];
-let erasers = [];
 
 let width;
 let height;
 
-let erase = false;
 let rafId = null;
 
 const imageLoaded = () => {
@@ -19,8 +17,7 @@ const imageLoaded = () => {
   canvasPaint.width = width;
   canvasPaint.height = height;
 
-  canvasPaint.addEventListener('mousedown', () => erase = true);
-  canvasPaint.addEventListener('mouseup', () => erase = false);
+  canvasPaint.addEventListener('mousedown', () => drops = []);
   canvasPaint.addEventListener('mousemove', addDrop);
 
   ctxImage.drawImage(image, 0, 0, width, height);

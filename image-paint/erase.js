@@ -39,9 +39,10 @@ const addDrop = (e) => {
 
 const loop = () => {
 	// ctxPaint.clearRect(0, 0, width, height);
-	
-	ctxPaint.globalCompositeOperation = 'destination-out'; 
-	drops.forEach((drop) => { 
+
+	ctxPaint.globalCompositeOperation = 'destination-out';
+
+	drops.forEach((drop) => {
 		const gradient = ctxPaint.createRadialGradient(
 			drop.x,
 			drop.y,
@@ -53,7 +54,7 @@ const loop = () => {
 
 		gradient.addColorStop(0, 'white');
 		gradient.addColorStop(0.9, 'rgba(0, 0, 0, 0)');
-		
+
 		ctxPaint.beginPath();
 		ctxPaint.fillStyle = gradient;
 		ctxPaint.arc(drop.x, drop.y, drop.radius, 0, Math.PI * 2);
@@ -67,7 +68,7 @@ const loop = () => {
 	if (erase) {
 		//
 	} else {
-		// ctxPaint.globalCompositeOperation = 'source-in'; 
+		// ctxPaint.globalCompositeOperation = 'source-in';
 		// ctxPaint.drawImage(image, 0, 0, width, height);
 		// ctxPaint.globalCompositeOperation = 'source-over';
 	}

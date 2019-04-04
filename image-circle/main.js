@@ -82,8 +82,8 @@ const gogogo = (img) => {
 	cancelAnimationFrame(rafId);
 
 	painters.splice(0, painters.length);
-	ctxDraw.clearRect(0, 0, canvasDraw.width, canvasDraw.height);
 	ctxImage.drawImage(img, 0, 0);
+	ctxDraw.drawImage(img, 0, 0);
 
 	for (let i = 0; i < 1500; i++) {
 		const r =  (Math.random() * ((img.width)));
@@ -103,6 +103,13 @@ const loop = () => {
 	painters.forEach((p) => {
 		ctxDraw.beginPath();
 
+		const { x: x1, y: y1 } = p.position;
+
+		p.update();
+
+		const { x: x2, y: y2 } = p.position;
+
+
 		ctxDraw.strokeStyle = getColor({
 			x: midX + p.positionClean.x,
 			y: midY + p.positionClean.y,
@@ -110,11 +117,11 @@ const loop = () => {
 
 		ctxDraw.lineWidth = p.width;
 
-		ctxDraw.moveTo(midX + p.position.x, midY + p.position.y);
+		ctxDraw.moveTo(midX + x1, midY + y1);
 
 		p.update(phase);
 
-		ctxDraw.lineTo(midX + p.position.x, midY + p.position.y);
+		ctxDraw.lineTo(midX + x2, midY + y2);
 
 		ctxDraw.stroke();
 		ctxDraw.closePath();

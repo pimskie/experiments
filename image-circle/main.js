@@ -9,8 +9,12 @@ const ctxDraw = canvasDraw.getContext('2d');
 
 const canvasImage = document.createElement('canvas');
 const ctxImage = canvasImage.getContext('2d');
-
 document.body.appendChild(canvasDraw);
+
+const btnCamera = document.querySelector('.js-camera');
+const btnCapture = document.querySelector('.js-capture');
+const btnCancel = document.querySelector('.js-cancel');
+const video = document.querySelector('.js-video');
 
 const width = 500;
 const height = 500;
@@ -91,21 +95,21 @@ const getColor = (position, ctx) => {
 	return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-const gogogo = (img) => {
+const gogogo = (source) => {
 	simplex = new SimplexNoise(Math.random());
 
 	cancelAnimationFrame(rafId);
 
 	painters.splice(0, painters.length);
-	ctxImage.drawImage(img, 0, 0);
-	ctxDraw.drawImage(img, 0, 0);
+	ctxImage.drawImage(source, 0, 0);
+	ctxDraw.drawImage(source, 0, 0);
 
 	pixelData = ctxImage.getImageData(0, 0, width, height);
 
 	const numBrushes = 2000;
 
 	for (let i = 0; i < numBrushes; i++) {
-		const r =  (Math.random() * ((img.width)));
+		const r = (Math.random() * ((source.width)));
 		const a = Math.random() * TAU;
 		const s = (Math.random() * 0.02);
 
@@ -153,3 +157,46 @@ img.addEventListener('load', () => {
 });
 
 img.src = 'http://pimskie.dev/public/assets/mona-lisa-500.jpg';
+
+const toggleVideo = (isRecording) => {
+	video.classList.toggle('is-hidden', !isRecording);
+	btnCapture.classList.toggle('is-hidden', !isRecording);
+	btnCancel.classList.toggle('is-hidden', !isRecording);
+	btnCamera.classList.toggle('is-hidden', isRecording);
+};
+
+const stopRecording = (stream) => {
+	stream.getTracks().forEach(track => track.stop());
+};
+
+btnCamera.addEventListener('click', () => {
+	const constraints = { video: { width: 500, height: 500 }, audio: false };
+
+	navigator.mediaDevices.getUserMedia(constraints)
+		.then(function (stream) {
+			toggleVideo(true);
+			// Older browsers may not have srcObject
+			// Avoid using this in new browsers, as it is going away.
+			video.srcObject = stream;
+
+			video.onloadedmetadata = function (e) {
+				video.play();
+			};
+
+			btnCancel.addEventListener('click', () => {
+				stopRecording(stream);
+				toggleVideo(false);
+			});
+
+			btnCapture.addEventListener('click', () => {
+				gogogo(video);
+
+				stopRecording(stream);
+				toggleVideo(false);
+			});
+		})
+		.catch(function (err) {
+			console.log(err.name + ": " + err.message);
+		});
+
+});

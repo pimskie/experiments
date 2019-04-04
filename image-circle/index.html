@@ -15,8 +15,9 @@
 
         body {
             width: 100vw;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
         }
@@ -28,14 +29,21 @@
         img {
             display: none;
         }
+
+        .is-hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <button class="js-start">start</button>
-    <button class="js-capture">capture</button>
+    <div class="ui">
+        <button class="js-camera">Camera</button>
+        <button class="js-capture is-hidden">capture</button>
+        <button class="js-cancel is-hidden">cancel</button>
+    </div>
 
-    <video width="500" height="500" class="js-video"></video>
+    <video width="500" height="500" class="js-video is-hidden"></video>
 
-    <script src="camera.js" type="module"></script>
+    <script src="main.js" type="module"></script>
 </body>
 </html>

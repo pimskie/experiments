@@ -1,5 +1,3 @@
-import '//unpkg.com/simplex-noise@2.4.0/simplex-noise';
-
 let simplex = new SimplexNoise(Math.random());
 
 const TAU = Math.PI * 2;
@@ -65,9 +63,10 @@ class Painter {
 	getNoiseValue(frame) {
 		const scale = 0.01;
 		const { position } = this;
+		const z = frame * scale;
 
 		return simplex.noise2D(position.x * scale, position.y * scale);
-		// return simplex.noise3D(position.x * scale, position.y * scale, frame * (scale * 0.5));
+		// return simplex.noise3D(position.x * scale, position.y * scale, z);
 	}
 
 	update(frame = 1) {
@@ -75,24 +74,27 @@ class Painter {
 
 		this.angle += this.speed;
 		this.radius = this.radiusBase + (20 * noiseValue);
-		this.width = 2 + (2 * noiseValue);
+		this.width = 1; //4 + (2 * noiseValue);
 
 		this.setPosition();
 	}
 }
 
 const getPixelIndex = (x, y, imageData) => (~~x + ~~y * imageData.width) * 4;
+const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 
 const getColor = (position, ctx) => {
 	const pixelIndex = getPixelIndex(position.x, position.y, pixelData);
 
-	const r = pixelData.data[pixelIndex];
-	const g = pixelData.data[pixelIndex + 1];
-	const b = pixelData.data[pixelIndex + 2];
+	const r = pixelData.data[pixelIndex] || 0;
+	const g = pixelData.data[pixelIndex + 1] || 0;
+	const b = pixelData.data[pixelIndex + 2] || 0;
 
-	const a = (r + g + b) <= 50 ? 0 : 1;
+	const sum = r + g + b;
+	const a = sum <= 50 ? 0 : 1;
+	const color = `rgba(${r}, ${g}, ${b}, ${a})`;
 
-	return `rgba(${r}, ${g}, ${b}, ${a})`;
+	return { sum, color };
 }
 
 const gogogo = (source) => {
@@ -109,7 +111,7 @@ const gogogo = (source) => {
 	const numBrushes = 2000;
 
 	for (let i = 0; i < numBrushes; i++) {
-		const r = (Math.random() * ((source.width)));
+		const r = Math.random() * (source.width);
 		const a = Math.random() * TAU;
 		const s = (Math.random() * 0.02);
 
@@ -120,20 +122,23 @@ const gogogo = (source) => {
 };
 
 const loop = () => {
-	painters.forEach((p) => {
+	painters.forEach((p, i) => {
 		const { x: x1, y: y1 } = p.position;
 
 		p.update(phase);
 
 		const { x: x2, y: y2 } = p.position;
 
+		const colorData = getColor({ x: midX + p.positionClean.x, y: midY + p.positionClean.y, }, ctxImage)
+		const colorTo = colorData.color;
+		const brightness = map(colorData.sum, 0, 600, -10, 20);
+
+		const colorAverage = tinycolor(colorTo)
+			.brighten(brightness)
+			.toHexString();
+
 		ctxDraw.beginPath();
-
-		ctxDraw.strokeStyle = getColor({
-			x: midX + p.positionClean.x,
-			y: midY + p.positionClean.y,
-		}, ctxImage);
-
+		ctxDraw.strokeStyle = colorAverage;
 		ctxDraw.lineWidth = p.width;
 
 		ctxDraw.moveTo(midX + x1, midY + y1);

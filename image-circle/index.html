@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,8 +23,23 @@
             align-items: center;
         }
 
+        .ui {
+            margin: 0 0 20px;
+        }
+
+        button {
+            padding: 10px;
+            background: transparent;
+            border: 1px solid #000;
+        }
+
+        button:hover {
+            background: #000;
+            color: #fff;
+        }
+
         canvas {
-            box-shadow: 0 0 1px rgba(0,0,0,.125), 0 2px 4px rgba(0,0,0,.125), 0 1px 4px rgba(0,0,0,.05);
+            box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 2px 4px rgba(0, 0, 0, .125), 0 1px 4px rgba(0, 0, 0, .05);
         }
 
         img {
@@ -35,6 +51,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="ui">
         <button class="js-camera">Camera</button>
@@ -45,8 +62,8 @@
     <video width="500" height="500" class="js-video is-hidden"></video>
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.1/tinycolor.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/chroma-js/2.0.3/chroma.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
-    <script src="instant.js" type="module"></script>
+    <script src="main.js" type="module"></script>
 </body>
+
 </html>

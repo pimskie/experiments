@@ -113,7 +113,7 @@ const gogogo = (source) => {
 	for (let i = 0; i < numBrushes; i++) {
 		const r = Math.random() * (source.width);
 		const a = Math.random() * TAU;
-		const s = (Math.random() * 0.02);
+		const s = -0.02 + (Math.random() * 0.04);
 
 		painters.push(new Painter(r, a, s));
 	}
@@ -161,7 +161,7 @@ img.addEventListener('load', () => {
 	canvasDraw.addEventListener('mouseup', () => gogogo(img));
 });
 
-img.src = 'http://pimskie.dev/public/assets/mona-lisa-500.jpg';
+img.src = 'https://pimskie.dev/public/assets/mona-lisa-500.jpg';
 
 const toggleVideo = (isRecording) => {
 	video.classList.toggle('is-hidden', !isRecording);
@@ -180,8 +180,7 @@ btnCamera.addEventListener('click', () => {
 	navigator.mediaDevices.getUserMedia(constraints)
 		.then(function (stream) {
 			toggleVideo(true);
-			// Older browsers may not have srcObject
-			// Avoid using this in new browsers, as it is going away.
+
 			video.srcObject = stream;
 
 			video.onloadedmetadata = function (e) {

@@ -2,86 +2,160 @@
 const TAU = Math.PI * 2;
 const PERP = Math.PI / 2;
 
-const w = 750;
-const h = 300;
-const wh = w * 0.5;
-const hh = h * 0.5;
-const hypo = Math.hypot(w, h);
-const radius = hypo * 0.5;
-
 const canvas = document.querySelector('.js-draw');
-const ctx = canvas.getContext('2d');
 
-let mouseAngle = 0;
+class Stage {
+	constructor(canvas, width, height) {
+		this.canvas = canvas;
+		this.ctx = canvas.getContext('2d');
 
-const points = new Array(100).fill().map(() => ({
-	r: 50 + Math.random() * (wh - 50),
-	a: Math.random() * TAU,
-	s: 0.0005 + (Math.random() * 0.0005),
-}));
+		this.canvas.width = width;
+		this.canvas.height = height;
 
-canvas.width = w;
-canvas.height = h;
+		this.hypo = Math.hypot(width, height);
 
-let phase = 0;
-const numLines = 100;
-const speed = 0.005;
+		this.mouseAngle = 0;
+		this.points = [];
 
-const from = { x: 0, y: hh };
-const to = { x: w, y: 350 };
-const point = { x: 300, y: 150 };
+		this.line = { from: { x: 0, y: height * 0.5 }, to: { x: width, y: height * 0.5 } };
 
-const drawLine = (from, to) => {
-	ctx.beginPath();
-	ctx.moveTo(from.x, from.y);
-	ctx.lineTo(to.x, to.y);
-	ctx.stroke();
-	ctx.closePath();
-};
+		this.colors = [['#fff', '#000', '#000', '#000','#000']];
+		this.palette = this.colors[0];
+	}
 
-const drawPoint = (point) => {
-	point.a += point.s;
-	point.x = wh + (Math.cos(point.a) * point.r);
-	point.y = hh + (Math.sin(point.a) * point.r);
+	get backgroundColor() {
+		return this.palette[0];
+	}
 
-	const denominator = Math.hypot(to.x - from.x, to.y - from.y);
-	const numerator = ((to.y - from.y) * point.x) - ((to.x - from.x) * point.y) + (to.x * from.y) - (to.y * from.x);
-	const distance = numerator / denominator;
-	const angle = Math.atan2(to.y - from.y, to.x - from.x);
-	const anglePerp = angle + PERP;
+	get lineColor() {
+		return this.palette[4];
+	}
 
-	const toX = point.x + (Math.cos(anglePerp) * distance);
-	const toY = point.y + (Math.sin(anglePerp) * distance);
+	get pointColor() {
+		return this.palette[3];
+	}
 
-	ctx.beginPath();
-	ctx.arc(point.x, point.y, 2, 0, TAU);
-	ctx.fill();
-	ctx.closePath();
+	get width() {
+		return this.canvas.width;
+	}
 
-	drawLine(point, { x: toX, y: toY });
-};
+	get widthHalf() {
+		return this.width * 0.5;
+	}
 
-const loop = () => {
-	ctx.clearRect(0, 0, w, h);
+	get height() {
+		return this.canvas.height;
+	}
 
-	from.x = wh + (Math.cos(mouseAngle) * radius);
-	from.y = hh + (Math.sin(mouseAngle) * radius);
-	to.x = wh + (Math.cos(mouseAngle + Math.PI) * radius);
-	to.y = hh + (Math.sin(mouseAngle + Math.PI) * radius);
+	get heightHalf() {
+		return this.height * 0.5;
+	}
 
-	points.forEach(drawPoint);
+	async init() {
+		this.colors = await Stage.getColors();
 
-	phase += speed;
+		this.points = new Array(100).fill().map(() => {
+			const r = 50 + Math.random() * this.heightHalf;
+			const o = r / this.heightHalf;
+			const p = {
+				r,
+				o,
+				a: Math.random() * TAU,
+				s: 0.0005 + (Math.random() * 0.0005),
+			};
 
-	requestAnimationFrame(loop);
-};
+			return p;
+		});
+
+		this.setPalette();
+
+		this.canvas.addEventListener('mousemove', e => this.onMouseMove(e));
+		this.canvas.addEventListener('mouseup', () => this.setPalette());
+	}
+
+	onMouseMove(e) {
+		const { width, height } = this.canvas;
+		const widthHalf = width * 0.5;
+		const heightHalf = height * 0.5;
+		const radius = width;
+
+		const x = e.clientX - e.target.offsetLeft;
+		const y = e.clientY - e.target.offsetTop;
+
+		this.mouseAngle = Math.atan2(this.heightHalf - y, this.widthHalf - x) * 0.5;
+
+		this.line.from.x = widthHalf + (Math.cos(this.mouseAngle) * radius);
+		this.line.from.y = heightHalf + (Math.sin(this.mouseAngle) * radius);
+		this.line.to.x = widthHalf + (Math.cos(this.mouseAngle + Math.PI) * radius);
+		this.line.to.y = heightHalf + (Math.sin(this.mouseAngle + Math.PI) * radius);
+	}
+
+	setPalette() {
+		this.palette = Stage.getPalette(this.colors);
+	}
+
+	drawLine(from, to, color) {
+		this.ctx.strokeStyle =color;
+
+		this.ctx.beginPath();
+		this.ctx.moveTo(from.x, from.y);
+		this.ctx.lineTo(to.x, to.y);
+		this.ctx.stroke();
+		this.ctx.closePath();
+	}
+
+	drawPoint (point, index) {
+		const { from, to } = this.line;
+		const wh = this.canvas.width * 0.5;
+		const hh = this.canvas.height * 0.5;
+
+		point.a += point.s;
+		point.x = wh + (Math.cos(point.a) * point.r);
+		point.y = hh + (Math.sin(point.a) * point.r);
+
+		const denominator = Math.hypot(to.x - from.x, to.y - from.y);
+		const numerator = ((to.y - from.y) * point.x) - ((to.x - from.x) * point.y) + (to.x * from.y) - (to.y * from.x);
+		const distance = numerator / denominator;
+
+		const angle = Math.atan2(to.y - from.y, to.x - from.x) + (Math.PI / 2);
+
+		const toX = point.x + (Math.cos(angle) * distance);
+		const toY = point.y + (Math.sin(angle) * distance);
+
+		this.ctx.beginPath();
+		this.ctx.fillStyle = this.palette[4 - (index % 2)];
+		this.ctx.arc(point.x, point.y, 2, 0, TAU);
+		this.ctx.fill();
+		this.ctx.closePath();
+
+		this.ctx.save();
+		this.ctx.globalAlpha = point.o;
+		this.drawLine(point, { x: toX, y: toY }, this.lineColor);
+		this.ctx.restore();
+	};
 
 
-loop();
+	run() {
+		this.ctx.fillStyle = this.backgroundColor;
+		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-canvas.addEventListener('mousemove', (e) => {
-	const left = e.clientX - e.target.offsetLeft;
-	const percentage = (left - wh) / wh;
+		this.points.forEach((p, i) => this.drawPoint(p, i));
 
-	mouseAngle = (Math.PI / 2) + (Math.PI / 2) * percentage;
-});
+		requestAnimationFrame(() => this.run());
+	}
+
+	static getPalette(colors) {
+		return colors[Math.floor(Math.random() * colors.length)];
+	}
+
+	static getColors() {
+		return fetch('//unpkg.com/nice-color-palettes@2.0.0/100.json')
+			.then(res => res.json());
+	}
+
+}
+
+const stage = new Stage(canvas, window.innerWidth, 500);
+
+stage.init();
+stage.run();

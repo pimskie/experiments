@@ -55,7 +55,7 @@ class Stage {
 		this.colors = await Stage.getColors();
 
 		this.points = new Array(100).fill().map(() => {
-			const r = 50 + Math.random() * this.heightHalf;
+			const r = 50 + Math.random() * this.widthHalf;
 			const o = r / this.heightHalf;
 			const p = {
 				r,
@@ -82,7 +82,7 @@ class Stage {
 		const x = e.clientX - e.target.offsetLeft;
 		const y = e.clientY - e.target.offsetTop;
 
-		this.mouseAngle = Math.atan2(this.heightHalf - y, this.widthHalf - x) * 0.5;
+		this.mouseAngle = Math.atan2(this.heightHalf - y, this.widthHalf - x);
 
 		this.line.from.x = widthHalf + (Math.cos(this.mouseAngle) * radius);
 		this.line.from.y = heightHalf + (Math.sin(this.mouseAngle) * radius);

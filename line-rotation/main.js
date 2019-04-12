@@ -1,84 +1,87 @@
 // https://ptsjs.org/
-
 const TAU = Math.PI * 2;
-const w = 500;
-const h = 500;
-const wh = w >> 1;
-const hh = h >> 1;
+const PERP = Math.PI / 2;
+
+const w = 750;
+const h = 300;
+const wh = w * 0.5;
+const hh = h * 0.5;
 const hypo = Math.hypot(w, h);
+const radius = hypo * 0.5;
 
-const ctxDraw = document.querySelector('.js-draw').getContext('2d');
-const ctxGhost = document.querySelector('.js-ghost').getContext('2d');
+const canvas = document.querySelector('.js-draw');
+const ctx = canvas.getContext('2d');
 
-const numLines = 100;
-const speed = 0.001;
+let mouseAngle = 0;
 
-let lines = [];
+const points = new Array(100).fill().map(() => ({
+	r: 50 + Math.random() * (wh - 50),
+	a: Math.random() * TAU,
+	s: 0.0005 + (Math.random() * 0.0005),
+}));
+
+canvas.width = w;
+canvas.height = h;
+
 let phase = 0;
+const numLines = 100;
+const speed = 0.005;
 
-ctxDraw.canvas.width = ctxGhost.canvas.width = w;
-ctxDraw.canvas.height = ctxGhost.canvas.height = h;
+const from = { x: 0, y: hh };
+const to = { x: w, y: 350 };
+const point = { x: 300, y: 150 };
 
-const generate = () => {
-	lines = [];
-
-	for (let i = 0; i < numLines; i++) {
-		const a = Math.random() * Math.PI;
-		const x = w * Math.random();
-		const y = hh;
-		const r = (wh * 0.75) * Math.cos(a);
-
-		lines.push({ x, y, a, r });
-	}
+const drawLine = (from, to) => {
+	ctx.beginPath();
+	ctx.moveTo(from.x, from.y);
+	ctx.lineTo(to.x, to.y);
+	ctx.stroke();
+	ctx.closePath();
 };
 
-const draw = () => {
-	ctxGhost.clearRect(0, 0, w, h);
-	ctxDraw.clearRect(0, 0, w, h);
+const drawPoint = (point) => {
+	point.a += point.s;
+	point.x = wh + (Math.cos(point.a) * point.r);
+	point.y = hh + (Math.sin(point.a) * point.r);
 
-	lines.forEach((line) => {
-		line.a += speed;
-		line.r = (wh * 0.75) * Math.cos(line.a);
+	const denominator = Math.hypot(to.x - from.x, to.y - from.y);
+	const numerator = ((to.y - from.y) * point.x) - ((to.x - from.x) * point.y) + (to.x * from.y) - (to.y * from.x);
+	const distance = numerator / denominator;
+	const angle = Math.atan2(to.y - from.y, to.x - from.x);
+	const anglePerp = angle + PERP;
 
-		const toX = line.x + (Math.cos(Math.PI / 2) * line.r);
-		const toY = line.y + (Math.sin(Math.PI / 2) * line.r);
+	const toX = point.x + (Math.cos(anglePerp) * distance);
+	const toY = point.y + (Math.sin(anglePerp) * distance);
 
-		ctxGhost.beginPath();
-		ctxGhost.moveTo(line.x, line.y);
-		ctxGhost.lineTo(toX, toY);
-		ctxGhost.stroke();
-		ctxGhost.closePath();
+	ctx.beginPath();
+	ctx.arc(point.x, point.y, 2, 0, TAU);
+	ctx.fill();
+	ctx.closePath();
 
-		if (Math.cos(line.a) > 0) {
-			line.x += 0.1;
-		} else {
-			line.x -= 0.1;
-		}
-
-		if (line.x > w) {
-			line.x = 0;
-		}
-
-		if (line.x < 0) {
-			line.x = w;
-		}
-	});
-
-	// ctxDraw.save();
-	// ctxDraw.translate(wh, hh);
-	// ctxDraw.drawImage(ctxGhost.canvas, -wh, -hh, wh, h);
-	// ctxDraw.restore();
+	drawLine(point, { x: toX, y: toY });
 };
 
 const loop = () => {
-	draw();
+	ctx.clearRect(0, 0, w, h);
+
+	from.x = wh + (Math.cos(mouseAngle) * radius);
+	from.y = hh + (Math.sin(mouseAngle) * radius);
+	to.x = wh + (Math.cos(mouseAngle + Math.PI) * radius);
+	to.y = hh + (Math.sin(mouseAngle + Math.PI) * radius);
+
+	points.forEach(drawPoint);
+
+	phase += speed;
 
 	requestAnimationFrame(loop);
 };
 
-generate();
+
 loop();
 
-document.body.addEventListener('click', () => {
-	generate();
+canvas.addEventListener('mousemove', (e) => {
+	const left = e.clientX - e.target.offsetLeft;
+	const percentage = (left - wh) / wh;
+
+	mouseAngle = (Math.PI / 2) + (Math.PI / 2) * percentage;
 });

@@ -58,24 +58,6 @@ const getSlopeInterceptForm = (x, m, b) => {
 const m = getSlope(from, to);
 const b = getYIntercept(to.x, to.y, m);
 
-// const doMagic = () => {
-// 	const denominator = Math.hypot(to.x - from.x, to.y - from.y);
-// 	const numerator = ((to.y - from.y) * point.x) - ((to.x - from.x) * point.y) + (to.x * from.y) - (to.y * from.x);
-// 	const distance = numerator / denominator;
-// 	const angle = Math.atan2(to.y - from.y, to.x - from.x);
-// 	const anglePerp = angle + PERP;
-
-// 	const toX = point.x + (Math.cos(anglePerp) * distance);
-// 	const toY = point.y + (Math.sin(anglePerp) * distance);
-
-// 	ctx.beginPath();
-// 	ctx.arc(point.x, point.y, 5, 0, TAU);
-// 	ctx.fill();
-// 	ctx.closePath();
-
-// 	drawLine(point, { x: toX, y: toY });
-// };
-
 const drawPoint = (point) => {
 	const denominator = Math.hypot(to.x - from.x, to.y - from.y);
 	const numerator = ((to.y - from.y) * point.x) - ((to.x - from.x) * point.y) + (to.x * from.y) - (to.y * from.x);

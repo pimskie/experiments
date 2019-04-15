@@ -113,7 +113,7 @@ class Stage {
 		this.ctx.closePath();
 	}
 
-	drawPoint (point, index) {
+	drawPoint (point) {
 		const { from, to } = this.line;
 		const wh = this.canvas.width * 0.5;
 		const hh = this.canvas.height * 0.5;
@@ -126,20 +126,22 @@ class Stage {
 		const numerator = ((to.y - from.y) * point.x) - ((to.x - from.x) * point.y) + (to.x * from.y) - (to.y * from.x);
 		const distance = numerator / denominator;
 
-		const angle = Math.atan2(to.y - from.y, to.x - from.x) + (Math.PI / 2);
+		const pointAngle = Math.atan2(to.y - from.y, to.x - from.x) + (Math.PI / 2);
+		const pointRadius = 0.5 + Math.abs(distance / this.heightHalf) * 3;
+		const lineWidth = 0.5 + (Math.abs(distance / this.heightHalf) - 0.5);
 
-		const toX = point.x + (Math.cos(angle) * distance);
-		const toY = point.y + (Math.sin(angle) * distance);
+		const toX = point.x + (Math.cos(pointAngle) * distance);
+		const toY = point.y + (Math.sin(pointAngle) * distance);
 
 		this.ctx.beginPath();
 		this.ctx.fillStyle = point.c;
-		this.ctx.arc(point.x, point.y, 2, 0, TAU);
+		this.ctx.arc(point.x, point.y, pointRadius, 0, TAU);
 		this.ctx.fill();
 		this.ctx.closePath();
 
 		this.ctx.save();
 		this.ctx.globalAlpha = point.o;
-		this.drawLine(point, { x: toX, y: toY }, this.lineColor, Math.abs(distance / this.heightHalf));
+		this.drawLine(point, { x: toX, y: toY }, this.lineColor, lineWidth);
 		this.ctx.restore();
 	};
 

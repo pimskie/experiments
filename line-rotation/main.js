@@ -53,13 +53,10 @@ class Stage {
 	async init() {
 		this.points = new Array(100).fill().map((_, i) => {
 			const r = (this.heightHalf * 0.5) + Math.random() * (this.heightHalf / 2);
-			const p = r / this.heightHalf;
-			const o = p;
 			const c = i % 2 === 0 ? this.options.pointColor1 : this.options.pointColor2;
 
 			const point = {
 				r,
-				o,
 				a: Math.random() * TAU,
 				s: 0.0005 + (Math.random() * 0.0008),
 				c,

@@ -147,10 +147,21 @@ class Stage {
 
 
 	run() {
+		this.ctx.globalCompositeOperation = 'source-over';
 		this.ctx.fillStyle = this.backgroundColor;
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 		this.points.forEach((p, i) => this.drawPoint(p, i));
+
+		const rectWidth = this.heightHalf;
+
+		this.ctx.save();
+		this.ctx.translate(this.widthHalf, this.heightHalf);
+		this.ctx.rotate(this.mouseAngle + (Math.PI / 4));
+		this.ctx.globalCompositeOperation = 'difference';
+		this.ctx.fillStyle = '#fff';
+		this.ctx.fillRect(-rectWidth / 2, -rectWidth / 2, rectWidth, rectWidth);
+		this.ctx.restore();
 
 		requestAnimationFrame(() => this.run());
 	}

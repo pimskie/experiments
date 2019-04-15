@@ -24,15 +24,19 @@ class Stage {
 	}
 
 	get backgroundColor() {
-		return this.palette[0];
+		return '#011627'; // this.palette[0];
 	}
 
 	get lineColor() {
-		return this.palette[4];
+		return '#FDFFFC'; // this.palette[4];
 	}
 
-	get pointColor() {
-		return this.palette[3];
+	get pointColor1() {
+		return '#41EAD4'; // this.palette[3];
+	}
+
+	get pointColor2() {
+		return '#F71735';
 	}
 
 	get width() {
@@ -54,17 +58,21 @@ class Stage {
 	async init() {
 		this.colors = await Stage.getColors();
 
-		this.points = new Array(100).fill().map(() => {
-			const r = 50 + Math.random() * this.widthHalf;
-			const o = r / this.heightHalf;
-			const p = {
+		this.points = new Array(100).fill().map((_, i) => {
+			const r = (this.heightHalf * 0.5) + Math.random() * (this.heightHalf / 2);
+			const p = r / this.heightHalf;
+			const o = p;
+			const c = i % 2 === 0 ? this.pointColor1 : this.pointColor2;
+
+			const point = {
 				r,
 				o,
 				a: Math.random() * TAU,
-				s: 0.0005 + (Math.random() * 0.0005),
+				s: 0.0005 + (Math.random() * 0.0008),
+				c,
 			};
 
-			return p;
+			return point;
 		});
 
 		this.setPalette();
@@ -94,10 +102,11 @@ class Stage {
 		this.palette = Stage.getPalette(this.colors);
 	}
 
-	drawLine(from, to, color) {
+	drawLine(from, to, color, width = 1) {
 		this.ctx.strokeStyle =color;
 
 		this.ctx.beginPath();
+		this.ctx.lineWidth = width;
 		this.ctx.moveTo(from.x, from.y);
 		this.ctx.lineTo(to.x, to.y);
 		this.ctx.stroke();
@@ -123,14 +132,14 @@ class Stage {
 		const toY = point.y + (Math.sin(angle) * distance);
 
 		this.ctx.beginPath();
-		this.ctx.fillStyle = this.palette[4 - (index % 2)];
+		this.ctx.fillStyle = point.c;
 		this.ctx.arc(point.x, point.y, 2, 0, TAU);
 		this.ctx.fill();
 		this.ctx.closePath();
 
 		this.ctx.save();
 		this.ctx.globalAlpha = point.o;
-		this.drawLine(point, { x: toX, y: toY }, this.lineColor);
+		this.drawLine(point, { x: toX, y: toY }, this.lineColor, Math.abs(distance / this.heightHalf));
 		this.ctx.restore();
 	};
 
@@ -155,7 +164,7 @@ class Stage {
 
 }
 
-const stage = new Stage(canvas, window.innerWidth, 500);
+const stage = new Stage(canvas, window.innerWidth, window.innerHeight);
 
 stage.init();
 stage.run();

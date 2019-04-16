@@ -193,7 +193,7 @@ class Stage {
 
 		const circleRadius = 10;
 		this.ctx.beginPath();
-		this.ctx.fillStyle = '#40d4ad';
+		this.ctx.fillStyle = '#fce9d5';
 		this.ctx.arc(this.widthHalf, this.heightHalf, circleRadius, 0, TAU);
 		this.ctx.fill();
 		this.ctx.closePath();

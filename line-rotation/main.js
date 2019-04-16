@@ -10,10 +10,8 @@ class Stage {
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d');
 
-		this.canvas.width = width;
-		this.canvas.height = height;
-
-		this.hypo = Math.hypot(width, height);
+		this.width = width;
+		this.height = height;
 
 		this.options = {
 			rotation: Math.atan2(width, height) + Math.PI / 2,
@@ -42,6 +40,10 @@ class Stage {
 		return this.canvas.height;
 	}
 
+	get hypo() {
+		return Math.hypot(this.width, this.height);
+	}
+
 	get widthHalf() {
 		return this.width * 0.5;
 	}
@@ -50,7 +52,23 @@ class Stage {
 		return this.height * 0.5;
 	}
 
-	async init() {
+	set width(w) {
+		this.canvas.width = w;
+	}
+
+	set height(h) {
+		this.canvas.height = h;
+	}
+
+	init() {
+		this.generate();
+
+		this.canvas.addEventListener('mousemove', e => this.onMouseMove(e));
+		this.canvas.addEventListener('mouseenter', e => this.onMoueEnter(e));
+		this.canvas.addEventListener('mouseleave', e => this.onMouseLeave(e));
+	}
+
+	generate() {
 		this.points = new Array(100).fill().map((_, i) => {
 			const r = (this.heightHalf * 0.5) + Math.random() * (this.heightHalf / 2);
 			const c = i % 2 === 0 ? this.options.pointColor1 : this.options.pointColor2;
@@ -64,10 +82,11 @@ class Stage {
 
 			return point;
 		});
+	}
 
-		this.canvas.addEventListener('mousemove', e => this.onMouseMove(e));
-		this.canvas.addEventListener('mouseenter', e => this.onMoueEnter(e));
-		this.canvas.addEventListener('mouseleave', e => this.onMouseLeave(e));
+	setSize(w, h) {
+		this.width = w;
+		this.height = h;
 	}
 
 	onMouseMove(e) {
@@ -136,16 +155,16 @@ class Stage {
 		const toX = point.x + (Math.cos(pointAngle) * distance);
 		const toY = point.y + (Math.sin(pointAngle) * distance);
 
+		this.ctx.save();
+		this.ctx.globalAlpha = point.o;
+		this.drawLine(point, { x: toX, y: toY }, this.options.lineColor, lineWidth);
+		this.ctx.restore();
+
 		this.ctx.beginPath();
 		this.ctx.fillStyle = point.c;
 		this.ctx.arc(point.x, point.y, pointRadius, 0, TAU);
 		this.ctx.fill();
 		this.ctx.closePath();
-
-		this.ctx.save();
-		this.ctx.globalAlpha = point.o;
-		this.drawLine(point, { x: toX, y: toY }, this.options.lineColor, lineWidth);
-		this.ctx.restore();
 	};
 
 	updateSeparator() {
@@ -156,8 +175,6 @@ class Stage {
 	}
 
 	run() {
-		const { hypo } = this;
-
 		this.ctx.globalCompositeOperation = 'source-over';
 		this.ctx.fillStyle = this.options.backgroundColor;
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -170,8 +187,8 @@ class Stage {
 		this.ctx.translate(this.widthHalf, this.heightHalf);
 		this.ctx.rotate(this.rotation);
 		this.ctx.globalCompositeOperation = 'difference';
-		this.ctx.fillStyle = this.options.pointColor1;
-		this.ctx.fillRect(-hypo / 2, 0, hypo, hypo);
+		this.ctx.fillStyle = this.options.lineColor;
+		this.ctx.fillRect(-this.hypo / 2, 0, this.hypo, this.hypo);
 		this.ctx.restore();
 
 		const circleRadius = 10;
@@ -196,3 +213,9 @@ const stage = new Stage(canvas, window.innerWidth, window.innerHeight);
 
 stage.init();
 stage.run();
+
+
+window.addEventListener('resize', () => {
+	stage.setSize(window.innerWidth, window.innerHeight);
+	stage.generate();
+});

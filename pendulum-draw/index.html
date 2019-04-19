@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Template</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .canvas {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+	</style>
+</head>
+<body>
+
+<div class="container">
+    <canvas class="canvas js-arms" width="500" height="500"></canvas>
+    <canvas class="canvas js-trails" width="500" height="500"></canvas>
+</div>
+
+<script src="//unpkg.com/dat.gui@0.7.6/build/dat.gui.js"></script>
+<script src="main.js" type="module"></script>
+
+</body>
+</html>

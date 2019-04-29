@@ -1,5 +1,3 @@
-const randomBetween = (min, max) => (Math.random() * (max - min + 1)) + min;
-
 class Stage {
 	constructor(canvas, width, height) {
 		this.canvas = canvas;
@@ -46,19 +44,57 @@ class Stage {
 	}
 }
 
+class Line {
+	constructor(begin, numPoints, width, height) {
+		this.begin = begin;
+		this.numPoints = numPoints;
+
+		this.beziers = [];
+
+		this.create(numPoints, width, height);
+	}
+
+	create(numPoints, width, height) {
+		let begin = {
+			x: this.begin.x,
+			y: this.begin.y,
+		};
+
+		const pointSpacing = width / (numPoints - 1);
+
+		this.beziers = new Array(numPoints - 1).fill().map((_, i) => {
+			const x = pointSpacing * (i + 1);
+			const y = height;
+
+			const end = { x, y };
+
+			const cp1x = (begin.x + end.x) * 0.5;
+			const cp2x = (begin.x + end.x) * 0.5;
+
+			const cp1 = { x: cp1x, y: height - 100 };
+			const cp2 = { x: cp2x, y: height + 100 };
+
+			begin.x = end.x;
+			begin.y = end.y;
+
+			return [cp1, cp2, end];
+		});
+	}
+
+	update() {
+
+	}
+}
+
 (async () => {
 	const palettes = await fetch('//unpkg.com/nice-color-palettes@2.0.0/100.json')
 		.then(res => res.json());
 
 	const stage = new Stage(document.querySelector('.js-arms'), window.innerWidth, window.innerHeight);
 
-	const options = {
-		remake() {
-			generate();
-		}
-	};
-
 	let palette = [];
+	let phase = 0;
+	const speed = 0.01;
 
 	const reset = () => {
 		stage.clear();
@@ -66,74 +102,43 @@ class Stage {
 		palette = palettes.map((a) => [Math.random(), a]).sort((a, b) => a[0] - b[0]).map((a) => a[1])[0];
 	};
 
-	const generate = () => {
-		reset();
-	};
-
-	const radiusPoints = 250;
-	const numPoints = 5;
-
-	const points = new Array(numPoints)
-		.fill()
-		.map(() => Math.random() * Math.PI * 2)
-		.sort((a, b) => a - b)
-		.map(a => ({ a, x: stage.widthHalf + (Math.cos(a) * radiusPoints), y: stage.heightHalf + (Math.sin(a) * radiusPoints) }));
-
-	const controlPoints = points.map((point, i) => {
-		const nextIndex = ((i + 1) + points.length) % points.length;
-		const nextPoint = points[nextIndex];
-
-		const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x);
-		const distance = Math.hypot(nextPoint.x - point.x, nextPoint.y - point.y);
-
-		const newAngle = angle - 0.5; //randomBetween(-1, 1);
-		const newDistance = distance * 0.5; // distance + randomBetween(-100, 100);
-
-		const cp = {
-			x: point.x + (Math.cos(newAngle) * newDistance),
-			y: point.y + (Math.sin(newAngle) * newDistance),
-		};
-
-		return cp;
-	});
-
-	const firstPoint = points[0]; //points.shift();
+	const line = new Line({ x: 0, y: stage.heightHalf }, 3, stage.width, stage.heightHalf);
 
 	const loop = () => {
 		const { ctx } = stage;
+
 		stage.clear();
 
 		ctx.beginPath();
-		ctx.moveTo(firstPoint.x, firstPoint.y);
+		ctx.moveTo(line.begin.x, line.begin.y);
 
-		for (let i = 0; i < points.length; i += 1) {
-			const cp = controlPoints[i + 1];
-			const point = points[i];
+		line.beziers.forEach((bezier) => {
+			const [cp1, cp2, p] = bezier;
 
-			// ctx.quadraticCurveTo(cp.x, cp.y, point.x, point.y);
-			ctx.lineTo(point.x, point.y);
-		}
+			ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y);
+		});
 
-		ctx.closePath();
 		ctx.stroke();
+		ctx.closePath();
 
-		for (let i = 0; i < points.length; i++) {
-			const cp = controlPoints[i];
-			const point = points[i];
 
-			stage.drawArc(cp, 5, 'red');
-			stage.drawArc(point, 5, 'blue');
-		}
+		line.beziers.forEach((bezier) => {
+			const [cp1, cp2, p] = bezier;
 
-		stage.drawArc(firstPoint, 5, 'green');
+		stage.drawArc(cp1, 3, 'red');
+		stage.drawArc(cp2, 3, 'green');
+
+			stage.drawArc(p, 4);
+		});
+
+		stage.drawArc(line.begin, 3, 'red');
+
+		phase += speed;
 
 		// requestAnimationFrame(loop);
 	};
 
-
-	// document.body.addEventListener('click', () => generate());
-
-	generate();
+	reset();
 	loop();
 
 })();

@@ -45,9 +45,16 @@ class Stage {
 }
 
 class Line {
-	constructor(begin, numPoints, width, height) {
-		this.begin = begin;
+	constructor(begin, numPoints, width, height, color = '#000') {
+		this.begin = {
+			startX: begin.x,
+			startY: begin.y,
+			x: begin.x,
+			y: begin.y,
+		};
+
 		this.numPoints = numPoints;
+		this.color = color;
 
 		this.beziers = [];
 
@@ -55,34 +62,50 @@ class Line {
 	}
 
 	create(numPoints, width, height) {
-		let begin = {
-			x: this.begin.x,
-			y: this.begin.y,
-		};
+		let startX = this.begin.x;
+		const y = this.begin.y;
 
 		const pointSpacing = width / (numPoints - 1);
 
 		this.beziers = new Array(numPoints - 1).fill().map((_, i) => {
-			const x = pointSpacing * (i + 1);
-			const y = height;
+			const pointX = startX + pointSpacing;
+			const pointY = y;
 
-			const end = { x, y };
+			const cp1x = startX + (pointSpacing * 0.3);
+			const cp1y = y + 100;
 
-			const cp1x = (begin.x + end.x) * 0.5;
-			const cp2x = (begin.x + end.x) * 0.5;
+			const cp2x = startX + (pointSpacing * 0.6);
+			const cp2y = y - 100;
 
-			const cp1 = { x: cp1x, y: height - 100 };
-			const cp2 = { x: cp2x, y: height + 100 };
+			const cp1 = { startX: cp1x, x: cp1x, y: cp1y };
+			const cp2 = { startX: cp2x, x: cp2x, y: cp2y };
+			const point = { startX: pointX, x: pointX, startY: pointY, y: pointY };
 
-			begin.x = end.x;
-			begin.y = end.y;
+			startX = pointX;
 
-			return [cp1, cp2, end];
+			return [cp1, cp2, point];
 		});
 	}
 
-	update() {
+	update(phase) {
+		const ampX = 100;
+		const ampY = 200;
+		const a1 = Math.PI;
+		const a2 = 0;
 
+		this.begin.y = this.begin.startY - (Math.cos(phase + a1) * ampY * 0.5);
+
+		this.beziers.forEach((bezier, i) => {
+			const [cp1, cp2, p] = bezier;
+
+			cp1.x = cp1.startX + (Math.cos(phase + a1) * ampX);
+			cp1.y = this.begin.y + (Math.sin(phase + a1) * ampY);
+
+			cp2.x = cp2.startX - (Math.cos(phase + a1) * ampX);
+			cp2.y = this.begin.y + (Math.sin(phase + a2) * ampY);
+
+			p.y = p.startY - (Math.cos(phase + a1) * ampY * 0.5);
+		});
 	}
 }
 
@@ -90,55 +113,49 @@ class Line {
 	const palettes = await fetch('//unpkg.com/nice-color-palettes@2.0.0/100.json')
 		.then(res => res.json());
 
+	let palette = palettes.map((a) => [Math.random(), a]).sort((a, b) => a[0] - b[0]).map((a) => a[1])[0];
+
 	const stage = new Stage(document.querySelector('.js-arms'), window.innerWidth, window.innerHeight);
 
-	let palette = [];
 	let phase = 0;
 	const speed = 0.01;
 
-	const reset = () => {
-		stage.clear();
+	const lines = new Array(20).fill().map((_, i) => {
+		const index = (i + palette.length) % palette.length;
+		const color = palette[index];
 
-		palette = palettes.map((a) => [Math.random(), a]).sort((a, b) => a[0] - b[0]).map((a) => a[1])[0];
-	};
-
-	const line = new Line({ x: 0, y: stage.heightHalf }, 3, stage.width, stage.heightHalf);
+		return new Line({ x: 0, y: stage.heightHalf }, 3, stage.width, stage.heightHalf, color);
+	});
 
 	const loop = () => {
 		const { ctx } = stage;
 
 		stage.clear();
 
-		ctx.beginPath();
-		ctx.moveTo(line.begin.x, line.begin.y);
+		lines.forEach((line, index) => {
+			const { beziers, color } = line;
 
-		line.beziers.forEach((bezier) => {
-			const [cp1, cp2, p] = bezier;
+			ctx.beginPath();
+			ctx.strokeStyle = color;
+			ctx.moveTo(line.begin.x, line.begin.y);
 
-			ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y);
+			beziers.forEach((bezier) => {
+				const [cp1, cp2, p] = bezier;
+
+				ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y);
+			});
+
+			line.update(phase + (index * (2 / lines.length)));
+
+			ctx.stroke();
+			ctx.closePath();
 		});
-
-		ctx.stroke();
-		ctx.closePath();
-
-
-		line.beziers.forEach((bezier) => {
-			const [cp1, cp2, p] = bezier;
-
-		stage.drawArc(cp1, 3, 'red');
-		stage.drawArc(cp2, 3, 'green');
-
-			stage.drawArc(p, 4);
-		});
-
-		stage.drawArc(line.begin, 3, 'red');
 
 		phase += speed;
 
-		// requestAnimationFrame(loop);
+		requestAnimationFrame(loop);
 	};
 
-	reset();
 	loop();
 
 })();

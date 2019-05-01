@@ -33,26 +33,31 @@ class Stage {
 		this.canvas.height = h;
 	}
 
-	clear() {
-		this.ctx.clearRect(0, 0, this.width, this.height);
+	clear(color = 'rgba(0, 0, 0, 0)') {
+		this.ctx.fillStyle = color;
+		this.ctx.fillRect(0, 0, this.width, this.height);
 	}
 }
 
-const tileWidth = 20;
+const randArrVal = arr =>  arr[Math.floor(Math.random() * arr.length)];
+
+const tileWidth = 15;
 const tileHalfWidth = tileWidth * 0.5;
 
 const ghost = new Stage(document.querySelector('.js-ghost'), tileWidth, tileWidth);
 const stage = new Stage(document.querySelector('.js-draw'), 500, 500);
 
-const cols = Math.round(stage.width / ghost.width);
-const rows = Math.round(stage.height / ghost.height);
+const cols = Math.ceil(stage.width / ghost.width);
+const rows = Math.ceil(stage.height / ghost.height);
 
 let rotations = [];
+const color = '#000';
+
 let drawFunction;
 
 const clear = () => {
-	ghost.clear();
-	stage.clear();
+	ghost.ctx.clearRect(0, 0, ghost.width, ghost.height);
+	stage.clear('#fff');
 };
 
 const reset = () => {
@@ -60,7 +65,7 @@ const reset = () => {
 
 	const drawFuntions = [drawArc, drawLine, drawTriangle];
 
-	drawFunction = drawFuntions[Math.floor(Math.random() * drawFuntions.length)];
+	drawFunction = randArrVal(drawFuntions);
 	rotations = new Array(rows * cols).fill().map(() => Math.floor(Math.random() * 4) * Math.PI / 2);
 };
 
@@ -68,8 +73,8 @@ const drawArc = (ctx, percent) => {
 	const endAngle = (Math.PI / 2) * percent;
 
 	ctx.beginPath();
-	ctx.strokeStyle = '#000';
-	ctx.lineWidth = 1;
+	ctx.strokeStyle = color;
+	ctx.lineWidth = 2;
 	ctx.arc(0, 0, tileHalfWidth, 0, endAngle, false);
 	ctx.stroke();
 	ctx.closePath();
@@ -82,11 +87,13 @@ const drawArc = (ctx, percent) => {
 };
 
 const drawLine = (ctx, percent) => {
-	const hypo = Math.hypot(ghost.width, ghost.height);
+	const hypo = Math.hypot(ghost.width, ghost.height) * 1.2;
 	const radius = hypo * percent;
 	const a = Math.PI / 4;
 
-	ctx.lineWidth = 1;
+	ctx.lineWidth = 2;
+	ctx.strokeStyle = color;
+
 	ctx.beginPath();
 	ctx.lineCap = 'square';
 	ctx.moveTo(0, 0);
@@ -98,7 +105,7 @@ const drawLine = (ctx, percent) => {
 const drawTriangle = (ctx, percent) => {
 	percent *= 0.5;
 
-	ctx.lineCap = 'square';
+	ctx.fillStyle = color;
 
 	ctx.beginPath();
 	ctx.moveTo(0, 0);
@@ -115,10 +122,10 @@ const drawTriangle = (ctx, percent) => {
 };
 
 const draw = () => {
+	clear();
+
 	const { ctx: ctxGhost } = ghost;
 	const { percent } = animation;
-
-	clear();
 
 	drawFunction(ctxGhost, percent);
 
@@ -160,13 +167,16 @@ const animate = async () => {
 	anime({
 		targets: animation,
 		percent: 0,
+
 		duration: 1500,
-		delay: 1000,
+		delay: 1500,
 		easing: 'easeInExpo',
 
 		update: draw,
+
 		complete: () => {
-			animation.delay = 500;
+			animation.delay = 1000;
+
 			animate();
 		},
 	});

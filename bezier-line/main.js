@@ -1,3 +1,5 @@
+const simplex = new SimplexNoise('seed');
+
 class Stage {
 	constructor(canvas, width, height) {
 		this.canvas = canvas;
@@ -61,6 +63,10 @@ class Line {
 		this.create(numPoints, width, height);
 	}
 
+	get end() {
+		return this.beziers[this.beziers.length - 1][2];
+	}
+
 	create(numPoints, width, height) {
 		let startX = this.begin.x;
 		const y = this.begin.y;
@@ -77,8 +83,8 @@ class Line {
 			const cp2x = startX + (pointSpacing * 0.6);
 			const cp2y = y - 100;
 
-			const cp1 = { startX: cp1x, x: cp1x, y: cp1y };
-			const cp2 = { startX: cp2x, x: cp2x, y: cp2y };
+			const cp1 = { startX: cp1x, x: cp1x, startY: cp1y, y: cp1y };
+			const cp2 = { startX: cp2x, x: cp2x, startY: cp2y, y: cp2y };
 			const point = { startX: pointX, x: pointX, startY: pointY, y: pointY };
 
 			startX = pointX;
@@ -87,24 +93,36 @@ class Line {
 		});
 	}
 
-	update(phase) {
-		const ampX = 100;
-		const ampY = 200;
-		const a1 = Math.PI;
-		const a2 = 0;
+	getNoiseValue(p, phase) {
+		const noiseScale = 0.01;
 
-		this.begin.y = this.begin.startY - (Math.cos(phase + a1) * ampY * 0.5);
+		return simplex.noise3D(p.x * noiseScale, p.y * noiseScale, phase);
+	}
+
+	update(phase) {
+		const beginNoise = this.getNoiseValue(this.begin, phase);
+		const endNoise = this.getNoiseValue(this.end, phase);
+
+		// const beginAngle = beginNoise;
+		// const endAngle = endNoise;
+
+		// this.begin.x += Math.cos(beginAngle);
+		// this.begin.y += Math.sin(beginAngle);
+
+		// this.end.x += Math.cos(endAngle);
+		// this.end.y += Math.sin(endAngle);
 
 		this.beziers.forEach((bezier, i) => {
-			const [cp1, cp2, p] = bezier;
+			const [cp1, cp2] = bezier;
 
-			cp1.x = cp1.startX + (Math.cos(phase + a1) * ampX);
-			cp1.y = this.begin.y + (Math.sin(phase + a1) * ampY);
+			const noise1 = this.getNoiseValue(cp1, phase);
+			const noise2 = this.getNoiseValue(cp2, phase);
 
-			cp2.x = cp2.startX - (Math.cos(phase + a1) * ampX);
-			cp2.y = this.begin.y + (Math.sin(phase + a2) * ampY);
+			cp1.x += Math.cos(noise1);
+			cp1.y += Math.sin(noise1);
 
-			p.y = p.startY - (Math.cos(phase + a1) * ampY * 0.5);
+			cp2.x += Math.cos(noise2);
+			cp2.y += Math.sin(noise2);
 		});
 	}
 }
@@ -118,13 +136,13 @@ class Line {
 	const stage = new Stage(document.querySelector('.js-arms'), window.innerWidth, window.innerHeight);
 
 	let phase = 0;
-	const speed = 0.01;
+	const speed = 0.001;
 
-	const lines = new Array(20).fill().map((_, i) => {
+	const lines = new Array(4).fill().map((_, i) => {
 		const index = (i + palette.length) % palette.length;
 		const color = palette[index];
 
-		return new Line({ x: 0, y: stage.heightHalf }, 3, stage.width, stage.heightHalf, color);
+		return new Line({ x: 0, y: stage.heightHalf }, 2, stage.width, stage.heightHalf, color);
 	});
 
 	const loop = () => {

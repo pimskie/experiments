@@ -18,26 +18,31 @@
             height: 100vh;
 
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
         .canvas {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
+            background: #fff;
+            box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 2px 4px rgba(0, 0, 0, .125), 0 1px 4px rgba(0, 0, 0, .05);
+        }
+
+        .canvas--ghost {
+            display: none;
         }
 	</style>
 </head>
 <body>
 
 <div class="container">
-    <canvas class="canvas js-arms" width="500" height="500"></canvas>
+    <canvas class="canvas canvas--ghost js-ghost" width="100" height="100"></canvas>
+    <canvas class="canvas js-draw" width="500" height="500"></canvas>
 </div>
 
 <script src="//unpkg.com/simplex-noise@2.4.0/simplex-noise"></script>
 
-<script src="test.js" type="module"></script>
+<script src="main.js" type="module"></script>
 
 </body>
 </html>

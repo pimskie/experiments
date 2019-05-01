@@ -38,12 +38,6 @@ class Stage {
 	}
 }
 
-const randomMultipleOf = (maxValue, multipleOf) => {
-	const randomValue = maxValue * Math.random();
-
-	return randomValue - (randomValue % multipleOf);
-};
-
 const tileWidth = 20;
 const tileHalfWidth = tileWidth * 0.5;
 
@@ -53,9 +47,8 @@ const stage = new Stage(document.querySelector('.js-draw'), 500, 500);
 const cols = Math.round(stage.width / ghost.width);
 const rows = Math.round(stage.height / ghost.height);
 
-const animation = { angle: 0, length: 0, delay: 0 };
-
 let rotations = [];
+let drawFunction;
 
 const clear = () => {
 	ghost.clear();
@@ -65,30 +58,69 @@ const clear = () => {
 const reset = () => {
 	clear();
 
-	rotations = new Array(rows * cols).fill().map(() => Math.floor(Math.random() * 2) * Math.PI / 2);
+	const drawFuntions = [drawArc, drawLine, drawTriangle];
+
+	drawFunction = drawFuntions[Math.floor(Math.random() * drawFuntions.length)];
+	rotations = new Array(rows * cols).fill().map(() => Math.floor(Math.random() * 4) * Math.PI / 2);
 };
 
-const generatePattern = () => {
-	const { ctx: ghostCtx } = ghost;
-	const { angle, length } = animation;
+const drawArc = (ctx, percent) => {
+	const endAngle = (Math.PI / 2) * percent;
 
-	ghostCtx.beginPath();
-	ghostCtx.strokeStyle = '#000';
-	ghostCtx.lineWidth = tileHalfWidth * 0.5;
-	ghostCtx.arc(0, 0, tileHalfWidth, angle, angle + length, false);
-	ghostCtx.stroke();
-	ghostCtx.closePath();
+	ctx.beginPath();
+	ctx.strokeStyle = '#000';
+	ctx.lineWidth = 1;
+	ctx.arc(0, 0, tileHalfWidth, 0, endAngle, false);
+	ctx.stroke();
+	ctx.closePath();
 
-	ghostCtx.save();
-	ghostCtx.translate(tileWidth, tileWidth);
-	ghostCtx.rotate(Math.PI);
-	ghostCtx.drawImage(ghost.canvas, 0, 0);
-	ghostCtx.restore();
+	ctx.save();
+	ctx.translate(tileWidth, tileWidth);
+	ctx.rotate(Math.PI);
+	ctx.drawImage(ghost.canvas, 0, 0);
+	ctx.restore();
+};
+
+const drawLine = (ctx, percent) => {
+	const hypo = Math.hypot(ghost.width, ghost.height);
+	const radius = hypo * percent;
+	const a = Math.PI / 4;
+
+	ctx.lineWidth = 1;
+	ctx.beginPath();
+	ctx.lineCap = 'square';
+	ctx.moveTo(0, 0);
+	ctx.lineTo(Math.cos(a) * radius, Math.sin(a) * radius);
+	ctx.stroke();
+	ctx.closePath();
+};
+
+const drawTriangle = (ctx, percent) => {
+	percent *= 0.5;
+
+	ctx.lineCap = 'square';
+
+	ctx.beginPath();
+	ctx.moveTo(0, 0);
+	ctx.lineTo(ghost.width * percent, 0);
+	ctx.lineTo(0, ghost.height * percent);
+	ctx.fill();
+	ctx.closePath();
+
+	ctx.save();
+	ctx.translate(tileWidth, tileWidth);
+	ctx.rotate(Math.PI);
+	ctx.drawImage(ghost.canvas, 0, 0);
+	ctx.restore();
 };
 
 const draw = () => {
+	const { ctx: ctxGhost } = ghost;
+	const { percent } = animation;
+
 	clear();
-	generatePattern();
+
+	drawFunction(ctxGhost, percent);
 
 	const { ctx } = stage;
 
@@ -114,7 +146,7 @@ const draw = () => {
 const animate = async () => {
 	await anime({
 		targets: animation,
-		length: Math.PI / 2,
+		percent: 1,
 
 		duration: 3000,
 		delay: animation.delay,
@@ -127,7 +159,7 @@ const animate = async () => {
 
 	anime({
 		targets: animation,
-		length: 0,
+		percent: 0,
 		duration: 1500,
 		delay: 1000,
 		easing: 'easeInExpo',
@@ -139,6 +171,8 @@ const animate = async () => {
 		},
 	});
 };
+
+const animation = { percent: 0, delay: 0 };
 
 reset();
 animate();

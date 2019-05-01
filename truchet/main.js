@@ -53,11 +53,7 @@ const stage = new Stage(document.querySelector('.js-draw'), 500, 500);
 const cols = Math.round(stage.width / ghost.width);
 const rows = Math.round(stage.height / ghost.height);
 
-const animation = {
-	angle: 0,
-	length: 0,
-	delay: 1000,
-};
+const animation = { angle: 0, length: 0, delay: 0 };
 
 let rotations = [];
 
@@ -69,7 +65,7 @@ const clear = () => {
 const reset = () => {
 	clear();
 
-	rotations = new Array(rows * cols).fill().map(() => randomMultipleOf(Math.PI * 2, Math.PI / 2));
+	rotations = new Array(rows * cols).fill().map(() => Math.floor(Math.random() * 2) * Math.PI / 2);
 };
 
 const generatePattern = () => {
@@ -123,7 +119,7 @@ const animate = async () => {
 		duration: 3000,
 		delay: animation.delay,
 
-		easing: 'easeInOutQuint',
+		easing: 'easeOutQuad',
 
 		begin: reset,
 		update: draw,
@@ -138,8 +134,7 @@ const animate = async () => {
 
 		update: draw,
 		complete: () => {
-			animation.delay = 1000;
-
+			animation.delay = 500;
 			animate();
 		},
 	});

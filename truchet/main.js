@@ -41,14 +41,19 @@ class Stage {
 
 const randArrVal = arr =>  arr[Math.floor(Math.random() * arr.length)];
 
-const tileWidth = 15;
+const cols = 30;
+const rows = cols;
+
+const stageWidth = 500;
+const stageHeight = 500;
+
+const tileWidth = Math.ceil(stageWidth / cols);
 const tileHalfWidth = tileWidth * 0.5;
 
 const ghost = new Stage(document.querySelector('.js-ghost'), tileWidth, tileWidth);
-const stage = new Stage(document.querySelector('.js-draw'), 500, 500);
+const stage = new Stage(document.querySelector('.js-draw'), stageWidth, stageHeight);
 
-const cols = Math.ceil(stage.width / ghost.width);
-const rows = Math.ceil(stage.height / ghost.height);
+
 
 let rotations = [];
 const color = '#000';
@@ -63,7 +68,7 @@ const clear = () => {
 const reset = () => {
 	clear();
 
-	const drawFuntions = [drawArc, drawLine, drawTriangle];
+	const drawFuntions = [drawArc, drawLine, drawTriangle, drawTriangleDouble];
 
 	drawFunction = randArrVal(drawFuntions);
 	rotations = new Array(rows * cols).fill().map(() => Math.floor(Math.random() * 4) * Math.PI / 2);
@@ -103,8 +108,6 @@ const drawLine = (ctx, percent) => {
 };
 
 const drawTriangle = (ctx, percent) => {
-	percent *= 0.5;
-
 	ctx.fillStyle = color;
 
 	ctx.beginPath();
@@ -113,6 +116,12 @@ const drawTriangle = (ctx, percent) => {
 	ctx.lineTo(0, ghost.height * percent);
 	ctx.fill();
 	ctx.closePath();
+};
+
+const drawTriangleDouble = (ctx, percent) => {
+	percent *= 0.5;
+
+	drawTriangle(ctx, percent);
 
 	ctx.save();
 	ctx.translate(tileWidth, tileWidth);
@@ -157,8 +166,7 @@ const animate = async () => {
 
 		duration: 3000,
 		delay: animation.delay,
-
-		easing: 'easeOutQuad',
+		easing: 'easeOutBack',
 
 		begin: reset,
 		update: draw,

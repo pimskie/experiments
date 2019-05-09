@@ -37,18 +37,19 @@ class Stage {
 }
 
 class Line {
-	constructor(stageWidth, stageHeight, angle = 0, phase = 0) {
+	constructor(stageWidth, stageHeight, angle = 0, phase = 0, hue = 230) {
 		this.stageHalfWidth = stageWidth * 0.5;
 		this.stageHalfHeight = stageHeight * 0.5;
 
 		this.angle = angle;
 		this.phase = phase;
+		this.hue = hue;
 
 		this.from = { x: 0, y: 0 };
 		this.to = { x: 0, y: 0 };
 
 		this.settings = {
-			angleChange: 1,
+			angleChange: 0.5,
 			radius: this.stageHalfWidth,
 			length: stageWidth,
 		};
@@ -60,22 +61,23 @@ class Line {
 		this.phase += increment;
 
 		const halfPi = Math.PI * 0.5;
-		const { length, radius } = this.settings;
+		const { length, radius, angleChange } = this.settings;
 
-		const lineRadius = Math.cos(this.phase) * radius;
+		const amplitude = Math.sin(this.phase) * radius;
+		const angleModifier = Math.sin(this.phase) * angleChange;
 
-		this.focalX = this.stageHalfWidth + (Math.cos(this.angle) * lineRadius);
-		this.focalY = this.stageHalfWidth + (Math.sin(this.angle) * lineRadius);
+		this.focalX = this.stageHalfWidth + (Math.cos(this.angle) * amplitude);
+		this.focalY = this.stageHalfWidth + (Math.sin(this.angle) * amplitude);
 
-		this.from.x = this.focalX + (Math.cos(this.angle + halfPi) * length);
-		this.from.y = this.focalY + (Math.sin(this.angle + halfPi) * length);
+		this.from.x = this.focalX + (Math.cos(this.angle + halfPi + angleModifier) * length);
+		this.from.y = this.focalY + (Math.sin(this.angle + halfPi + angleModifier) * length);
 
-		this.to.x = this.focalX + (Math.cos(this.angle - halfPi) * length);
-		this.to.y = this.focalY + (Math.sin(this.angle - halfPi) * length);
+		this.to.x = this.focalX + (Math.cos(this.angle - halfPi + angleModifier) * length);
+		this.to.y = this.focalY + (Math.sin(this.angle - halfPi + angleModifier) * length);
 	}
 
 	draw(ctx) {
-		ctx.strokeStyle = '#616161';
+		ctx.strokeStyle = `hsla(${this.hue}, 100%, 80%, 0.75)`;
 
 		ctx.beginPath();
 		ctx.moveTo(this.from.x, this.from.y);
@@ -84,6 +86,7 @@ class Line {
 		ctx.closePath();
 
 		ctx.beginPath();
+		ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
 		ctx.arc(this.focalX, this.focalY, 3, 0, Math.PI * 2);
 		ctx.fill();
 		ctx.closePath();
@@ -92,11 +95,16 @@ class Line {
 
 const stage = new Stage('canvas', 500, 500);
 
-const numLines = 4;
-const angleStep = (Math.PI * 2) / numLines;
-const phaseStep = 0.5 / numLines;
+const numLines = 50;
+const angleStep = (Math.PI * 1) / numLines;
+const phaseStep = 1 / numLines;
+const hueMin = 300;
+const hueMax = 350;
+const hueStep = (hueMax - hueMin) / numLines;
 
-const lines = new Array(numLines).fill().map((_, i) => new Line(stage.width, stage.height, angleStep * i, 0 ));
+const lines = new Array(numLines)
+	.fill()
+	.map((_, i) => new Line(stage.width, stage.height, angleStep * i, phaseStep * i, hueMin + (hueStep * i) ));
 
 let phase = 0;
 const speed = 0.01;

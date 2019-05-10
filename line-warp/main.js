@@ -140,7 +140,7 @@ const animate = () => {
 	clear();
 
 	lines.forEach((line) => {
-		// line.update(speed);
+		line.update(speed);
 		line.draw(stage.ctx, settings.drawFocalPoints);
 	});
 

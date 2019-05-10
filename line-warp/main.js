@@ -49,7 +49,7 @@ class Line {
 		this.to = { x: 0, y: 0 };
 
 		this.settings = {
-			angleChange: 0.5,
+			angleChange: 0,
 			radius: this.stageHalfWidth,
 			length: stageWidth,
 		};
@@ -76,7 +76,7 @@ class Line {
 		this.to.y = this.focalY + (Math.sin(this.angle - halfPi + angleModifier) * length);
 	}
 
-	draw(ctx) {
+	draw(ctx, drawFocalPoint = false) {
 		ctx.strokeStyle = `hsla(${this.hue}, 100%, 80%, 0.75)`;
 
 		ctx.beginPath();
@@ -85,29 +85,43 @@ class Line {
 		ctx.stroke();
 		ctx.closePath();
 
-		ctx.beginPath();
-		ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
-		ctx.arc(this.focalX, this.focalY, 3, 0, Math.PI * 2);
-		ctx.fill();
-		ctx.closePath();
+		if (drawFocalPoint) {
+			ctx.beginPath();
+			ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
+			ctx.arc(this.focalX, this.focalY, 2, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.closePath();
+		}
 	}
 }
 
 const stage = new Stage('canvas', 500, 500);
 
-const numLines = 50;
-const angleStep = (Math.PI * 1) / numLines;
-const phaseStep = 1 / numLines;
-const hueMin = 300;
-const hueMax = 350;
-const hueStep = (hueMax - hueMin) / numLines;
+const settings = {
+	numLines: 10,
+	timeOffset: 0.05,
+	rotations: 1,
+	drawFocalPoints: true,
+};
 
-const lines = new Array(numLines)
-	.fill()
-	.map((_, i) => new Line(stage.width, stage.height, angleStep * i, phaseStep * i, hueMin + (hueStep * i) ));
-
+let lines = [];
 let phase = 0;
 const speed = 0.01;
+
+const generate = () => {
+	const { numLines, rotations, timeOffset: phaseStep } = settings;
+
+	const angleStep = (Math.PI * rotations) / numLines;
+
+	const hueMin = 300;
+	const hueMax = 350;
+	const hueStep = (hueMax - hueMin) / numLines;
+
+	lines = new Array(numLines)
+		.fill()
+		.map((_, i) => new Line(stage.width, stage.height, angleStep * i, phase + (phaseStep * i), hueMin + (hueStep * i)));
+
+};
 
 const clear = () => {
 	stage.clear();
@@ -115,6 +129,7 @@ const clear = () => {
 
 const reset = () => {
 	clear();
+	generate();
 };
 
 const draw = () => {
@@ -125,12 +140,19 @@ const animate = () => {
 	clear();
 
 	lines.forEach((line) => {
-		line.update(speed);
-		line.draw(stage.ctx);
+		// line.update(speed);
+		line.draw(stage.ctx, settings.drawFocalPoints);
 	});
 
 	requestAnimationFrame(animate);
 };
+
+const gui = new dat.GUI();
+gui.add(settings, 'numLines').min(10).max(400).step(1).onChange(reset);
+gui.add(settings, 'timeOffset').min(0).max(0.2).onChange(reset);
+gui.add(settings, 'rotations').min(0).max(4).step(0.25).onChange(reset);
+gui.add(settings, 'drawFocalPoints');
+
 
 reset();
 animate();

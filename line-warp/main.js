@@ -1,3 +1,5 @@
+import anime from '//unpkg.com/animejs@3.0.1/lib/anime.es.js';
+
 class Stage {
 	constructor(canvasSelector, width, height) {
 		this.canvas = document.querySelector(canvasSelector);
@@ -146,13 +148,6 @@ const animate = () => {
 
 	requestAnimationFrame(animate);
 };
-
-const gui = new dat.GUI();
-gui.add(settings, 'numLines').min(10).max(400).step(1).onChange(reset);
-gui.add(settings, 'timeOffset').min(0).max(0.2).onChange(reset);
-gui.add(settings, 'rotations').min(0).max(4).step(0.25).onChange(reset);
-gui.add(settings, 'drawFocalPoints');
-
 
 reset();
 animate();

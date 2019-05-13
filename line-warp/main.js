@@ -39,37 +39,38 @@ class Stage {
 }
 
 class Line {
-	constructor(stageWidth, stageHeight, angle = 0, phase = 0, hue = 230) {
-		this.stageHalfWidth = stageWidth * 0.5;
-		this.stageHalfHeight = stageHeight * 0.5;
+	constructor({ midX, midY, angle = 0, phaseOffset = 0, phaseGlobal = 0, hue = 230 } = {}) {
+		this.midX = midX;
+		this.midY = midY;
 
 		this.angle = angle;
-		this.phase = phase;
+
+		this.phase = phaseGlobal + phaseOffset;
+		this.phaseOffset = phaseOffset;
 		this.hue = hue;
 
 		this.from = { x: 0, y: 0 };
 		this.to = { x: 0, y: 0 };
 
 		this.settings = {
-			angleChange: 0,
-			radius: this.stageHalfWidth,
-			length: stageWidth,
+			radius: midX,
+			length: midX * 2,
 		};
 
-		this.update();
+		this.update(phaseGlobal);
 	}
 
-	update(increment = 0) {
-		this.phase += increment;
+	update(phaseGlobal = 0, angleChange = 0) {
+		this.phase = phaseGlobal + this.phaseOffset;
 
 		const halfPi = Math.PI * 0.5;
-		const { length, radius, angleChange } = this.settings;
+		const { length, radius } = this.settings;
 
 		const amplitude = Math.sin(this.phase) * radius;
 		const angleModifier = Math.sin(this.phase) * angleChange;
 
-		this.focalX = this.stageHalfWidth + (Math.cos(this.angle) * amplitude);
-		this.focalY = this.stageHalfWidth + (Math.sin(this.angle) * amplitude);
+		this.focalX = this.midX + (Math.cos(this.angle) * amplitude);
+		this.focalY = this.midX + (Math.sin(this.angle) * amplitude);
 
 		this.from.x = this.focalX + (Math.cos(this.angle + halfPi + angleModifier) * length);
 		this.from.y = this.focalY + (Math.sin(this.angle + halfPi + angleModifier) * length);
@@ -97,57 +98,117 @@ class Line {
 	}
 }
 
+const TAU = Math.PI * 2;
 const stage = new Stage('canvas', 500, 500);
 
 const settings = {
-	numLines: 10,
-	timeOffset: 0.05,
-	rotations: 1,
+	numLines: 50,
+	phase: 0,
+	lineAngleChange: 0,
+	lineAngleStep: 0,
+	linePhaseOffset: 0,
 	drawFocalPoints: true,
 };
 
 let lines = [];
-let phase = 0;
-const speed = 0.01;
 
 const generate = () => {
-	const { numLines, rotations, timeOffset: phaseStep } = settings;
-
-	const angleStep = (Math.PI * rotations) / numLines;
-
+	const { phase, numLines, linePhaseOffset, lineAngleStep } = settings;
 	const hueMin = 300;
 	const hueMax = 350;
 	const hueStep = (hueMax - hueMin) / numLines;
 
 	lines = new Array(numLines)
 		.fill()
-		.map((_, i) => new Line(stage.width, stage.height, angleStep * i, phase + (phaseStep * i), hueMin + (hueStep * i)));
-
+		.map((_, i) => new Line({
+			midX: stage.widthHalf,
+			midY: stage.heightHalf,
+			angle: lineAngleStep * i,
+			phaseGlobal: phase,
+			phaseOffset: linePhaseOffset * i,
+			hue: hueMin + (hueStep * i),
+		}));
 };
 
 const clear = () => {
 	stage.clear();
 };
 
-const reset = () => {
-	clear();
-	generate();
-};
-
-const draw = () => {
-	clear();
-};
-
 const animate = () => {
 	clear();
 
-	lines.forEach((line) => {
-		line.update(speed);
-		line.draw(stage.ctx, settings.drawFocalPoints);
-	});
+	const { phase, lineAngleChange, drawFocalPoints } = settings;
 
-	requestAnimationFrame(animate);
+	lines.forEach((line) => {
+		line.update(phase, lineAngleChange);
+		line.draw(stage.ctx, drawFocalPoints);
+	});
 };
 
-reset();
-animate();
+const draw = () => {
+	generate();
+	animate();
+};
+
+const loop = () => {
+	// draw();
+
+	requestAnimationFrame(loop);
+};
+
+const animSpeed = 1000;
+
+const timeline = anime.timeline({
+	targets: settings,
+	easing: 'linear',
+
+	update: () => {
+		generate();
+		animate();
+	},
+});
+
+timeline.add({
+	lineAngleStep: () => TAU / settings.numLines,
+	phase: 0.25,
+	duration: animSpeed,
+});
+
+timeline.add({
+	phase: 0.5,
+	lineAngleChange: Math.PI,
+	duration: animSpeed,
+});
+
+timeline.add({
+	linePhaseOffset: Math.PI / (settings.numLines * 5),
+	phase: Math.PI / 2,
+	duration: animSpeed * 2,
+});
+
+timeline.add({
+	linePhaseOffset: 0,
+	lineAngleChange: Math.PI * 0.25,
+	phase: {
+		value: '*= 1.5',
+	},
+	duration: animSpeed * 2,
+});
+
+
+// timeline.add({
+// 	numLines: {
+// 		value: '*= 2',
+// 		round: 1,
+// 	},
+// 	lineAngleStep: () => Math.PI / settings.numLines,
+
+// 	duration: animSpeed,
+// });
+
+// timeline.add({
+// 	phase: {
+// 		value: '*= 0.25',
+// 	},
+// 	duration: animSpeed,
+// });

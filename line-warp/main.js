@@ -39,7 +39,7 @@ class Stage {
 }
 
 class Line {
-	constructor({ midX, midY, angle = 0, phaseOffset = 0, phaseGlobal = 0, hue = 230 } = {}) {
+	constructor({ midX, midY, angle = 0, phaseOffset = 0, phaseGlobal = 0 } = {}) {
 		this.midX = midX;
 		this.midY = midY;
 
@@ -47,14 +47,13 @@ class Line {
 
 		this.phase = phaseGlobal + phaseOffset;
 		this.phaseOffset = phaseOffset;
-		this.hue = hue;
 
 		this.from = { x: 0, y: 0 };
 		this.to = { x: 0, y: 0 };
 
 		this.settings = {
 			radius: midX,
-			length: midX * 2,
+			length: midX,
 		};
 
 		this.update(phaseGlobal);
@@ -79,9 +78,10 @@ class Line {
 		this.to.y = this.focalY + (Math.sin(this.angle - halfPi + angleModifier) * length);
 	}
 
-	draw(ctx, drawFocalPoint = false) {
-		ctx.strokeStyle = `hsla(${this.hue}, 100%, 80%, 0.75)`;
+	draw(ctx, drawFocalPoint = false, hue = 300) {
+		const color = `hsla(${hue}, 100%, 80%, 0.75)`;
 
+		ctx.strokeStyle = color;
 		ctx.beginPath();
 		ctx.moveTo(this.from.x, this.from.y);
 		ctx.lineTo(this.to.x, this.to.y);
@@ -89,12 +89,16 @@ class Line {
 		ctx.closePath();
 
 		if (drawFocalPoint) {
-			ctx.beginPath();
-			ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
-			ctx.arc(this.focalX, this.focalY, 2, 0, Math.PI * 2);
-			ctx.fill();
-			ctx.closePath();
+			this.drawAnchor(ctx, { x: this.focalX, y: this.focalY }, color);
 		}
+	}
+
+	drawAnchor(ctx, position, color, radius = 2) {
+		ctx.beginPath();
+		ctx.fillStyle = color;
+		ctx.arc(position.x, position.y, radius, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.closePath();
 	}
 }
 
@@ -102,7 +106,9 @@ const TAU = Math.PI * 2;
 const stage = new Stage('canvas', 500, 500);
 
 const settings = {
-	numLines: 50,
+	minHue: 300,
+	maxHue: 360,
+	numLines: 2,
 	phase: 0,
 	lineAngleChange: 0,
 	lineAngleStep: 0,
@@ -114,10 +120,6 @@ let lines = [];
 
 const generate = () => {
 	const { phase, numLines, linePhaseOffset, lineAngleStep } = settings;
-	const hueMin = 300;
-	const hueMax = 350;
-	const hueStep = (hueMax - hueMin) / numLines;
-
 	lines = new Array(numLines)
 		.fill()
 		.map((_, i) => new Line({
@@ -126,7 +128,6 @@ const generate = () => {
 			angle: lineAngleStep * i,
 			phaseGlobal: phase,
 			phaseOffset: linePhaseOffset * i,
-			hue: hueMin + (hueStep * i),
 		}));
 };
 
@@ -137,78 +138,61 @@ const clear = () => {
 const animate = () => {
 	clear();
 
-	const { phase, lineAngleChange, drawFocalPoints } = settings;
+	const { minHue, maxHue, phase, lineAngleChange, drawFocalPoints } = settings;
 
 	lines.forEach((line) => {
 		line.update(phase, lineAngleChange);
-		line.draw(stage.ctx, drawFocalPoints);
+
+		const distance = Math.hypot(stage.widthHalf - line.focalX, stage.heightHalf - line.focalY);
+		const percent = distance / Math.hypot(stage.widthHalf, stage.heightHalf);
+		const hue = minHue + ((maxHue - minHue) * percent);
+
+		line.draw(stage.ctx, drawFocalPoints, hue);
 	});
 };
 
-const draw = () => {
-	generate();
-	animate();
-};
-
-const loop = () => {
-	// draw();
-
-	requestAnimationFrame(loop);
-};
-
-const animSpeed = 1000;
+const animSpeed = 4000;
 
 const timeline = anime.timeline({
 	targets: settings,
+	duration: animSpeed,
 	easing: 'linear',
+	direction: 'alternate',
+	loop: true,
+
+	loopBegin: () => {
+		// settings.phase = 0;
+	},
 
 	update: () => {
+		settings.phase += 0.005;
 		generate();
 		animate();
 	},
 });
 
 timeline.add({
-	lineAngleStep: () => TAU / settings.numLines,
-	phase: 0.25,
-	duration: animSpeed,
+	numLines: {
+		value: 200,
+		round: 1,
+	},
+
+	lineAngleStep: () => TAU / 200,
 });
 
 timeline.add({
-	phase: 0.5,
-	lineAngleChange: Math.PI,
-	duration: animSpeed,
+	lineAngleChange: Math.PI * 0.5,
 });
 
+
 timeline.add({
-	linePhaseOffset: Math.PI / (settings.numLines * 5),
-	phase: Math.PI / 2,
-	duration: animSpeed * 2,
+	linePhaseOffset: 0.003,
 });
 
 timeline.add({
 	linePhaseOffset: 0,
-	lineAngleChange: Math.PI * 0.25,
-	phase: {
-		value: '*= 1.5',
+
+	lineAngleChange: {
+		value: '*= 2',
 	},
-	duration: animSpeed * 2,
 });
-
-
-// timeline.add({
-// 	numLines: {
-// 		value: '*= 2',
-// 		round: 1,
-// 	},
-// 	lineAngleStep: () => Math.PI / settings.numLines,
-
-// 	duration: animSpeed,
-// });
-
-// timeline.add({
-// 	phase: {
-// 		value: '*= 0.25',
-// 	},
-// 	duration: animSpeed,
-// });

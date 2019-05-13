@@ -79,7 +79,7 @@ class Line {
 	}
 
 	draw(ctx, drawFocalPoint = false, hue = 300) {
-		const color = `hsla(${hue}, 100%, 80%, 0.75)`;
+		const color = `hsla(320, 100%, 60%, 0.5)`;
 
 		ctx.strokeStyle = color;
 		ctx.beginPath();

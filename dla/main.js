@@ -3,7 +3,9 @@
 import Vector from '//rawgit.com/pimskie/vector/master/vector.js';
 import { wrappBBox } from '//rawgit.com/pimskie/utils/master/utils.js';
 
-const distanceBetween = (v1, v2) => {
+const randomBetween = (min, max) => Math.random() * (max - min) + min;
+
+const distance = (v1, v2) => {
 	const dx = v2.x - v1.x;
 	const dy = v2.y - v1.y;
 
@@ -50,8 +52,14 @@ class Stage {
 	}
 }
 
+for (let i = 0; i < 10; i++) {
+	const length = 10;
+
+	console.log(randomBetween(-length, length));
+}
+
 class Particle {
-	constructor({ position = new Vector(), radius = 3, fill = '#000' } = {}) {
+	constructor({ position = { x: 0, y: 0 }, radius = 3, fill = '#000' } = {}) {
 		this.position = position;
 		this.radius = radius;
 		this.fill = fill;
@@ -60,20 +68,19 @@ class Particle {
 	}
 
 	update(stageWidth, stageHeight) {
-		const angle = randomGaussian() * TAU;
 		const length = 2;
 
-		const velocity = new Vector();
-		velocity.length = length;
-		velocity.angle = angle;
+		const x = randomBetween(-length, length);
+		const y = randomBetween(-length, length);
 
-		this.position.addSelf(velocity);
+		this.position.x += x;
+		this.position.y += y;
 
 		wrappBBox(this.position, stageWidth, stageHeight);
 	}
 
 	intersects(particles) {
-		const intersecting = particles.find(p => distanceBetween(p.position, this.position) <= this.radius * this.radius + p.radius * p.radius);
+		const intersecting = particles.find(p => distance(p.position, this.position) <= this.radius * this.radius + p.radius * p.radius);
 
 		if (intersecting) {
 			this.distance += intersecting.distance;
@@ -107,7 +114,7 @@ const settings = {
 
 let particles = [];
 let branch = [new Particle({
-	position: new Vector(stage.widthHalf, stage.heightHalf),
+	position: { x: stage.widthHalf, y: stage.heightHalf },
 	fill: 'red',
 })];
 
@@ -117,7 +124,9 @@ const generate = () => {
 	particles = new Array(numParticles).fill().map((_, i) => {
 		const a = randomGaussian() * TAU;
 		const r = stage.widthHalf * 0.5 + (Math.random() * stage.widthHalf * 0.5);
-		const position = new Vector(stage.widthHalf + Math.cos(a) * r, stage.heightHalf + Math.sin(a) * r);
+		const position = {
+			x: stage.widthHalf + Math.cos(a) * r,
+			y: stage.heightHalf + Math.sin(a) * r };
 
 		return new Particle({ position });
 	});

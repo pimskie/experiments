@@ -106,7 +106,7 @@ const settings = {
 
 let lines = [];
 let phase = 0;
-const speed = 0;
+const speed = 0.01;
 
 const generate = () => {
 	const { numLines, rotations, timeOffset: phaseStep } = settings;

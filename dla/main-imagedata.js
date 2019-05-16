@@ -1,18 +1,9 @@
+
 // Diffusion-Limited Aggregation
 
-import Vector from '//rawgit.com/pimskie/vector/master/vector.js';
-import { wrappBBox } from '//rawgit.com/pimskie/utils/master/utils.js';
+import { randomBetween, wrappBBox, pixelIndex as getPixelIndex } from '//rawgit.com/pimskie/utils/master/utils.js';
 
-const randomBetween = (min, max) => Math.random() * (max - min) + min;
-
-const distance = (v1, v2) => {
-	const dx = v2.x - v1.x;
-	const dy = v2.y - v1.y;
-
-	return dx * dx + dy * dy;
-};
-
-const randomGaussian = () => Math.random();
+const worker = new Worker('worker.js');
 
 class Stage {
 	constructor(canvasSelector, width, height) {
@@ -47,15 +38,14 @@ class Stage {
 		this.canvas.height = h;
 	}
 
+	get imageData() {
+		return this.ctx.getImageData(0, 0, this.width, this.height);
+	}
+
 	clear() {
+		this.ctx.fillStyle = '#fff';
 		this.ctx.clearRect(0, 0, this.width, this.height);
 	}
-}
-
-for (let i = 0; i < 10; i++) {
-	const length = 10;
-
-	console.log(randomBetween(-length, length));
 }
 
 class Particle {
@@ -79,18 +69,10 @@ class Particle {
 		wrappBBox(this.position, stageWidth, stageHeight);
 	}
 
-	intersects(particles) {
-		const intersecting = particles.find(p => distance(p.position, this.position) <= this.radius * this.radius + p.radius * p.radius);
-
-		if (intersecting) {
-			this.distance += intersecting.distance;
-			this.radius = intersecting.radius * 0.99;
-			this.fill = 'red';
-
-			return true;
-		}
-
-		return false;
+	intersects(intersecting) {
+		this.distance += intersecting.distance;
+		this.radius = intersecting.radius * 0.99;
+		this.fill = 'red';
 	}
 
 	draw(ctx) {
@@ -108,31 +90,68 @@ const TAU = Math.PI * 2;
 const stage = new Stage('canvas', 500, 500);
 
 const settings = {
-	numParticles: 200,
-	numSteps: 30,
+	numParticles: 10000,
+	numSteps: 20,
 };
 
-let padding = 100;
+let padding = 20;
 let particles = [];
 let branch = [
 	new Particle({
 		position: { x: stage.widthHalf, y: stage.heightHalf },
 		fill: 'red',
+	}),
+	new Particle({
+		position: { x: padding, y: padding },
+		fill: 'red',
+	}),
+	new Particle({
+		position: { x: stage.width - padding, y: padding },
+		fill: 'red',
+	}),
+	new Particle({
+		position: { x: stage.width - padding, y: stage.height - padding },
+		fill: 'red',
+	}),
+	new Particle({
+		position: { x: padding, y: stage.height - padding },
+		fill: 'red',
 	})
 ];
+
+
+let imageData;
+
+worker.onmessage = ({ data } = e) => {
+	clear();
+
+	imageData = stage.imageData;
+
+	particles = data.particles;
+	branch = data.branch;
+
+	// branch.forEach(p => drawParticle(p, imageData, [255, 0, 0]));
+	particles.forEach(p => drawParticle(p, imageData));
+	branch.forEach(p => drawParticle(p, imageData, [255]));
+
+	stage.ctx.putImageData(imageData, 0, 0);
+
+	loop();
+
+}
 
 const generate = () => {
 	const { numParticles } = settings;
 
 	particles = new Array(numParticles).fill().map((_, i) => {
-		const a = randomGaussian() * TAU;
+		const a = Math.random() * TAU;
 		const r = stage.widthHalf * 0.5 + (Math.random() * stage.widthHalf * 0.5);
 		const position = {
 			x: stage.widthHalf + Math.cos(a) * r,
 			y: stage.heightHalf + Math.sin(a) * r
 		};
 
-		return new Particle({ position });
+		return new Particle({ position, radius: 2 });
 	});
 };
 
@@ -140,35 +159,26 @@ const clear = () => {
 	stage.clear();
 };
 
-const updateParticles = () => {
-	for (let i = 0; i < particles.length; i++) {
-		const p = particles[i];
+const drawParticle = (p, imageData, [r = 0, g = 0, b = 0] = []) => {
+	const { position: { x, y } } = p;
+	const pixelIndex = getPixelIndex(~~x, ~~y, imageData);
 
-		p.update(stage.width, stage.height);
-		p.draw(stage.ctx);
-
-		if (p.intersects(branch)) {
-			branch.push(p);
-			particles.splice(i, 1);
-		}
-	}
-
+	imageData.data[pixelIndex] = r;
+	imageData.data[pixelIndex + 1] = g;
+	imageData.data[pixelIndex + 2] = b;
+	imageData.data[pixelIndex + 3] = 255;
 };
 
 const loop = () => {
 	const { numSteps } = settings;
 
-	clear();
-
-	branch.forEach((p) => {
-		p.draw(stage.ctx);
+	worker.postMessage({
+		stageWidth: stage.width,
+		stageHeight: stage.height,
+		numSteps,
+		particles,
+		branch,
 	});
-
-	for (let i = 0; i < numSteps; i++) {
-		updateParticles();
-	}
-
-	requestAnimationFrame(loop);
 };
 
 generate();

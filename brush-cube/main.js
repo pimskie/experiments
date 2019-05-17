@@ -34,28 +34,38 @@ class Stage {
 		this.canvas.height = h;
 	}
 
+	drawLine(from, to) {
+		this.ctx.beginPath();
+		this.ctx.moveTo(from.x, from.y);
+		this.ctx.lineTo(to.x, to.y);
+		this.ctx.stroke();
+		this.ctx.closePath();
+	}
+
 	clear() {
 		this.ctx.clearRect(0, 0, this.width, this.height);
 	}
 }
 
-const stage = new Stage('canvas', 500, 500);
-const targetLength = 30;
 
 class Tree {
-	constructor(angle, from, stage) {
+	constructor(angle, from, length, stage, completeCallback) {
 		this.stage = stage;
 
 		this.angle = angle;
 		this.from = from;
 
+		this.completeCallback = completeCallback;
+
 		this.to = { x: from.x, y: from.y };
 		this.origin = { x: from.x, y: from.y };
 		this.length = 0;
-		this.targetLength = 25;
+		this.targetLength = length;
 
-		this.branchCount = 0;
-		this.maxBranches = 200;
+		this.isCompleted = false;
+		this.maxDepth = 15;
+
+		this.run();
 	}
 
 	run() {
@@ -75,9 +85,9 @@ class Tree {
 
 		anime({
 			targets: branch,
-			length: targetLength,
+			length: this.targetLength,
 			easing: 'easeOutCubic',
-			duration: 250,
+			duration: 100,
 
 			update: () => {
 				this.draw(branch);
@@ -93,7 +103,13 @@ class Tree {
 		const from = { x: line.to.x, y: line.to.y };
 		const depth = line.depth + 1;
 
-		if (line.depth === 20) {
+		if (line.depth === this.maxDepth) {
+			if (!this.isCompleted) {
+				this.completeCallback();
+			}
+
+			this.isCompleted = true;
+
 			return;
 		}
 
@@ -106,24 +122,30 @@ class Tree {
 	}
 
 	draw(line) {
-		const { ctx } = this.stage;
 		const { angle, length, from, to } = line;
 
 		line.to.x = from.x + (Math.cos(angle) * length);
 		line.to.y = from.y + (Math.sin(angle) * length);
 
-		ctx.beginPath();
-		ctx.moveTo(from.x, from.y);
-		ctx.lineTo(to.x, to.y);
-		ctx.stroke();
-		ctx.closePath();
+		this.stage.drawLine(line.from, line.to);
 	}
 }
 
+const stage = new Stage('canvas', 500, 500);
+const length = 25;
+let angle = Math.PI * 0.25;
+
 const loop = () => {
-	requestAnimationFrame(loop);
+	const from = {
+		x: stage.widthHalf + (Math.cos(angle) * length),
+		y: (Math.sin(angle) * length)
+	};
+
+	new Tree(Math.PI * 0.5, from, length, stage, loop);
+
+	angle += Math.PI * 0.5;
 };
 
-const tree = new Tree(Math.PI / 2, { x: stage.widthHalf, y: 0 }, stage);
+const start = { x: stage.widthHalf, y: 0 };
 
-tree.run();
+new Tree(Math.PI * 0.5, start, length, stage, loop);

@@ -41,8 +41,9 @@ class Stage {
 
 const stage = new Stage('canvas', 500, 500);
 const targetLength = 30;
+let loopCount = 0;
 
-class Tree {
+class Branch {
 	constructor(angle, from, stage) {
 		this.stage = stage;
 
@@ -51,66 +52,49 @@ class Tree {
 
 		this.to = { x: from.x, y: from.y };
 		this.origin = { x: from.x, y: from.y };
-		this.length = 0;
-		this.targetLength = 25;
 
-		this.branchCount = 0;
-		this.maxBranches = 200;
+		this.length = 0;
 	}
 
 	run() {
-		this.addBranch(this.angle, this.from, 0);
-	}
-
-	addBranch(angle, from, depth) {
-		this.branchCount++;
-
-		const branch = {
-			from: { x: from.x, y: from.y },
-			to: { x: from.x, y: from.y },
-			length: 0,
-			angle,
-			depth,
-		};
-
 		anime({
-			targets: branch,
+			targets: this,
 			length: targetLength,
 			easing: 'easeOutCubic',
 			duration: 250,
 
 			update: () => {
-				this.draw(branch);
+				this.draw();
 			},
+			// update: () => draw(line),
+			// complete: () => {
+			// 	if (loopCount < 20) {
+			// 		if (line.direction === Math.PI / 2) {
+			// 			addLine(Math.PI * 0.25, { x: line.to.x, y: line.to.y });
+			// 			addLine(Math.PI * 0.75, { x: line.to.x, y: line.to.y });
+			// 		} else {
+			// 			addLine(Math.PI * 0.5, { x: line.to.x, y: line.to.y });
+			// 		}
+			// 	} else {
+			// 		addLine(Math.PI / 2, {
+			// 			x: stage.widthHalf + (Math.cos(Math.PI / 2) * targetLength),
+			// 			y: Math.sin(Math.PI / 2) * targetLength,
+			// 		});
+			// 	}
 
-			complete: () => {
-				this.onBranchComplete(branch);
-			},
+			// 	line = null;
+
+			// 	loopCount++;
+			// },
 		});
 	}
 
-	onBranchComplete(line) {
-		const from = { x: line.to.x, y: line.to.y };
-		const depth = line.depth + 1;
-
-		if (line.depth === 20) {
-			return;
-		}
-
-		if (line.angle !== Math.PI * 0.5) {
-			this.addBranch(Math.PI * 0.5, from, depth);
-		} else {
-			this.addBranch(Math.PI * 0.25, from, depth);
-			this.addBranch(Math.PI * 0.75, from, depth);
-		}
-	}
-
-	draw(line) {
+	draw() {
 		const { ctx } = this.stage;
-		const { angle, length, from, to } = line;
+		const { angle, length, from, to } = this;
 
-		line.to.x = from.x + (Math.cos(angle) * length);
-		line.to.y = from.y + (Math.sin(angle) * length);
+		to.x = from.x + (Math.cos(angle) * length);
+		to.y = from.y + (Math.sin(angle) * length);
 
 		ctx.beginPath();
 		ctx.moveTo(from.x, from.y);
@@ -120,10 +104,14 @@ class Tree {
 	}
 }
 
+const draw = (line) => {
+	c
+};
+
 const loop = () => {
 	requestAnimationFrame(loop);
 };
 
-const tree = new Tree(Math.PI / 2, { x: stage.widthHalf, y: 0 }, stage);
+const branch = new Branch(Math.PI / 2, { x: stage.widthHalf, y: 0 }, stage);
 
-tree.run();
+branch.run();

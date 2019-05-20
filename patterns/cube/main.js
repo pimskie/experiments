@@ -50,63 +50,43 @@ class Stage {
 
 
 const stage = new Stage('canvas', 300, 300);
-const side = 20;
+const side = 40;
 const cols = Math.ceil(stage.width / side);
 const rows = Math.ceil(stage.height / side);
 
-const drawDiagonal = (from, angle, length) => {
-	const to = {
-		x: from.x + (Math.cos(angle) * length),
-		y: from.y + (Math.sin(angle) * length),
-	};
-
-	stage.drawLine(from, to, 'red');
-};
-
 const numSides = 6;
-const angleStep = (Math.PI * 2 / numSides);
+const angleStep = (Math.PI * 2) / numSides;
 
-const t1 = { x: Math.cos(0) * side, y: Math.sin(0) * side };
-const t2 = { x: Math.cos(angleStep) * side, y: Math.sin(angleStep) * side };
-const distance = (t1.x - t2.x) / 2;
+const mid = { x: stage.widthHalf, y: stage.heightHalf };
+const legEnd = { x: mid.x + (Math.cos(angleStep / 2) * side), y: mid.y + (Math.sin(angleStep / 2) * side) };
+const distanceX = Math.abs(legEnd.x - mid.x);
+const distanceY = Math.abs(legEnd.y - mid.y);
 
-
-const drawShape = () => {
+const drawShape = (anchor) => {
 	let angle = -Math.PI / 2;
 
 	for (let i = 0; i < numSides; i++) {
 		const to = {
-			x: mid.x + (Math.cos(angle) * side),
-			y: mid.y + (Math.sin(angle) * side),
+			x: anchor.x + (Math.cos(angle) * side),
+			y: anchor.y + (Math.sin(angle) * side),
 		};
-		stage.drawLine(mid, to);
+
+		stage.drawLine(anchor, to);
 
 		angle += angleStep;
 	}
 };
 
-let mid = { x: stage.widthHalf, y: stage.heightHalf };
-drawShape();
+let x = 0;
+let y = 0;
 
-mid.x += side * 1.5 + distance;
-drawShape();
+for (let i = 0; i < rows; i += 1) {
+	for (let q = 0; q < cols; q += 1) {
+		drawShape({ x, y });
 
+		x += distanceX * 2;
+	}
 
-// console.log(dy);
-
-// let offsetX = 0;
-// let y = 0;
-
-// for (let i = 0; i < 1; i += 1) {
-// 	for (let q = 0; q < cols; q += 1) {
-// 		const x = offsetX + (q * side);
-
-// 		const from = { x, y };
-// 		const to = { x, y: y + side };
-
-// 		stage.drawLine(from, to);
-// 	}
-
-// 	y += side / 2;
-// 	offsetX = side / 2;
-// }
+	x = i % 2 === 0 ? distanceX : 0;
+	y += distanceY * 3;
+}

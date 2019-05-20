@@ -1,4 +1,3 @@
-// https://twitter.com/Art_Relatable/status/1126486986099834880
 import anime from '//unpkg.com/animejs@3.0.1/lib/anime.es.js';
 
 class Stage {
@@ -50,7 +49,7 @@ class Stage {
 
 
 const stage = new Stage('canvas', 300, 300);
-const side = 40;
+const side = 32;
 const cols = Math.ceil(stage.width / side);
 const rows = Math.ceil(stage.height / side);
 
@@ -62,27 +61,53 @@ const legEnd = { x: mid.x + (Math.cos(angleStep / 2) * side), y: mid.y + (Math.s
 const distanceX = Math.abs(legEnd.x - mid.x);
 const distanceY = Math.abs(legEnd.y - mid.y);
 
-const drawShape = (anchor) => {
+const drawShape = (shape) => {
 	let angle = -Math.PI / 2;
+	const { length } = shape;
+	const { ctx } = stage;
 
 	for (let i = 0; i < numSides; i++) {
 		const to = {
-			x: anchor.x + (Math.cos(angle) * side),
-			y: anchor.y + (Math.sin(angle) * side),
+			x: shape.x + (Math.cos(angle) * length),
+			y: shape.y + (Math.sin(angle) * length),
 		};
 
-		stage.drawLine(anchor, to);
+		ctx.beginPath();
+		ctx.moveTo(shape.x, shape.y);
+		ctx.lineTo(to.x, to.y);
+		ctx.stroke();
+		ctx.closePath();
 
 		angle += angleStep;
 	}
+
+	ctx.fillStyle = '#000';
+	ctx.beginPath();
+	ctx.moveTo(shape.x, shape.y);
+	ctx.lineTo(shape.x + (Math.cos(-Math.PI / 2) * length), shape.y + (Math.sin(-Math.PI / 2) * length));
+	ctx.lineTo(shape.x + (Math.cos(-Math.PI / 2 + angleStep) * length), shape.y + (Math.sin(-Math.PI / 2 + angleStep) * length));
+	ctx.fill();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.moveTo(shape.x, shape.y);
+	ctx.lineTo(shape.x + (Math.cos(Math.PI / 2) * length), shape.y + (Math.sin(Math.PI / 2) * length));
+	ctx.lineTo(shape.x + (Math.cos(Math.PI / 2 + angleStep) * length), shape.y + (Math.sin(Math.PI / 2 + angleStep) * length));
+	ctx.fill();
+	ctx.closePath();
+
 };
 
 let x = 0;
 let y = 0;
+const length = 0;
+const rotation = 0;
+
+const forms = [];
 
 for (let i = 0; i < rows; i += 1) {
 	for (let q = 0; q < cols; q += 1) {
-		drawShape({ x, y });
+		forms.push({ x, y, length, rotation });
 
 		x += distanceX * 2;
 	}
@@ -90,3 +115,16 @@ for (let i = 0; i < rows; i += 1) {
 	x = i % 2 === 0 ? distanceX : 0;
 	y += distanceY * 3;
 }
+
+anime({
+	targets: forms,
+	length: side,
+	duration: 500,
+	easing: 'easeOutCubic',
+	delay: anime.stagger(10),
+
+	update: () => {
+		stage.clear();
+		forms.forEach(drawShape);
+	}
+});

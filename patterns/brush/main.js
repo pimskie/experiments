@@ -49,21 +49,20 @@ class Stage {
 
 
 class Tree {
-	constructor(angle, from, length, stage, completeCallback) {
+	constructor(angle, from, length, stage, completeCallback = () => { }) {
 		this.stage = stage;
 
+		this.originalAngle = angle;
 		this.angle = angle;
 		this.from = from;
 
 		this.completeCallback = completeCallback;
 
 		this.to = { x: from.x, y: from.y };
-		this.origin = { x: from.x, y: from.y };
-		this.length = 0;
 		this.targetLength = length;
 
 		this.isCompleted = false;
-		this.maxDepth = 15;
+		this.maxDepth = 14;
 
 		this.run();
 	}
@@ -100,12 +99,9 @@ class Tree {
 	}
 
 	onBranchComplete(line) {
-		const from = { x: line.to.x, y: line.to.y };
-		const depth = line.depth + 1;
-
 		if (line.depth === this.maxDepth) {
 			if (!this.isCompleted) {
-				this.completeCallback();
+				this.completeCallback(this.originalAngle);
 			}
 
 			this.isCompleted = true;
@@ -113,16 +109,20 @@ class Tree {
 			return;
 		}
 
-		if (line.angle !== Math.PI * 0.5) {
-			this.addBranch(Math.PI * 0.5, from, depth);
+		const from = { x: line.to.x, y: line.to.y };
+		const depth = line.depth + 1;
+		const quartPI = Math.PI * 0.25;
+
+		if (depth % 2 === 0) {
+			this.addBranch(this.originalAngle, from, depth);
 		} else {
-			this.addBranch(Math.PI * 0.25, from, depth);
-			this.addBranch(Math.PI * 0.75, from, depth);
+			this.addBranch(this.originalAngle - quartPI, from, depth);
+			this.addBranch(this.originalAngle + quartPI, from, depth);
 		}
 	}
 
 	draw(line) {
-		const { angle, length, from, to } = line;
+		const { angle, length, from } = line;
 
 		line.to.x = from.x + (Math.cos(angle) * length);
 		line.to.y = from.y + (Math.sin(angle) * length);
@@ -132,10 +132,10 @@ class Tree {
 }
 
 const stage = new Stage('canvas', 500, 500);
-const length = 25;
+const length = 20;
 let angle = Math.PI * 0.25;
 
-const loop = () => {
+const loop = (branchAngle) => {
 	const from = {
 		x: stage.widthHalf + (Math.cos(angle) * length),
 		y: (Math.sin(angle) * length)
@@ -146,6 +146,5 @@ const loop = () => {
 	angle += Math.PI * 0.5;
 };
 
-const start = { x: stage.widthHalf, y: 0 };
 
-new Tree(Math.PI * 0.5, start, length, stage, loop);
+new Tree(Math.PI * 0.5, { x: stage.widthHalf, y: 0 }, length, stage, loop);

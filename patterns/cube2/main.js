@@ -47,60 +47,42 @@ class Stage {
 	}
 }
 
-
 const stage = new Stage('canvas', 500, 500);
-const side = 22;
-const cols = Math.ceil(stage.width / side);
-const rows = Math.ceil(stage.height / side);
+const sideLength = 50;
+const cols = Math.ceil(stage.width / sideLength);
+const rows = Math.ceil(stage.height / sideLength);
 
 const numSides = 6;
 const angleStep = (Math.PI * 2) / numSides;
 
 const mid = { x: stage.widthHalf, y: stage.heightHalf };
-const legEnd = { x: mid.x + (Math.cos(angleStep / 2) * side), y: mid.y + (Math.sin(angleStep / 2) * side) };
+const legEnd = { x: mid.x + (Math.cos(angleStep / 2) * sideLength), y: mid.y + (Math.sin(angleStep / 2) * sideLength) };
 const distanceX = Math.abs(legEnd.x - mid.x);
 const distanceY = Math.abs(legEnd.y - mid.y);
 
-const drawShape = (shape, fill = false) => {
+const drawShape = (mid, ctx) => {
 	let angle = -Math.PI / 2;
-	const { length } = shape;
-	const { ctx } = stage;
 
-	for (let i = 0; i < numSides; i++) {
-		const to = {
-			x: shape.x + (Math.cos(angle) * length),
-			y: shape.y + (Math.sin(angle) * length),
-		};
+	ctx.save();
+	ctx.translate(mid.x, mid.y);
 
-		ctx.beginPath();
-		ctx.moveTo(shape.x, shape.y);
-		ctx.lineTo(to.x, to.y);
-		ctx.stroke();
-		ctx.closePath();
+	ctx.moveTo(Math.cos(angle) * sideLength, Math.sin(angle) * sideLength);
 
+	for (let i = 1; i < numSides; i++) {
 		angle += angleStep;
+
+		ctx.lineTo(Math.cos(angle) * sideLength, Math.sin(angle) * sideLength);
 	}
 
-	if (fill) {
-		ctx.fillStyle = '#000';
-		ctx.beginPath();
-		ctx.moveTo(shape.x, shape.y);
-		ctx.lineTo(shape.x + (Math.cos(-Math.PI / 2) * length), shape.y + (Math.sin(-Math.PI / 2) * length));
-		ctx.lineTo(shape.x + (Math.cos(-Math.PI / 2 + angleStep) * length), shape.y + (Math.sin(-Math.PI / 2 + angleStep) * length));
-		ctx.fill();
-		ctx.closePath();
+	ctx.closePath();
+	ctx.stroke();
 
-		ctx.beginPath();
-		ctx.moveTo(shape.x, shape.y);
-		ctx.lineTo(shape.x + (Math.cos(Math.PI / 2) * length), shape.y + (Math.sin(Math.PI / 2) * length));
-		ctx.lineTo(shape.x + (Math.cos(Math.PI / 2 + angleStep) * length), shape.y + (Math.sin(Math.PI / 2 + angleStep) * length));
-		ctx.fill();
-		ctx.closePath();
-	}
+	ctx.restore();
 };
 
-let x = 0;
-let y = 0;
+
+let x = distanceX;
+let y = distanceY * 2;
 const length = 0;
 const rotation = 0;
 
@@ -108,32 +90,16 @@ const forms = [];
 
 for (let i = 0; i < rows; i += 1) {
 	for (let q = 0; q < cols; q += 1) {
-		forms.push({ x, y, length, rotation });
+		drawShape({ x, y }, stage.ctx);
+		drawShape({ x: x - distanceX, y: y - distanceY }, stage.ctx);
+		drawShape({ x: x + distanceX, y: y - distanceY }, stage.ctx);
 
 		x += distanceX * 2;
 	}
 
-	x = i % 2 === 0 ? distanceX : 0;
+	x = i % 2 === 0 ? distanceX * 2 : distanceX;
 	y += distanceY * 3;
 }
 
-const fillShape = false;
+console.log( { distanceX, distanceY });
 
-const go = () => {
-	anime({
-		targets: forms,
-		length: side,
-		easing: 'easeOutCubic',
-		direction: 'alternate',
-		loop: true,
-		duration: 300,
-		delay: anime.stagger(10),
-
-		update: () => {
-			stage.clear();
-			forms.forEach(form => drawShape(form, fillShape));
-		},
-	});
-};
-
-go();

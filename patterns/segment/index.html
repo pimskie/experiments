@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Template</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+        body {
+            background: #fbfbfb;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .canvas {
+            box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 2px 4px rgba(0, 0, 0, .125), 0 1px 4px rgba(0, 0, 0, .05);
+        }
+	</style>
+</head>
+<body>
+
+<div class="container">
+    <canvas class="canvas js-draw" width="500" height="500"></canvas>
+</div>
+
+<script src="main.js" type="module"></script>
+
+</body>
+</html>

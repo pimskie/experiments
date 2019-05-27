@@ -33,15 +33,6 @@ class Stage {
 		this.canvas.height = h;
 	}
 
-	drawLine(from, to, color = '#000') {
-		this.ctx.strokeStyle = color;
-		this.ctx.beginPath();
-		this.ctx.moveTo(from.x, from.y);
-		this.ctx.lineTo(to.x, to.y);
-		this.ctx.stroke();
-		this.ctx.closePath();
-	}
-
 	clear() {
 		this.ctx.clearRect(0, 0, this.width, this.height);
 	}
@@ -49,8 +40,8 @@ class Stage {
 
 const stage = new Stage('canvas', 500, 500);
 const sideLength = 50;
-const cols = Math.ceil(stage.width / sideLength);
-const rows = Math.ceil(stage.height / sideLength);
+const cols = Math.floor(stage.width / sideLength);
+const rows = Math.floor(stage.height / sideLength);
 
 const numSides = 6;
 const angleStep = (Math.PI * 2) / numSides;
@@ -60,43 +51,168 @@ const legEnd = { x: mid.x + (Math.cos(angleStep / 2) * sideLength), y: mid.y + (
 const distanceX = Math.abs(legEnd.x - mid.x);
 const distanceY = Math.abs(legEnd.y - mid.y);
 
-const drawShape = (mid, ctx) => {
-	let angle = -Math.PI / 2;
+const drawShape = (shape) => {
+	const {
+		x,
+		y,
+		opacity,
+		fill,
+		scale,
+		angle: angleModifier = 0,
+	} = shape;
+	const { ctx } = stage;
 
-	ctx.save();
-	ctx.translate(mid.x, mid.y);
+	const length = sideLength * scale;
 
-	ctx.moveTo(Math.cos(angle) * sideLength, Math.sin(angle) * sideLength);
+	let angle = (-Math.PI / 2) + angleModifier;
+
+	ctx.strokeStyle = `rgba(0, 0, 0, ${opacity})`;
+	ctx.fillStyle = `rgba(0, 0, 0, ${opacity * 0.1})`;
+	ctx.lineWidth = 0.5;
+
+	ctx.beginPath();
+	ctx.moveTo(x + (Math.cos(angle) * length), y + (Math.sin(angle) * length));
 
 	for (let i = 1; i < numSides; i++) {
 		angle += angleStep;
 
-		ctx.lineTo(Math.cos(angle) * sideLength, Math.sin(angle) * sideLength);
+		ctx.lineTo(x + (Math.cos(angle) * length), y + (Math.sin(angle) * length));
 	}
 
 	ctx.closePath();
-	ctx.stroke();
+	ctx.stroke()
 
-	ctx.restore();
+	if (fill) {
+		ctx.fill();
+	}
 };
 
+const createShapes = () => {
+	let x = distanceX;
+	let y = distanceY * 2;
 
-let x = distanceX;
-let y = distanceY * 2;
+	const shapes = [];
 
-const forms = [];
+	for (let i = 0; i < rows; i += 1) {
+		for (let q = 0; q < cols; q += 1) {
 
-for (let i = 0; i < rows; i += 1) {
-	for (let q = 0; q < cols; q += 1) {
-		drawShape({ x, y }, stage.ctx);
-		drawShape({ x: x - distanceX, y: y - distanceY }, stage.ctx);
+			shapes.push({
+				x: x,
+				y: y,
+				scale: 0.5,
+				opacity: 0,
+				angle: 0,
+			});
 
-		x += distanceX * 2;
+			shapes.push({
+				x: x - distanceX,
+				y: y - distanceY,
+				scale: 0.5,
+				opacity: 0,
+				angle: 0,
+			});
+			x += distanceX * 2;
+		}
+
+		x = i % 2 === 0 ? distanceX * 2 : distanceX;
+		y += distanceY * 3;
 	}
 
-	x = i % 2 === 0 ? distanceX * 2 : distanceX;
-	y += distanceY * 3;
-}
+	return shapes;
+};
 
-console.log( { distanceX, distanceY });
+const forms = createShapes();
 
+const fadeIn = {
+	opacity: [0, 1],
+	delay: anime.stagger(10),
+};
+
+const scaleLarge = {
+	scale: [0.5, 2],
+	duration: 1000,
+};
+
+const scaleHalf = {
+	scale: [2, 1.25],
+	duration: 1000,
+};
+
+const scaleDefault = {
+	scale: 1,
+	duration: 2000,
+};
+
+const scaleSmall = {
+	scale: 0.5,
+	duration: 2000,
+};
+
+anime.timeline({
+	targets: forms,
+	easing: 'easeOutSine',
+	duration: 200,
+	update: () => {
+		stage.clear();
+		forms.forEach(drawShape);
+	},
+})
+.add(fadeIn)
+.add(scaleLarge)
+.add(scaleHalf)
+.add({ angle: Math.PI, duration: 1000 })
+.add(scaleDefault)
+.add(scaleSmall)
+
+// const rotate = () => {
+// 	anime({
+// 		targets: forms,
+// 		angle: Math.PI,
+// 		easing: 'easeOutCirc',
+// 		duration: 1000,
+
+// 		update: () => {
+// 			stage.clear();
+// 			forms.forEach(form => drawShape(form));
+// 		},
+// 	});
+// };
+
+// const scale = () => {
+// 	anime({
+// 		targets: forms,
+// 		scale: 0.5,
+// 		easing: 'easeOutCirc',
+// 		duration: 1000,
+
+// 		update: () => {
+// 			stage.clear();
+// 			forms.forEach(form => drawShape(form));
+// 		},
+
+// 		complete: () => {
+// 			rotate();
+// 		},
+// 	});
+// };
+
+// const draw = () => {
+// 	anime({
+// 		targets: forms,
+// 		opacity: 1,
+// 		easing: 'easeOutCirc',
+// 		duration: 250,
+// 		delay: anime.stagger(25),
+
+// 		update: () => {
+// 			stage.clear();
+// 			forms.forEach(form => drawShape(form));
+// 		},
+
+// 		complete: () => {
+// 			scale();
+// 		},
+// 	});
+// };
+
+// draw();

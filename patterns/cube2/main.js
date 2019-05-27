@@ -83,8 +83,6 @@ const drawShape = (mid, ctx) => {
 
 let x = distanceX;
 let y = distanceY * 2;
-const length = 0;
-const rotation = 0;
 
 const forms = [];
 
@@ -92,7 +90,6 @@ for (let i = 0; i < rows; i += 1) {
 	for (let q = 0; q < cols; q += 1) {
 		drawShape({ x, y }, stage.ctx);
 		drawShape({ x: x - distanceX, y: y - distanceY }, stage.ctx);
-		drawShape({ x: x + distanceX, y: y - distanceY }, stage.ctx);
 
 		x += distanceX * 2;
 	}

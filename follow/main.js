@@ -38,7 +38,6 @@ class Mover {
 
 		this.target = new Vector(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
 	}
-
 	getAngle() {
 		const turnSpeed = 0.05;
 

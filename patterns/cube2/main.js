@@ -102,6 +102,8 @@ const createShapes = () => {
 				scale: 0.5,
 				opacity: 0,
 				angle: 0,
+				col: q,
+				row: i,
 			});
 
 			shapes.push({
@@ -110,7 +112,10 @@ const createShapes = () => {
 				scale: 0.5,
 				opacity: 0,
 				angle: 0,
+				col: q,
+				row: i,
 			});
+
 			x += distanceX * 2;
 		}
 
@@ -158,11 +163,18 @@ anime.timeline({
 	},
 })
 .add(fadeIn)
-.add(scaleLarge)
-.add(scaleHalf)
+// .add(scaleLarge)
+// .add(scaleHalf)
+// .add(scaleDefault)
+// .add(scaleSmall)
+// .add({
+// 	y: (shape, index) => {
+// 		return index % 3 === 0 ? shape.y + (distanceY * 3) : shape.y - distanceY;
+// 	},
+
+// 	duration: 1500,
+// })
 .add({ angle: Math.PI, duration: 1000 })
-.add(scaleDefault)
-.add(scaleSmall)
 
 // const rotate = () => {
 // 	anime({

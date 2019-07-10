@@ -4,6 +4,8 @@ import { wrappBBox, distanceBetween } from '//rawgit.com/pimskie/utils/master/ut
 const TAU = Math.PI * 2;
 const simplex = new SimplexNoise();
 
+const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
+
 const getAngleDifference = (current, target) => {
 	let angle = target - current;
 	angle = (angle + Math.PI) % TAU - Math.PI;
@@ -55,76 +57,8 @@ class Stage {
 	}
 }
 
-class Mover {
-	constructor(position, target) {
-		this.position = position;
-		this.target = target;
-
-		// this.painting = painting;
-
-		this.velocity = new Vector();
-		this.velocity.length = 0.5 + (Math.random());
-		this.velocity.angle = Math.random() * TAU;
-
-		this.turnSpeed = 0.1 + ((Math.random() * 0.9)) * 0.1;
-	}
-
-	update(stageWidth, stageHeight, targets) {
-		wrappBBox(this.position, stageWidth, stageHeight);
-
-		this.target = Mover.getClosest(this.position, targets);
-
-		const targetAngle = Math.atan2(this.target.position.y - this.position.y, this.target.position.x - this.position.x);
-
-		this.velocity.angle = moveTowardsAngle(this.velocity.angle, targetAngle, this.turnSpeed);
-		this.position.addSelf(this.velocity);
-	}
-
-	draw(context) {
-		// this.painting.drawSelf(context, this.position, '#ff0000');
-	}
-
-	static getClosest(position, others) {
-		let [closest] = others;
-
-		others.forEach((other) => {
-			if (distanceBetween(position, other.position) < distanceBetween(position, closest.position)) {
-				closest = other;
-			}
-		});
-
-		return closest;
-	}
-}
-
-class Target {
-	constructor(position) {
-		this.position = position;
-		// this.painting = painting;
-
-		this.velocity = new Vector();
-		this.velocity.length = 0.5 + (Math.random());
-		this.velocity.angle = Math.random() * TAU;
-
-		this.turnSpeed = 0.1 + ((Math.random() * 0.9)) * 0.1;
-	}
-
-	update(stageWidth, stageHeight) {
-		wrappBBox(this.position, stageWidth, stageHeight);
-
-		this.position.addSelf(this.velocity);
-	}
-
-	draw(context) {
-		// this.painting.drawSelf(context, this.position, '#000');
-	}
-}
-
-const stage = new Stage(
-	document.querySelector('canvas'),
-	window.innerWidth,
-	window.innerHeight
-);
+const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
+const stageTrail = new Stage(document.querySelector('.js-canvas-trail'), window.innerWidth, window.innerHeight);
 
 const numMovers = 30;
 
@@ -151,12 +85,12 @@ const getVelocity = () => {
 function move() {
 	wrappBBox(this.position, this.stage.width, this.stage.height);
 
+	this.positionPrevious = this.position.clone();
 	this.position.addSelf(this.velocity);
 };
 
 function draw() {
 	const { stage: { context }, position, color } = this;
-
 
 	context.save();
 	context.translate(position.x, position.y);
@@ -170,20 +104,37 @@ function draw() {
 	context.restore();
 }
 
+const drawTrail = (from, to, color = '#ff0000') => {
+	const { context } = stageTrail;
+
+	context.save();
+
+	context.beginPath();
+	context.globalAlpha = 0.25;
+	context.strokeStyle = color;
+	context.moveTo(from.x, from.y);
+	context.lineTo(to.x, to.y);
+	context.stroke();
+	context.closePath();
+
+	context.restore();
+
+};
+
 const createTarget = () => {
 	return {
 		position: stage.getRandomPosition(),
 		velocity: getVelocity(),
-		color: '#ff0000',
+		color: randomArrayValue(['#fa87ba', '#fc4c83', '#d11f61', '#8d2c4a']),
 		stage,
 
-		update() {
-			const rand = Math.round(Math.random() * 20);
+		update(index) {
+			const scale = 0.01;
+			const z = performance.now() * 0.0001;
+			const noiseValue = simplex.noise3D((this.position.x + index) * scale,( this.position.y + index) * scale, z);
+			// const noiseValue = simplex.noise3D(this.position.x * scale, this.position.y * scale, performance.now() * 0.0001);
 
-			if (rand === 20) {
-				const change = (Math.random() > 0.5 ? -Math.PI / 2 : Math.PI / 2) * Math.random();
-				this.velocity.angle += change;
-			}
+			this.velocity.angle = noiseValue * TAU;
 		},
 
 		draw,
@@ -211,22 +162,27 @@ const createPredator = () => {
 		move,
 	};
 };
+
 const targets = new Array(numMovers).fill().map(() => createTarget());
 const predators = new Array(numMovers).fill().map(() => createPredator());
 
 const loop = () => {
 	stage.clear();
 
-	targets.forEach((target) => {
-		target.update();
+	targets.forEach((target, index) => {
+		target.update(index);
 		target.move();
 		target.draw()
+
+		drawTrail(target.positionPrevious, target.position, target.color);
 	});
 
 	predators.forEach((predator) => {
 		predator.update(targets);
 		predator.move();
 		predator.draw()
+
+		drawTrail(predator.positionPrevious, predator.position, '#000');
 	});
 
 	requestAnimationFrame(loop);

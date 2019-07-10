@@ -23,14 +23,24 @@
         }
 
         .canvas {
-            border: 1px solid #000;
+            position: absolute;
+            z-index: 10;
+
+            top: 0;
+            left: 0;
         }
+
+        .canvas--trail {
+            z-index: 1;
+        }
+
 	</style>
 </head>
 <body>
 
 <div class="container">
     <canvas class="canvas js-canvas" width="500" height="500"></canvas>
+    <canvas class="canvas canvas--trail js-canvas-trail" width="500" height="500"></canvas>
 </div>
 <script src="//unpkg.com/simplex-noise@2.4.0/simplex-noise"></script>
 <script src="main.js" type="module"></script>

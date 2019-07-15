@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Flock</title>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+
+			overflow: hidden;
+		}
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .canvas {
+            position: absolute;
+            z-index: 10;
+
+            top: 0;
+            left: 0;
+        }
+
+        .canvas--trail {
+            z-index: 1;
+        }
+
+    </style>
+
+    <title>Flock</title>
+</head>
+<body>
+
+<div class="container">
+    <canvas class="canvas js-canvas" width="500" height="500"></canvas>
+</div>
+<script src="//unpkg.com/simplex-noise@2.4.0/simplex-noise"></script>
+<script src="main.js" type="module"></script>
+
+</body>
+</html>

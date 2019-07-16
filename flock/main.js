@@ -173,10 +173,10 @@ const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth,
 
 const count = 100;
 const boids = new Array(count).fill().map((_, i) => {
-	const position = stage.getRandomPosition();
-	const mass = 1 + Math.random() * 5;
+	const position = stage.getCenter(); // stage.getRandomPosition();
+	const mass = 1; //  + Math.random() * 5;
 
-	const a = i * (TAU / count);
+	const a = Math.random() * TAU;
 	const l = 0.5 + Math.random() * 0.5;
 	const velocity = new Vector();
 

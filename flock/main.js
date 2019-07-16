@@ -1,11 +1,15 @@
 import Vector from '//rawgit.com/pimskie/vector/master/vector.js';
 
+const angleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
+
 const distanceBetween = (v1, v2) => {
 	// Approximation by using octagons approach
 	var x = v2.x - v1.x;
 	var y = v2.y - v1.y;
 	return 1.426776695 * Math.min(0.7071067812 * (Math.abs(x) + Math.abs(y)), Math.max(Math.abs(x), Math.abs(y)));
 };
+
+const simplex = new SimplexNoise();
 
 const TAU = Math.PI * 2;
 
@@ -40,12 +44,12 @@ class Boid {
 		this.checkBounds(stage);
 	}
 
-	draw(ctx) {
+	draw(ctx, hue) {
 		const armLength = 5;
 		const spread = Math.PI * 0.1;
 		const { angle } = this.velocity;
-		const hue = ((angle * 0.5) % TAU) * (180 / Math.PI);
-		const fill = `hsl(${hue}, 100%, 0%)`;
+		// const hue = ((angle * 0.5) % TAU) * (180 / Math.PI);
+		const fill = `hsl(${hue}, 100%, 50%)`;
 
 		ctx.save();
 		ctx.translate(this.position.x, this.position.y);
@@ -142,6 +146,25 @@ class Boid {
 		return flee;
 	}
 
+	goto(destination) {
+		return destination
+			.clone()
+			.subtract(this.position)
+			.multiply(0.0001);
+	}
+
+	getNoiseVector(time) {
+		const { x, y } = this.position;
+		const scale = 0.01;
+
+		const noise = simplex.noise3D(x * scale, y * scale, time);
+		const angle = TAU * noise;
+
+		const vector = new Vector(Math.cos(angle), Math.sin(angle));
+
+		return vector;
+	}
+
 	checkBounds(stage) {
 		const { width, height } = stage;
 
@@ -186,24 +209,24 @@ class Stage {
 
 		this.canvas.width = this.width;
 		this.canvas.height = this.height;
+
+		this.center = new Vector(this.centerX, this.centerY);
 	}
 
 	getRandomPosition() {
 		return new Vector(this.width * Math.random(), this.height * Math.random());
 	}
-
-	getCenter() {
-		return new Vector(this.centerX, this.centerY);
-	}
 }
 
+let time = 0;
+const timeUpdate = 0.01;
 
 const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
-const predator = stage.getCenter();
+const predator = stage.center.clone();
 
-const numBoids = 400;
+const numBoids = 200;
 const boids = new Array(numBoids).fill().map((_, i) => {
-	const position = stage.getCenter();
+	const position = stage.getRandomPosition();
 	const mass = 1;
 
 	const a = Math.random() * TAU;
@@ -222,17 +245,27 @@ const loop = () => {
 	stage.clear();
 
 	boids.forEach((boid, i) => {
+		const noiseForce = boid.getNoiseVector(time);
 		const { separation, alignment, cohesion } = boid.getForces(boids, 15, 100, 50);
 		const predatorForce = boid.flee(predator);
+		const directionalForce = boid.goto(stage.center);
 
+		boid.applyForce(noiseForce.multiplySelf(0.05));
+
+		boid.applyForce(directionalForce);
 		boid.applyForce(separation);
 		boid.applyForce(alignment);
 		boid.applyForce(cohesion);
 		boid.applyForce(predatorForce);
 
 		boid.update(stage);
-		boid.draw(stage.context);
+
+		const hue = angleBetween(stage.center, boid.position) * (180 / Math.PI) * 0.25;
+
+		boid.draw(stage.context, hue);
 	});
+
+	time += timeUpdate;
 
 	stats.end();
 

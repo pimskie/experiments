@@ -44,20 +44,21 @@ class Boid {
 		const armLength = 5;
 		const spread = Math.PI * 0.1;
 		const { angle } = this.velocity;
-		const lineWidth = this.mass * 0.5;
+		const h = (angle % TAU) * (180 / Math.PI);
+		const fill = `hsl(${h}, 100%, 50%)`;
 
 		ctx.save();
 		ctx.translate(this.position.x, this.position.y);
 		ctx.rotate(angle);
 
+		ctx.fillStyle = fill;
 		ctx.beginPath();
-		ctx.lineWidth = lineWidth;
 		ctx.moveTo(Math.cos(-spread - Math.PI) * armLength, Math.sin(-spread - Math.PI) * armLength);
 		ctx.lineTo(0, 0);
 		ctx.lineTo(Math.cos(spread - Math.PI) * armLength, Math.sin(spread - Math.PI) * armLength);
 
+		ctx.fill();
 		ctx.closePath();
-		ctx.stroke();
 		ctx.restore();
 	}
 
@@ -70,7 +71,6 @@ class Boid {
 
 		let cohesionCount = 0;
 		const cohesion = new Vector();
-
 
 		boids.forEach((boid) => {
 			if (boid === this) {
@@ -123,9 +123,24 @@ class Boid {
 		return { separation, alignment, cohesion };
 	}
 
-	// separation: steer to avoid crowding local flockmates
-	// This vector is normalized, and then scaled up proportionally to how close the boid is
-	// http://harry.me/blog/2011/02/17/neat-algorithms-flocking/
+	flee(predator) {
+		const fleeDistance = 300;
+
+		const difference = this.position.subtract(predator);
+		const distance = distanceBetween(this.position, predator);
+
+		const flee = new Vector();
+
+		// separation
+		if (distance <= fleeDistance) {
+			difference.normalize();
+
+			flee.addSelf(difference);
+			flee.multiplySelf(0.05);
+		}
+
+		return flee;
+	}
 
 	checkBounds(stage) {
 		const { width, height } = stage;
@@ -184,8 +199,9 @@ class Stage {
 
 
 const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
+const predator = stage.getCenter();
 
-const numBoids = 600;
+const numBoids = 400;
 const boids = new Array(numBoids).fill().map((_, i) => {
 	const position = stage.getCenter();
 	const mass = 1;
@@ -207,10 +223,13 @@ const loop = () => {
 
 	boids.forEach((boid, i) => {
 		const { separation, alignment, cohesion } = boid.getForces(boids, 15, 100, 50);
+		const predatorForce = boid.flee(predator);
 
 		boid.applyForce(separation);
 		boid.applyForce(alignment);
-		boid.applyForce(cohesion  );
+		boid.applyForce(cohesion);
+
+		boid.applyForce(predatorForce);
 
 		boid.update(stage);
 		boid.draw(stage.context);

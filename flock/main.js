@@ -110,18 +110,18 @@ class Boid {
 		});
 
 		if (separationCount > 0) {
-			separation.divideSelf(separationCount);
+			separation.divideSelf(separationCount).multiplySelf(2);
 		}
 
 		if (alignmentCount > 0) {
 			alignment.divideSelf(alignmentCount);
-			alignment.multiplySelf(0.02);
+			alignment.multiplySelf(0.2);
 		}
 
 		if (cohesionCount > 0) {
 			cohesion.divideSelf(cohesionCount);
 			cohesion.subtractSelf(this.position);
-			cohesion.length = 0.001;
+			cohesion.length = 0.01;
 		}
 
 		return { separation, alignment, cohesion };
@@ -195,7 +195,9 @@ class Stage {
 	}
 
 	clear() {
-		this.context.clearRect(0, 0, this.width, this.height);
+		this.context.fillStyle = 'rgba(255, 255, 255, 0.1)';
+		this.context.fillRect(0, 0, this.width, this.height);
+		// this.context.clearRect(0, 0, this.width, this.height);
 	}
 
 	setSize(width, height) {
@@ -224,13 +226,13 @@ const timeUpdate = 0.01;
 const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
 const predator = stage.center.clone();
 
-const numBoids = 200;
+const numBoids = 100;
 const boids = new Array(numBoids).fill().map((_, i) => {
-	const position = stage.getRandomPosition();
+	const position = stage.center.clone();
 	const mass = 1;
 
 	const a = Math.random() * TAU;
-	const l = 0.5 + Math.random() * 0.5;
+	const l = 1;
 	const velocity = new Vector();
 
 	velocity.length = l;
@@ -246,21 +248,21 @@ const loop = () => {
 
 	boids.forEach((boid, i) => {
 		const noiseForce = boid.getNoiseVector(time);
-		const { separation, alignment, cohesion } = boid.getForces(boids, 15, 100, 50);
+		const { separation, alignment, cohesion } = boid.getForces(boids, 50, 50, 50);
 		const predatorForce = boid.flee(predator);
 		const directionalForce = boid.goto(stage.center);
 
-		boid.applyForce(noiseForce.multiplySelf(0.05));
+		// boid.applyForce(noiseForce.multiplySelf(0.05));
 
-		boid.applyForce(directionalForce);
-		boid.applyForce(separation);
-		boid.applyForce(alignment);
-		boid.applyForce(cohesion);
+		// boid.applyForce(directionalForce);
+		boid.applyForce(separation.multiplySelf(1));
+		boid.applyForce(alignment.multiplySelf(1));
+		boid.applyForce(cohesion.multiplySelf(1));
 		boid.applyForce(predatorForce);
 
 		boid.update(stage);
 
-		const hue = angleBetween(stage.center, boid.position) * (180 / Math.PI) * 0.25;
+		const hue = 1 + (Math.cos(time) * 120); // angleBetween(stage.center, boid.position) * (180 / Math.PI) * 0.25;
 
 		boid.draw(stage.context, hue);
 	});

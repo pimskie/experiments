@@ -1,10 +1,18 @@
 import Vector from '//rawgit.com/pimskie/vector/master/vector.js';
-import { wrappBBox, distanceBetween, clamp } from '//rawgit.com/pimskie/utils/master/utils.js';
+
+const distanceBetween = (p1, p2) => {
+	// Approximation by using octagons approach
+	var x = p2.x - p1.x;
+	var y = p2.y - p1.y;
+	return 1.426776695 * Math.min(0.7071067812 * (Math.abs(x) + Math.abs(y)), Math.max(Math.abs(x), Math.abs(y)));
+};
 
 const TAU = Math.PI * 2;
-const simplex = new SimplexNoise();
 
-const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
+const stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+
+document.body.appendChild(stats.dom);
 
 class Boid {
 	constructor({ position, velocity, mass }) {
@@ -23,7 +31,7 @@ class Boid {
 
 	update(stage) {
 		this.velocity.addSelf(this.acceleration);
-		this.velocity.limit(2);
+		this.velocity.limit(1);
 
 		this.position.addSelf(this.velocity);
 
@@ -33,7 +41,7 @@ class Boid {
 	}
 
 	draw(ctx) {
-		const armLength = 20;
+		const armLength = 10;
 		const spread = Math.PI * 0.1;
 		const { angle } = this.velocity;
 		const lineWidth = this.mass * 0.5;
@@ -54,51 +62,77 @@ class Boid {
 	}
 
 	// cohesion: steer to move towards the average position (center of mass) of local flockmates
-	getCohesion(others) {
-		const centerOfMass = others.reduce((com, boid) => {
-			com.addSelf(boid.position.clone());
+	getCohesion(boids, perception) {
+		const sum = new Vector();
+		let numNeighbours = 0;
 
-			return com;
-		}, new Vector());
+		boids.forEach((neighbour) => {
+			const distance = distanceBetween(this.position, neighbour.position);
 
-		if (others.length) {
-			centerOfMass.subtractSelf(this.position);
-			centerOfMass.divideSelf(Math.max(others.length - 1, 1));
-			centerOfMass.multiplySelf(0.00001);
+			if (neighbour === this || distance > perception) {
+				return;
+			}
+
+			sum.addSelf(neighbour.position.clone());
+
+			numNeighbours += 1;
+		});
+
+		if (numNeighbours > 0) {
+			sum.divideSelf(numNeighbours);
+			sum.subtractSelf(this.position);
+			sum.length = 0.001;
 		}
 
-		return centerOfMass;
+		return sum;
 	}
 
 	// separation: steer to avoid crowding local flockmates
 	// This vector is normalized, and then scaled up proportionally to how close the boid is
 	// http://harry.me/blog/2011/02/17/neat-algorithms-flocking/
-	getSeparation(neighbours) {
+	getSeparation(boids, perception) {
 		const separation = new Vector();
 
-		neighbours.forEach((neighbour) => {
+		let numNeighbours = 0;
+
+		boids.forEach((neighbour) => {
 			const distance = distanceBetween(this.position, neighbour.position);
+
+			if (neighbour === this || distance > perception) {
+				return;
+			}
 
 			const diff = this.position.subtract(neighbour.position);
 			diff.normalize();
 			diff.divideSelf(Math.max(distance, 1));
 
 			separation.addSelf(diff);
+
+			numNeighbours += 1;
 		});
 
-		separation.divideSelf(Math.max(neighbours.length, 1));
+		separation.divideSelf(Math.max(numNeighbours, 1));
 
 		return separation;
 	}
 
-	getAllignment(others) {
-		const velocity = others.reduce((vel, boid) => {
-			vel.addSelf(boid.velocity);
+	getAllignment(boids, perception) {
+		const velocity = new Vector();
+		let numNeighbours = 0;
 
-			return vel;
-		}, new Vector());
+		boids.forEach((neighbour) => {
+			const distance = distanceBetween(this.position, neighbour.position);
 
-		velocity.divideSelf(Math.max(1, others.length - 1));
+			if (neighbour === this || distance > perception) {
+				return;
+			}
+
+			velocity.addSelf(neighbour.velocity);
+
+			numNeighbours += 1;
+		});
+
+		velocity.divideSelf(Math.max(1, numNeighbours));
 		velocity.multiplySelf(0.02);
 
 		return velocity;
@@ -106,15 +140,6 @@ class Boid {
 
 	checkBounds(stage) {
 		const { width, height } = stage;
-		const { x, y } = this.position;
-
-		// if (x < 0 || x > width) {
-		// 	this.velocity.x *= -1
-		// }
-
-		// if (y < 0 || y > height) {
-		// 	this.velocity.y *= -1
-		// }
 
 		if (this.position.x > width) {
 			this.position.x = 0;
@@ -173,8 +198,8 @@ const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth,
 
 const count = 100;
 const boids = new Array(count).fill().map((_, i) => {
-	const position = stage.getCenter(); // stage.getRandomPosition();
-	const mass = 1; //  + Math.random() * 5;
+	const position = stage.getCenter();
+	const mass = 1;
 
 	const a = Math.random() * TAU;
 	const l = 0.5 + Math.random() * 0.5;
@@ -187,15 +212,19 @@ const boids = new Array(count).fill().map((_, i) => {
 });
 
 
+const separationProximity = 10;
+const alignmentProximity = 50;
+const cohesionProximity = 50;
+
 const loop = () => {
+	stats.begin();
+
 	stage.clear();
 
 	boids.forEach((boid, i) => {
-		const neighbours = boids.filter(b => b !== boid && distanceBetween(b.position, boid.position) <= 50);
-
-		const separation = boid.getSeparation(neighbours);
-		const alignment = boid.getAllignment(neighbours);
-		const cohesion = boid.getCohesion(neighbours);
+		const separation = boid.getSeparation(boids, separationProximity);
+		const alignment = boid.getAllignment(boids, alignmentProximity);
+		const cohesion = boid.getCohesion(boids, cohesionProximity);
 
 		boid.applyForce(separation);
 		boid.applyForce(alignment);
@@ -204,6 +233,8 @@ const loop = () => {
 		boid.update(stage);
 		boid.draw(stage.context);
 	});
+
+	stats.end();
 
 	requestAnimationFrame(loop);
 };

@@ -44,8 +44,8 @@ class Boid {
 		const armLength = 5;
 		const spread = Math.PI * 0.1;
 		const { angle } = this.velocity;
-		const h = (angle % TAU) * (180 / Math.PI);
-		const fill = `hsl(${h}, 100%, 50%)`;
+		const hue = ((angle * 0.5) % TAU) * (180 / Math.PI);
+		const fill = `hsl(${hue}, 100%, 0%)`;
 
 		ctx.save();
 		ctx.translate(this.position.x, this.position.y);
@@ -228,7 +228,6 @@ const loop = () => {
 		boid.applyForce(separation);
 		boid.applyForce(alignment);
 		boid.applyForce(cohesion);
-
 		boid.applyForce(predatorForce);
 
 		boid.update(stage);
@@ -244,4 +243,9 @@ loop();
 
 window.addEventListener('resize', () => {
 	stage.setSize(window.innerWidth, window.innerHeight);
+});
+
+document.body.addEventListener('pointermove', (e) => {
+	predator.x = e.clientX;
+	predator.y = e.clientY;
 });

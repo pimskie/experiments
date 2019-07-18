@@ -11,15 +11,12 @@ stats.showPanel(0);
 document.body.appendChild(stats.dom);
 
 
-let time = 0;
-const timeUpdate = 0.01;
-
 const stage = new Stage(document.querySelector('.js-canvas'), 750, 750);
-const grid = new Grid({ width: stage.width, height: stage.height, cols: 20, rows: 20 });
+const grid = new Grid({ width: stage.width, height: stage.height, cols: 10, rows: 10 });
 
 const predator = stage.center.clone();
 
-const numBoids = 700;
+const numBoids = 500;
 const boids = new Array(numBoids).fill().map((_, i) => {
 	const position = stage.getRandomPosition();
 	const mass = 1;
@@ -38,22 +35,32 @@ const loop = () => {
 	stats.begin();
 
 	stage.clear();
-	// grid.draw(stage.context);
+	grid.draw(stage.context);
 
-	const perception = grid.spacingX * 0.5;
+	const perception = 50;
 
-	boids.forEach(b => b.cellIndex = grid.getCellIndex(b.position));
+	boids.forEach((b) => {
+		const regionCells = grid.getRegionCells(b.position);
+		const [cellIndex] = regionCells;
+
+		b.cellIndex = cellIndex;
+		b.regionCells = regionCells;
+	});
 
 	boids.forEach((boid, i) => {
-		const { separation, alignment, cohesion } = boid.getForces(boids, perception, perception, perception);
+		if (i === 0) {
+			//
+		}
+
+		const { separation, alignment, cohesion } = boid.getForces(boids, 20, perception, perception);
 		const predatorForce = boid.flee(predator);
 		const directionalForce = boid.goto(stage.center);
 
-		boid.applyForce(directionalForce);
+		// boid.applyForce(directionalForce);
 		boid.applyForce(separation);
 		boid.applyForce(alignment);
 		boid.applyForce(cohesion);
-		boid.applyForce(predatorForce);
+		// boid.applyForce(predatorForce);
 
 		boid.update(stage);
 
@@ -61,8 +68,6 @@ const loop = () => {
 
 		boid.draw(stage.context, hue);
 	});
-
-	time += timeUpdate;
 
 	stats.end();
 

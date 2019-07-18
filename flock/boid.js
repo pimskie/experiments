@@ -68,14 +68,12 @@ class Boid {
 		let cohesionCount = 0;
 		const cohesion = new Vector();
 
-		const dir = { x: 0, y: 0 };
-
 		boids.forEach((boid) => {
 			if (boid === this) {
 				return;
 			}
 
-			if (boid.cellIndex !== this.cellIndex) {
+			if (!this.regionCells.includes(boid.cellIndex)) {
 				return;
 			}
 

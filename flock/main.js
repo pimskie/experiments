@@ -49,7 +49,7 @@ class Boid {
 		const spread = Math.PI * 0.1;
 		const { angle } = this.velocity;
 		// const hue = ((angle * 0.5) % TAU) * (180 / Math.PI);
-		const fill = `hsl(${hue}, 100%, 50%)`;
+		const fill = `hsl(${hue}, 100%, 10%)`;
 
 		ctx.save();
 		ctx.translate(this.position.x, this.position.y);
@@ -76,10 +76,13 @@ class Boid {
 		let cohesionCount = 0;
 		const cohesion = new Vector();
 
+		const dir = { x: 0, y: 0 };
+
 		boids.forEach((boid) => {
 			if (boid === this) {
 				return;
 			}
+
 
 			const difference = this.position.subtract(boid.position);
 			const distance = distanceBetween(this.position, boid.position);
@@ -196,8 +199,8 @@ class Stage {
 
 	clear() {
 		this.context.fillStyle = 'rgba(255, 255, 255, 0.1)';
-		this.context.fillRect(0, 0, this.width, this.height);
-		// this.context.clearRect(0, 0, this.width, this.height);
+		// this.context.fillRect(0, 0, this.width, this.height);
+		this.context.clearRect(0, 0, this.width, this.height);
 	}
 
 	setSize(width, height) {
@@ -226,9 +229,9 @@ const timeUpdate = 0.01;
 const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
 const predator = stage.center.clone();
 
-const numBoids = 100;
+const numBoids = 400;
 const boids = new Array(numBoids).fill().map((_, i) => {
-	const position = stage.center.clone();
+	const position = stage.getRandomPosition();
 	const mass = 1;
 
 	const a = Math.random() * TAU;

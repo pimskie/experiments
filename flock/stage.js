@@ -9,9 +9,12 @@ class Stage {
 	}
 
 	clear() {
-		this.context.fillStyle = 'rgba(255, 255, 255, 0.1)';
-		// this.context.fillRect(0, 0, this.width, this.height);
-		this.context.clearRect(0, 0, this.width, this.height);
+		// this.context.clearRect(0, 0, this.width, this.height);
+
+		this.context.globalCompositeOperation = 'destination-out';
+		this.context.fillStyle = 'rgba(0, 0, 0, 0.02)';
+		this.context.fillRect(0, 0, this.width, this.height);
+		this.context.globalCompositeOperation = 'lighter';
 	}
 
 	setSize(width, height) {

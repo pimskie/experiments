@@ -1,27 +1,28 @@
 import { wrappBBox } from 'https://rawgit.com/pimskie/utils/master/utils.js?d=44';
 
 class Grid {
-	constructor({ width, height, cols, rows }) {
+	constructor({ width, height, space }) {
+		this.space = space;
+
+		this.setSize(width, height);
+	}
+
+	setSize(width, height) {
 		this.width = width;
 		this.height = height;
 
-		this.cols = cols;
-		this.rows = rows;
-
-		this.spacingX = this.width / this.cols;
-		this.spacingY = this.height / this.rows;
-
-		console.log(this.cols * this.rows)
+		this.cols = Math.ceil(this.width / this.space);
+		this.rows = Math.ceil(this.height / this.space);
 	}
 
 	draw(ctx) {
 		ctx.strokeStyle = '#484848';
 
-		for (let x = 0; x < this.width; x += this.spacingX) {
+		for (let x = 0; x < this.width; x += this.space) {
 			this.drawLine(ctx, { x, y: 0 }, { x, y: this.height });
 		}
 
-		for (let y = 0; y < this.height; y += this.spacingY) {
+		for (let y = 0; y < this.height; y += this.space) {
 			this.drawLine(ctx, { x: 0, y }, { x: this.width, y });
 		}
 	}
@@ -35,8 +36,8 @@ class Grid {
 	}
 
 	getCellIndex({ x = 0, y = 0 }) {
-		const col = Math.ceil(x / this.spacingX);
-		const row = Math.ceil(y / this.spacingY);
+		const col = Math.ceil(x / this.space);
+		const row = Math.ceil(y / this.space);
 
 		const index = (Math.max(0, row - 1) * this.cols) + col;
 
@@ -45,12 +46,12 @@ class Grid {
 
 	getRegionCells(position) {
 		const { x, y } = position;
-		const { spacingX: sx, spacingY: sy, width, height } = this;
+		const { space } = this;
 
-		const above = wrappBBox({ x, y: y - sy }, width, height);
-		const right = wrappBBox({ x: x + sx, y }, width, height);
-		const under = wrappBBox({ x, y: y + sy }, width, height);
-		const left = wrappBBox({ x: x - sx, y }, width, height);
+		const above = { x, y: y - space };
+		const right = { x: x + space, y };
+		const under = { x, y: y + space };
+		const left = { x: x - space, y };
 
 		return [
 			this.getCellIndex(position),

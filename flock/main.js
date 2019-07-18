@@ -11,12 +11,14 @@ stats.showPanel(0);
 document.body.appendChild(stats.dom);
 
 
-const stage = new Stage(document.querySelector('.js-canvas'), 750, 750);
-const grid = new Grid({ width: stage.width, height: stage.height, cols: 10, rows: 10 });
-
+const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
+const grid = new Grid({ width: stage.width, height: stage.height, space: 50 });
 const predator = stage.center.clone();
 
-const numBoids = 500;
+const perception = 100;
+let scatter = false;
+
+const numBoids = 400;
 const boids = new Array(numBoids).fill().map((_, i) => {
 	const position = stage.getRandomPosition();
 	const mass = 1;
@@ -35,9 +37,7 @@ const loop = () => {
 	stats.begin();
 
 	stage.clear();
-	grid.draw(stage.context);
-
-	const perception = 50;
+	// grid.draw(stage.context);
 
 	boids.forEach((b) => {
 		const regionCells = grid.getRegionCells(b.position);
@@ -48,25 +48,24 @@ const loop = () => {
 	});
 
 	boids.forEach((boid, i) => {
-		if (i === 0) {
-			//
-		}
-
-		const { separation, alignment, cohesion } = boid.getForces(boids, 20, perception, perception);
-		const predatorForce = boid.flee(predator);
+		const { separation, alignment, cohesion } = boid.getForces(boids, 50, perception, perception);
 		const directionalForce = boid.goto(stage.center);
 
-		// boid.applyForce(directionalForce);
-		boid.applyForce(separation);
-		boid.applyForce(alignment);
+		boid.applyForce(directionalForce.multiplySelf(0.25));
 		boid.applyForce(cohesion);
-		// boid.applyForce(predatorForce);
+		boid.applyForce(alignment);
+		boid.applyForce(separation.multiplySelf(2));
 
-		boid.update(stage);
+		if (scatter) {
+			const predatorForce = boid.flee(predator, stage.width * 0.1);
+			boid.applyForce(predatorForce);
+
+		}
 
 		const hue = (boid.cellIndex / (grid.cols * grid.rows)) * 360;
 
-		boid.draw(stage.context, hue);
+		boid.update(hue, stage);
+		boid.draw(stage.context);
 	});
 
 	stats.end();
@@ -78,9 +77,18 @@ loop();
 
 window.addEventListener('resize', () => {
 	stage.setSize(window.innerWidth, window.innerHeight);
+	grid.setSize(stage.width, stage.height);
 });
 
 document.body.addEventListener('pointermove', (e) => {
 	predator.x = e.clientX;
 	predator.y = e.clientY;
+});
+
+document.body.addEventListener('pointerdown', () => {
+	scatter = true;
+});
+
+document.body.addEventListener('pointerup', () => {
+	scatter = false;
 });

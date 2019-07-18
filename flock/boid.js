@@ -17,6 +17,11 @@ class Boid {
 		this.mass = mass;
 
 		this.acceleration = new Vector();
+
+		this.cellIndex = 0;
+		this.regionCells = [];
+
+		this.hue = 0;
 	}
 
 	applyForce(force) {
@@ -25,7 +30,9 @@ class Boid {
 		this.acceleration.addSelf(force.divideSelf(this.mass));
 	}
 
-	update(stage) {
+	update(hueTarget, stage) {
+		this.hue += (hueTarget - this.hue) * 0.05;
+
 		this.velocity.addSelf(this.acceleration);
 		this.velocity.limit(1.5);
 
@@ -36,22 +43,18 @@ class Boid {
 		this.checkBounds(stage);
 	}
 
-	draw(ctx, hue) {
+	draw(ctx) {
 		const armLength = 5;
 		const spread = Math.PI * 0.1;
 		const { angle } = this.velocity;
-		// const hue = ((angle * 0.5) % TAU) * (180 / Math.PI);
-		const fill = `hsl(${hue}, 100%, 50%)`;
+		const fill = `hsl(${this.hue}, 100%, 60%)`;
 
 		ctx.save();
 		ctx.translate(this.position.x, this.position.y);
-		ctx.rotate(angle);
 
 		ctx.fillStyle = fill;
 		ctx.beginPath();
-		ctx.moveTo(Math.cos(-spread - Math.PI) * armLength, Math.sin(-spread - Math.PI) * armLength);
-		ctx.lineTo(0, 0);
-		ctx.lineTo(Math.cos(spread - Math.PI) * armLength, Math.sin(spread - Math.PI) * armLength);
+		ctx.arc(0, 0, 1.5, 0, TAU, false);
 
 		ctx.fill();
 		ctx.closePath();
@@ -106,7 +109,7 @@ class Boid {
 		});
 
 		if (separationCount > 0) {
-			separation.divideSelf(separationCount).multiplySelf(2);
+			separation.divideSelf(separationCount);
 		}
 
 		if (alignmentCount > 0) {
@@ -123,20 +126,17 @@ class Boid {
 		return { separation, alignment, cohesion };
 	}
 
-	flee(predator) {
-		const fleeDistance = 300;
-
+	flee(predator, perception = 100) {
 		const difference = this.position.subtract(predator);
 		const distance = distanceBetween(this.position, predator);
 
 		const flee = new Vector();
 
 		// separation
-		if (distance <= fleeDistance) {
-			difference.normalize();
+		if (distance <= perception) {
+			difference.normalize().multiplySelf(distance / perception);
 
 			flee.addSelf(difference);
-			flee.multiplySelf(0.05);
 		}
 
 		return flee;

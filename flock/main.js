@@ -2,7 +2,7 @@ import Vector from '//rawgit.com/pimskie/vector/master/vector.js';
 
 import Stage from './stage.js';
 import Boid from './boid.js';
-import Grid from './grid.js';
+// import Grid from './grid.js';
 
 const TAU = Math.PI * 2;
 
@@ -11,7 +11,7 @@ stats.showPanel(0);
 document.body.appendChild(stats.dom);
 
 const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
-const grid = new Grid({ width: stage.width, height: stage.height, space: 50 });
+// const grid = new Grid({ width: stage.width, height: stage.height, space: 50 });
 const predator = stage.center.clone();
 
 let scatter = false;
@@ -40,13 +40,13 @@ const loop = () => {
 	stats.begin();
 	stage.clear();
 
-	boids.forEach((b) => {
-		const regionCells = grid.getRegionCells(b.position);
-		const [cellIndex] = regionCells;
+	// boids.forEach((b) => {
+	// 	const regionCells = grid.getRegionCells(b.position);
+	// 	const [cellIndex] = regionCells;
 
-		b.cellIndex = cellIndex;
-		b.regionCells = regionCells;
-	});
+	// 	b.cellIndex = cellIndex;
+	// 	b.regionCells = regionCells;
+	// });
 
 	const perception = controlPerception.value;
 
@@ -80,7 +80,7 @@ loop();
 
 window.addEventListener('resize', () => {
 	stage.setSize(window.innerWidth, window.innerHeight);
-	grid.setSize(stage.width, stage.height);
+	// grid.setSize(stage.width, stage.height);
 });
 
 document.body.addEventListener('pointermove', (e) => {

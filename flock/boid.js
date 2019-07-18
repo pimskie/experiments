@@ -44,9 +44,6 @@ class Boid {
 	}
 
 	draw(ctx) {
-		const armLength = 5;
-		const spread = Math.PI * 0.1;
-		const { angle } = this.velocity;
 		const fill = `hsl(${this.hue}, 100%, 60%)`;
 
 		ctx.save();
@@ -55,7 +52,6 @@ class Boid {
 		ctx.fillStyle = fill;
 		ctx.beginPath();
 		ctx.arc(0, 0, 1.5, 0, TAU, false);
-
 		ctx.fill();
 		ctx.closePath();
 		ctx.restore();
@@ -76,9 +72,9 @@ class Boid {
 				return;
 			}
 
-			if (!this.regionCells.includes(boid.cellIndex)) {
-				return;
-			}
+			// if (!this.regionCells.includes(boid.cellIndex)) {
+			// 	return;
+			// }
 
 			const difference = this.position.subtract(boid.position);
 			const distance = distanceBetween(this.position, boid.position);
@@ -128,13 +124,14 @@ class Boid {
 
 	flee(predator, perception = 100) {
 		const difference = this.position.subtract(predator);
-		const distance = distanceBetween(this.position, predator);
+		const distance = difference.length;
+		const force = distance / perception;
 
 		const flee = new Vector();
 
 		// separation
 		if (distance <= perception) {
-			difference.normalize().multiplySelf(distance / perception);
+			difference.normalize().multiplySelf(force);
 
 			flee.addSelf(difference);
 		}

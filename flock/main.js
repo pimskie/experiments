@@ -20,6 +20,7 @@ const numBoids = 400;
 const controlSeparation = document.getElementById('separation');
 const controlCohesion = document.getElementById('cohesion');
 const controlAlignment = document.getElementById('alignment');
+const controlPerception = document.getElementById('perception');
 
 const boids = new Array(numBoids).fill().map((_, i) => {
 	const position = stage.getRandomPosition();
@@ -47,8 +48,10 @@ const loop = () => {
 		b.regionCells = regionCells;
 	});
 
+	const perception = controlPerception.value;
+
 	boids.forEach((boid, i) => {
-		const { separation, alignment, cohesion } = boid.getForces(boids, 50, 100, 100);
+		const { separation, alignment, cohesion } = boid.getForces(boids, perception * 0.5, perception, perception);
 		const directionalForce = boid.goto(stage.center);
 
 		boid.applyForce(directionalForce.multiplySelf(0.25));
@@ -58,12 +61,12 @@ const loop = () => {
 
 		if (scatter) {
 			const predatorForce = boid.flee(predator, stage.width * 0.1);
+
 			boid.applyForce(predatorForce);
 
 		}
 
-		const hue = 180 + Math.cos((boid.cellIndex / grid.numCells) * 2) * 180;
-
+		const hue = 180 + (Math.cos((boid.position.x + boid.position.y) * 0.001) * 180);
 		boid.update(hue, stage);
 		boid.draw(stage.context);
 	});

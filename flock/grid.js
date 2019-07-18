@@ -1,5 +1,3 @@
-import { wrappBBox } from 'https://rawgit.com/pimskie/utils/master/utils.js?d=44';
-
 class Grid {
 	constructor({ width, height, space }) {
 		this.space = space;

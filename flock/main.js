@@ -1,235 +1,25 @@
 import Vector from '//rawgit.com/pimskie/vector/master/vector.js';
 
-const angleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
-
-const distanceBetween = (v1, v2) => {
-	// Approximation by using octagons approach
-	var x = v2.x - v1.x;
-	var y = v2.y - v1.y;
-	return 1.426776695 * Math.min(0.7071067812 * (Math.abs(x) + Math.abs(y)), Math.max(Math.abs(x), Math.abs(y)));
-};
-
-const simplex = new SimplexNoise();
+import Stage from './stage.js';
+import Boid from './boid.js';
+import Grid from './grid.js';
 
 const TAU = Math.PI * 2;
 
 const stats = new Stats();
-stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-
+stats.showPanel(0);
 document.body.appendChild(stats.dom);
 
-class Boid {
-	constructor({ position, velocity, mass }) {
-		this.position = position;
-		this.velocity = velocity;
-		this.mass = mass;
-
-		this.acceleration = new Vector();
-	}
-
-	applyForce(force) {
-		// force = mass * acceleration
-		// acceleration = force / mass
-		this.acceleration.addSelf(force.divideSelf(this.mass));
-	}
-
-	update(stage) {
-		this.velocity.addSelf(this.acceleration);
-		this.velocity.limit(1.5);
-
-		this.position.addSelf(this.velocity);
-
-		this.acceleration.multiplySelf(0);
-
-		this.checkBounds(stage);
-	}
-
-	draw(ctx, hue) {
-		const armLength = 5;
-		const spread = Math.PI * 0.1;
-		const { angle } = this.velocity;
-		// const hue = ((angle * 0.5) % TAU) * (180 / Math.PI);
-		const fill = `hsl(${hue}, 100%, 10%)`;
-
-		ctx.save();
-		ctx.translate(this.position.x, this.position.y);
-		ctx.rotate(angle);
-
-		ctx.fillStyle = fill;
-		ctx.beginPath();
-		ctx.moveTo(Math.cos(-spread - Math.PI) * armLength, Math.sin(-spread - Math.PI) * armLength);
-		ctx.lineTo(0, 0);
-		ctx.lineTo(Math.cos(spread - Math.PI) * armLength, Math.sin(spread - Math.PI) * armLength);
-
-		ctx.fill();
-		ctx.closePath();
-		ctx.restore();
-	}
-
-	getForces(boids, separationPerception, alignmentPerception, cohesionPerception) {
-		let separationCount = 0;
-		const separation = new Vector();
-
-		let alignmentCount = 0;
-		const alignment = new Vector();
-
-		let cohesionCount = 0;
-		const cohesion = new Vector();
-
-		const dir = { x: 0, y: 0 };
-
-		boids.forEach((boid) => {
-			if (boid === this) {
-				return;
-			}
-
-
-			const difference = this.position.subtract(boid.position);
-			const distance = distanceBetween(this.position, boid.position);
-
-			// separation
-			if (distance <= separationPerception) {
-				difference.normalize();
-				difference.divideSelf(Math.max(distance, 1));
-
-				separation.addSelf(difference);
-
-				separationCount++;
-			}
-
-			// alignment
-			if (distance <= alignmentPerception) {
-				alignment.addSelf(boid.velocity);
-
-				alignmentCount++;
-			}
-
-			// cohesion
-			if (distance <= cohesionPerception) {
-				cohesion.addSelf(boid.position);
-
-				cohesionCount++;
-			}
-		});
-
-		if (separationCount > 0) {
-			separation.divideSelf(separationCount).multiplySelf(2);
-		}
-
-		if (alignmentCount > 0) {
-			alignment.divideSelf(alignmentCount);
-			alignment.multiplySelf(0.2);
-		}
-
-		if (cohesionCount > 0) {
-			cohesion.divideSelf(cohesionCount);
-			cohesion.subtractSelf(this.position);
-			cohesion.length = 0.01;
-		}
-
-		return { separation, alignment, cohesion };
-	}
-
-	flee(predator) {
-		const fleeDistance = 300;
-
-		const difference = this.position.subtract(predator);
-		const distance = distanceBetween(this.position, predator);
-
-		const flee = new Vector();
-
-		// separation
-		if (distance <= fleeDistance) {
-			difference.normalize();
-
-			flee.addSelf(difference);
-			flee.multiplySelf(0.05);
-		}
-
-		return flee;
-	}
-
-	goto(destination) {
-		return destination
-			.clone()
-			.subtract(this.position)
-			.multiply(0.0001);
-	}
-
-	getNoiseVector(time) {
-		const { x, y } = this.position;
-		const scale = 0.01;
-
-		const noise = simplex.noise3D(x * scale, y * scale, time);
-		const angle = TAU * noise;
-
-		const vector = new Vector(Math.cos(angle), Math.sin(angle));
-
-		return vector;
-	}
-
-	checkBounds(stage) {
-		const { width, height } = stage;
-
-		if (this.position.x > width) {
-			this.position.x = 0;
-		}
-
-		if (this.position.x < 0) {
-			this.position.x = width;
-		}
-
-		if (this.position.y > height) {
-			this.position.y = 0;
-		}
-
-		if (this.position.y < 0) {
-			this.position.y = height;
-		}
-	}
-}
-
-class Stage {
-	constructor(canvas, width, height) {
-		this.canvas = canvas;
-		this.context = this.canvas.getContext('2d');
-
-		this.setSize(width, height);
-	}
-
-	clear() {
-		this.context.fillStyle = 'rgba(255, 255, 255, 0.1)';
-		// this.context.fillRect(0, 0, this.width, this.height);
-		this.context.clearRect(0, 0, this.width, this.height);
-	}
-
-	setSize(width, height) {
-		this.width = width;
-		this.height = height;
-
-		this.centerX = this.width * 0.5;
-		this.centerY = this.height * 0.5;
-
-		this.radius = Math.min(this.width, this.height) * 0.5;
-
-		this.canvas.width = this.width;
-		this.canvas.height = this.height;
-
-		this.center = new Vector(this.centerX, this.centerY);
-	}
-
-	getRandomPosition() {
-		return new Vector(this.width * Math.random(), this.height * Math.random());
-	}
-}
 
 let time = 0;
 const timeUpdate = 0.01;
 
-const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
+const stage = new Stage(document.querySelector('.js-canvas'), 750, 750);
+const grid = new Grid({ width: stage.width, height: stage.height, cols: 20, rows: 20 });
+
 const predator = stage.center.clone();
 
-const numBoids = 400;
+const numBoids = 700;
 const boids = new Array(numBoids).fill().map((_, i) => {
 	const position = stage.getRandomPosition();
 	const mass = 1;
@@ -248,24 +38,26 @@ const loop = () => {
 	stats.begin();
 
 	stage.clear();
+	// grid.draw(stage.context);
+
+	const perception = grid.spacingX * 0.5;
+
+	boids.forEach(b => b.cellIndex = grid.getCellIndex(b.position));
 
 	boids.forEach((boid, i) => {
-		const noiseForce = boid.getNoiseVector(time);
-		const { separation, alignment, cohesion } = boid.getForces(boids, 50, 50, 50);
+		const { separation, alignment, cohesion } = boid.getForces(boids, perception, perception, perception);
 		const predatorForce = boid.flee(predator);
 		const directionalForce = boid.goto(stage.center);
 
-		// boid.applyForce(noiseForce.multiplySelf(0.05));
-
-		// boid.applyForce(directionalForce);
-		boid.applyForce(separation.multiplySelf(1));
-		boid.applyForce(alignment.multiplySelf(1));
-		boid.applyForce(cohesion.multiplySelf(1));
+		boid.applyForce(directionalForce);
+		boid.applyForce(separation);
+		boid.applyForce(alignment);
+		boid.applyForce(cohesion);
 		boid.applyForce(predatorForce);
 
 		boid.update(stage);
 
-		const hue = 1 + (Math.cos(time) * 120); // angleBetween(stage.center, boid.position) * (180 / Math.PI) * 0.25;
+		const hue = (boid.cellIndex / (grid.cols * grid.rows)) * 360;
 
 		boid.draw(stage.context, hue);
 	});

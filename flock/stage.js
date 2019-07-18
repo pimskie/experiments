@@ -12,7 +12,7 @@ class Stage {
 		// this.context.clearRect(0, 0, this.width, this.height);
 
 		this.context.globalCompositeOperation = 'destination-out';
-		this.context.fillStyle = 'rgba(0, 0, 0, 0.02)';
+		this.context.fillStyle = 'rgba(0, 0, 0, 0.05)';
 		this.context.fillRect(0, 0, this.width, this.height);
 		this.context.globalCompositeOperation = 'lighter';
 	}

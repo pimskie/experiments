@@ -13,10 +13,12 @@ class Grid {
 
 		this.cols = Math.ceil(this.width / this.space);
 		this.rows = Math.ceil(this.height / this.space);
+		this.numCells = this.cols * this.rows;
 	}
 
 	draw(ctx) {
 		ctx.strokeStyle = '#484848';
+		ctx.lineWidth = 0.5;
 
 		for (let x = 0; x < this.width; x += this.space) {
 			this.drawLine(ctx, { x, y: 0 }, { x, y: this.height });

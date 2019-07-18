@@ -10,15 +10,17 @@ const stats = new Stats();
 stats.showPanel(0);
 document.body.appendChild(stats.dom);
 
-
 const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
 const grid = new Grid({ width: stage.width, height: stage.height, space: 50 });
 const predator = stage.center.clone();
 
-const perception = 100;
 let scatter = false;
-
 const numBoids = 400;
+
+const controlSeparation = document.getElementById('separation');
+const controlCohesion = document.getElementById('cohesion');
+const controlAlignment = document.getElementById('alignment');
+
 const boids = new Array(numBoids).fill().map((_, i) => {
 	const position = stage.getRandomPosition();
 	const mass = 1;
@@ -35,9 +37,7 @@ const boids = new Array(numBoids).fill().map((_, i) => {
 
 const loop = () => {
 	stats.begin();
-
 	stage.clear();
-	// grid.draw(stage.context);
 
 	boids.forEach((b) => {
 		const regionCells = grid.getRegionCells(b.position);
@@ -48,13 +48,13 @@ const loop = () => {
 	});
 
 	boids.forEach((boid, i) => {
-		const { separation, alignment, cohesion } = boid.getForces(boids, 50, perception, perception);
+		const { separation, alignment, cohesion } = boid.getForces(boids, 50, 100, 100);
 		const directionalForce = boid.goto(stage.center);
 
 		boid.applyForce(directionalForce.multiplySelf(0.25));
-		boid.applyForce(cohesion);
-		boid.applyForce(alignment);
-		boid.applyForce(separation.multiplySelf(2));
+		boid.applyForce(cohesion.multiplySelf(controlCohesion.value));
+		boid.applyForce(alignment.multiplySelf(controlAlignment.value));
+		boid.applyForce(separation.multiplySelf(controlSeparation.value));
 
 		if (scatter) {
 			const predatorForce = boid.flee(predator, stage.width * 0.1);
@@ -62,7 +62,7 @@ const loop = () => {
 
 		}
 
-		const hue = (boid.cellIndex / (grid.cols * grid.rows)) * 360;
+		const hue = 180 + Math.cos((boid.cellIndex / grid.numCells) * 2) * 180;
 
 		boid.update(hue, stage);
 		boid.draw(stage.context);

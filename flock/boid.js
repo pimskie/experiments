@@ -1,6 +1,5 @@
 import Vector from '//rawgit.com/pimskie/vector/master/vector.js';
 
-const simplex = new SimplexNoise();
 const TAU = Math.PI * 2;
 
 const distanceBetween = (v1, v2) => {
@@ -11,9 +10,10 @@ const distanceBetween = (v1, v2) => {
 };
 
 class Boid {
-	constructor({ position, velocity, mass }) {
+	constructor({ position, velocity, mass, maxVelocity = 1.5 }) {
 		this.position = position;
 		this.velocity = velocity;
+		this.maxVelocity = maxVelocity;
 		this.mass = mass;
 
 		this.acceleration = new Vector();
@@ -34,7 +34,7 @@ class Boid {
 		this.hue += (hueTarget - this.hue) * 0.05;
 
 		this.velocity.addSelf(this.acceleration);
-		this.velocity.limit(1.5);
+		this.velocity.limit(this.maxVelocity);
 
 		this.position.addSelf(this.velocity);
 
@@ -43,7 +43,7 @@ class Boid {
 		this.checkBounds(stage);
 	}
 
-	draw(ctx) {
+	draw(ctx, radius = 1.5) {
 		const fill = `hsl(${this.hue}, 100%, 60%)`;
 
 		ctx.save();
@@ -51,7 +51,7 @@ class Boid {
 
 		ctx.fillStyle = fill;
 		ctx.beginPath();
-		ctx.arc(0, 0, 1.5, 0, TAU, false);
+		ctx.arc(0, 0, radius, 0, TAU, false);
 		ctx.fill();
 		ctx.closePath();
 		ctx.restore();
@@ -123,7 +123,7 @@ class Boid {
 	}
 
 	flee(predator, perception = 100) {
-		const difference = this.position.subtract(predator);
+		const difference = this.position.subtract(predator.position);
 		const distance = difference.length;
 		const force = distance / perception;
 
@@ -146,16 +146,13 @@ class Boid {
 			.multiply(0.0001);
 	}
 
-	getNoiseVector(time) {
-		const { x, y } = this.position;
-		const scale = 0.01;
+	getNearest(boids) {
+		const sorted = boids.map((b) => {
+			const distance = distanceBetween(this.position, b.position);
+			return { position: b.position, distance };
+		}).sort((a, b) => a.distance - b.distance);
 
-		const noise = simplex.noise3D(x * scale, y * scale, time);
-		const angle = TAU * noise;
-
-		const vector = new Vector(Math.cos(angle), Math.sin(angle));
-
-		return vector;
+		return sorted[0];
 	}
 
 	checkBounds(stage) {

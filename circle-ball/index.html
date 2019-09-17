@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+
+	<style>
+		@import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
+
+		html, body { margin: 0; padding: 0; }
+
+		body {
+			font-size: 0.8rem;
+			font-family: 'Montserrat', sans-serif;
+
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+		}
+
+        canvas {
+            border: 1px solid;
+        }
+
+		.container {
+			margin: 0 0 1rem;
+		}
+
+		a {
+			color: #282c2e;
+		}
+
+		a:hover {
+			text-decoration: none;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<canvas class="js-canvas"></canvas>
+	</div>
+
+	<div class="links"></div>
+
+	<script src="main.js"></script>
+</body>
+</html>

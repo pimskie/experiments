@@ -1,8 +1,6 @@
 const simplex = new SimplexNoise(0.3);
 const TAU = Math.PI * 2;
 
-// const PALETTE = ['#FF9F1C', '#ffbf69', '#ffffff', '#cbf3f0', '#2ec4b6'];
-// const PALETTE = ['#c5f0a4', '#35b0ab', '#226b80', '#f34573'];
 const PALETTE = [
 	[94, 72, 79],
 	[178, 54, 45],
@@ -24,12 +22,12 @@ class Stage {
 		this.context.clearRect(0, 0, this.width, this.height);
 	}
 
-  fade() {
-    this.context.globalCompositeOperation = 'destination-out';
+	fade() {
+		this.context.globalCompositeOperation = 'destination-out';
 		this.context.fillStyle = 'rgba(0, 0, 0, 0.05)';
 		this.context.fillRect(0, 0, this.width, this.height);
 		this.context.globalCompositeOperation = 'lighter';
-  }
+	}
 
 	setSize(width, height) {
 		this.width = width;
@@ -52,85 +50,70 @@ class Stage {
 }
 
 class Segment {
-  constructor(position, index) {
-    const { x, y } = position;
+	constructor(position, index) {
+		const { x, y } = position;
 
-    this.position = { x, y };
-    this.positionPrevious = { x, y };
+		this.position = { x, y };
+		this.positionPrevious = { x, y };
 		this.index = index;
 
-    this.length = 2;
+		this.length = 2;
 
-    this.phase = this.index * 0.001;
+		this.phase = this.index * 0.001;
 		this.speed = 0.001;
 
 		this.acceleration = { x: 0, y: 0 };
 	}
 
-	applyForce(force) {
+	update() {
+		const volatilityX = 0.0002;
+		const volatilityY = 0.0006;
 
-	}
-
-  update() {
-    const volatilityX = 0.0001;
-    const volatilityY = 0.0005;
-
-    const noise = simplex.noise3D(this.position.x * volatilityX, this.position.y * volatilityY, this.phase);
+		const noise = simplex.noise3D(this.position.x * volatilityX, this.position.y * volatilityY, this.phase);
 		const angleX = clamp(noise * Math.PI, -Math.PI / 2, Math.PI / 2);
 
-    const velocity = {
-      x: Math.cos(angleX) * this.length,
-      y: Math.sin(noise * (Math.PI)) * this.length,
-    };
+		const velocity = {
+			x: Math.cos(angleX) * this.length,
+			y: Math.sin(noise * (Math.PI)) * this.length,
+		};
 
-    this.positionPrevious.x = this.position.x;
-    this.positionPrevious.y = this.position.y;
+		this.positionPrevious.x = this.position.x;
+		this.positionPrevious.y = this.position.y;
 
-    this.position.x += velocity.x;
-    this.position.y += velocity.y;
+		this.position.x += velocity.x;
+		this.position.y += velocity.y;
 
-    this.phase += this.speed;
+		this.phase += this.speed;
 	}
 }
 
 class Scene {
-  constructor(stage,numSegments) {
-    this.stage = stage;
+	constructor(stage, numSegments) {
+		this.stage = stage;
 		this.numSegments = numSegments;
-    this.segmentSpacing = this.stage.height / this.numSegments;
+		this.segmentSpacing = this.stage.height / this.numSegments;
 
-    this.segments = [];
+		this.segments = [];
 		this.rafId = null;
+	}
 
-		this.forces = [
-			{
-				position: { x: this.stage.width * 0.25, y: 0 },
-				direction: { x: 1, y: 1 },
-			},
-			{
-				position: { x: this.stage.centerX, y: this.stage.height },
-				direction: { x: 1, y: -1 },
-			}
-		];
-  }
+	reset() {
+		this.stage.clear();
+		this.generate();
+	}
 
-  reset() {
-    this.stage.clear();
-    this.generate();
-  }
-
-  generate() {
+	generate() {
 		const { stage: { centerY } } = this;
 
-    this.segments = new Array(this.numSegments).fill().map((_, i) => {
-			const x = 25;
+		this.segments = new Array(this.numSegments).fill().map((_, i) => {
+			const x = 0;
 			const y = i * this.segmentSpacing;
 			const percentCenterY = Math.abs((y - centerY) / centerY);
 			const lightness = 50 * percentCenterY;
 
-      return new Segment({ x, y }, i, lightness);
-    });
-  }
+			return new Segment({ x, y }, i, lightness);
+		});
+	}
 
 	connect(from, to, [h, s, l]) {
 		const { positionPrevious: topLeft, position: topRight } = from;
@@ -151,11 +134,10 @@ class Scene {
 		context.closePath();
 	}
 
-  run() {
-    for (let i = 0; i < this.segments.length; i++) {
+	run() {
+		for (let i = 0; i < this.segments.length; i++) {
 			const segment = this.segments[i];
 
-			segment.applyForce(this.forces[0]);
 			segment.update();
 
 			if (i < this.segments.length - 1) {
@@ -167,8 +149,8 @@ class Scene {
 			}
 		}
 
-    this.rafId = requestAnimationFrame(() => this.run());
-  }
+		this.rafId = requestAnimationFrame(() => this.run());
+	}
 }
 
 const stage = new Stage(document.querySelector('.js-canvas'), window.innerWidth, window.innerHeight);
@@ -182,5 +164,5 @@ window.addEventListener('resize', () => {
 });
 
 document.body.addEventListener('click', () => {
-  scene.reset();
+	scene.reset();
 });

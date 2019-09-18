@@ -1,3 +1,4 @@
+const simplex = new SimplexNoise(Math.random())
 const TAU = Math.PI * 2;
 
 class Stage {
@@ -31,27 +32,37 @@ class Stage {
 }
 
 class Element {
-	constructor(position, width, height, wave, percent) {
+	constructor(position, radiusDefault) {
 		this.position = position;
-		this.percent = percent;
-
-		this.width = width;
-		this.height = height;
-
-		this.wave = wave;
-
-		this.center = {
-			x: this.position.x + (this.width * 0.5),
-			y: this.position.y + (this.height * 0.5),
-		};
+		this.radiusDefault = radiusDefault;
+		this.radius = this.radiusDefault;
 	}
 
-	update(phase) {
+	update(focusPoint, maxDistance) {
+		const distance = Math.hypot(this.position.x - focusPoint.x, this.position.y - focusPoint.y);
+		this.radius = (1 - (distance / maxDistance)) * 10;
 
+		this.radius = Math.max(0.5, this.radius); // Math.max(0, Math.min(this.radius, 10));
 	}
 
-	draw(ctx) {
+	drawStok(ctx, center) {
+		ctx.beginPath();
+		ctx.strokeStyle = '#ccc';
+		ctx.lineWidth = 0.5;
+		ctx.moveTo(this.position.x, this.position.y);
+		ctx.lineTo(center.x, center.y)
+		ctx.stroke();
+		ctx.closePath();
+	}
 
+	drawElement(ctx, center) {
+		ctx.save();
+		ctx.translate(this.position.x, this.position.y);
+		ctx.beginPath();
+		ctx.arc(0, 0, this.radius, 0, TAU, false);
+		ctx.fill();
+		ctx.closePath();
+		ctx.restore();
 	}
 }
 
@@ -66,6 +77,10 @@ class Scene {
 
 		this.elements = [];
 		this.rafId = null;
+
+		this.automated = true;
+
+		this.setFocusPoint(stage.center);
 	}
 
 	reset() {
@@ -75,57 +90,92 @@ class Scene {
 	}
 
 	generate() {
+		this.elements = [];
 
-	}
+		const { stage: { center } } = this;
+		const numOrbits = 10;
+		const radiusStep = this.radius / numOrbits;
 
-	draw() {
-		const { stage: { context, center } } = this;
-		const numCircles = 10;
-		const radiusStep = this.radius / numCircles;
+		for (let i = 0; i < numOrbits; i++) {
+			const orbitRadius = radiusStep * i;
+			const numCircles = Math.ceil(orbitRadius / 5);
+			const angleStep = TAU / numCircles;
 
-		for (let i = 0; i < numCircles; i++) {
-			this.drawCircle(context, center, radiusStep * i)
+			for (let q = 0; q < numCircles; q++) {
+				const x = center.x + (Math.cos(angleStep * q) * orbitRadius);
+				const y = center.y + (Math.sin(angleStep * q) * orbitRadius);
+				const radius = 5;
+
+				this.elements.push(new Element({ x, y }, radius ));
+			}
 		}
 	}
 
-	drawCircle(ctx, center, radius) {
-		const numParticles = radius / 5;
-		console.log(1 - (radius / this.radius));
-
-		const size = 1 + ((1 - (radius / this.radius)) * 10);
-		this.drawParticles(ctx, center, radius, numParticles, size);
+	setFocusPoint(point) {
+		this.focusPoint = {
+			x: point.x,
+			y: point.y,
+		};
 	}
-
-	drawParticles(ctx, center, radius, numParticles, size) {
-		const angleStep = TAU / numParticles;
-
-		for (let i = 0; i < numParticles; i++) {
-			const x = center.x + (Math.cos(angleStep * i) * radius);
-			const y = center.y + (Math.sin(angleStep * i) * radius);
-
-			ctx.save();
-			ctx.translate(x, y);
-			ctx.beginPath();
-			ctx.arc(0, 0, size, 0, TAU, false);
-			ctx.fill();
-			ctx.closePath();
-			ctx.restore();
-		}
-	}
-
 
 	run() {
-		this.phase += 0.01;
-
 		this.stage.clear();
 
-		this.draw(stage.context);
-		// this.rafId = requestAnimationFrame(() => this.run());
+		const { context, center } = this.stage;
+
+		if (this.automated) {
+			const radius = this.radius * (Math.cos(this.phase));
+			const angle = simplex.noise2D(this.phase * 0.05, this.phase * 0.05);
+
+			this.focusPoint = {
+				x: center.x + (Math.cos(angle) * radius),
+				y: center.y + (Math.sin(angle) * radius),
+			};
+		}
+
+		this.elements.forEach((e) => {
+			e.update(this.focusPoint, this.radius);
+			e.drawStok(context, center);
+		});
+
+		this.elements.forEach((e) => {
+			e.drawElement(context, center);
+		});
+
+		this.phase += 0.03;
+		this.rafId = requestAnimationFrame(() => this.run());
 	}
 }
 
 const stage = new Stage(document.querySelector('.js-canvas'), 500, 500);
 const scene = new Scene(stage);
+
+
+const onPointerMove = (e) => {
+	const target = (e.touches && e.touches.length) ? e.touches[0] : e;
+
+	scene.setFocusPoint({
+		x: target.clientX - e.target.offsetLeft,
+		y: target.clientY - e.target.offsetTop,
+	});
+};
+
+const onPointerOver = () => {
+	scene.automated = false;
+};
+
+const onPointerLeave = () => {
+	scene.automated = true;
+};
+
+stage.canvas.addEventListener('mousemove', onPointerMove);
+stage.canvas.addEventListener('touchmove', onPointerMove);
+
+stage.canvas.addEventListener('mouseenter', onPointerOver);
+stage.canvas.addEventListener('touchstart', onPointerOver);
+
+stage.canvas.addEventListener('mouseleave', onPointerLeave);
+stage.canvas.addEventListener('touchend', onPointerLeave);
 
 scene.generate();
 scene.run();

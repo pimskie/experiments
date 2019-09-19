@@ -35,35 +35,35 @@ class Stage {
 }
 
 class Element {
-	constructor(position, radius) {
-		this.positionCurrent = { x: position.x,y: position.y };
-		this.positionDefault = { x: position.x, y: position.y };
+	constructor(position, radiusDefault) {
+		this.positionCurrent = {
+			x: position.x,
+			y: position.y,
+		};
 
-		this.radius = radius;
+		this.positionDefault = {
+			x: position.x,
+			y: position.y,
+		};
+
+		this.radiusDefault = radiusDefault;
+		this.radius = this.radiusDefault;
+
 		this.maxReach = 50;
 	}
 
-	update(focusPoint, distanceMax, reachForce) {
-		const distance = distanceBetween(this.positionDefault, focusPoint);
-
-		this.reachTo(distance, focusPoint, reachForce);
-		this.scale(distance, distanceMax);
-	}
-
-	scale(distance, distanceMax) {
-		this.radius = Math.max(0.5, (1 - (distance / distanceMax)) * 10);
-	}
-
-	reachTo(distance, focusPoint, reachForce) {
+	update(focusPoint, maxDistance) {
 		const { positionDefault: pd } = this;
 
 		const angle = angleBetween(pd, focusPoint);
-		const distanceNorm = Math.min(distance / reachForce, 1);
+		const distance = distanceBetween(pd, focusPoint);
 
-		const length = 50 * distanceNorm;
+		const length = 160 * Math.min((distance / maxDistance), maxDistance);
 
 		this.positionCurrent.x = pd.x + (Math.cos(angle) * length);
 		this.positionCurrent.y = pd.y + (Math.sin(angle) * length);
+
+		this.radius = 5; // Math.max(0.5, (1 - (distance / maxDistance)) * 10);
 	}
 
 	drawStok(ctx, center) {
@@ -85,6 +85,10 @@ class Element {
 		ctx.closePath();
 		ctx.restore();
 	}
+
+	reachTo(position) {
+		const angle = angleBetween(position, this.positionCurrent)
+	}
 }
 
 class Scene {
@@ -93,8 +97,7 @@ class Scene {
 
 		this.stage = stage;
 
-		this.padding = 100;
-		this.numOrbits = 10;
+		this.padding = 50;
 		this.radius = (stage.width - (this.padding * 2)) * 0.5;
 
 		this.elements = [];
@@ -114,7 +117,8 @@ class Scene {
 	generate() {
 		this.elements = [];
 
-		const { numOrbits, stage: { center } } = this;
+		const { stage: { center } } = this;
+		const numOrbits = 1;
 		const radiusStep = this.radius / numOrbits;
 
 		for (let i = 0; i < numOrbits; i++) {
@@ -133,7 +137,10 @@ class Scene {
 	}
 
 	setFocusPoint(point) {
-		this.focusPoint = { x: point.x, y: point.y };
+		this.focusPoint = {
+			x: point.x,
+			y: point.y,
+		};
 	}
 
 	run() {
@@ -141,18 +148,18 @@ class Scene {
 
 		const { context, center } = this.stage;
 
-		if (this.automated) {
-			const radius = (this.radius * 2) + ((this.radius * 0.5) * simplex.noise3D(this.phase, this.phase, this.phase));
-			const angle = TAU * simplex.noise3D(this.phase, this.phase, this.phase);
+		// if (this.automated) {
+		// 	const radius = this.radius * (Math.cos(this.phase));
+		// 	const angle = simplex.noise2D(this.phase * 0.05, this.phase * 0.05);
 
-			this.focusPoint = {
-				x: center.x + (Math.cos(angle) * radius),
-				y: center.y + (Math.sin(angle) * radius),
-			};
-		}
+		// 	this.focusPoint = {
+		// 		x: center.x + (Math.cos(angle) * radius),
+		// 		y: center.y + (Math.sin(angle) * radius),
+		// 	};
+		// }
 
 		this.elements.forEach((e) => {
-			e.update(this.focusPoint, this.radius * 2, this.stage.width * 0.01);
+			e.update(this.focusPoint, this.radius * 2);
 			e.drawStok(context, center);
 		});
 
@@ -160,12 +167,12 @@ class Scene {
 			e.drawElement(context, center);
 		});
 
-		this.phase += 0.001;
+		this.phase += 0.03;
 		this.rafId = requestAnimationFrame(() => this.run());
 	}
 }
 
-const stage = new Stage(document.querySelector('.js-canvas'), 750, 750);
+const stage = new Stage(document.querySelector('.js-canvas'), 500, 500);
 const scene = new Scene(stage);
 
 

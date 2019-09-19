@@ -28,7 +28,7 @@ class Stage {
 		this.canvas.width = this.width;
 		this.canvas.height = this.height;
 
-		this.radius = Math.min(this.width, this.height) * 0.5;
+		this.radius = Math.max(this.width, this.height) * 0.5;
 	}
 
 	getRandomPosition() {
@@ -38,13 +38,12 @@ class Stage {
 
 
 class Segment {
-	constructor(position, radius, numPoints, scale) {
+	constructor(position, radius, numPoints) {
 		this.position = position;
 		this.radius = radius;
 		this.numPoints = numPoints;
-		this.scale = scale;
 
-		this.pointRadius = 8 * this.scale;
+		this.pointRadius = 5;
 	}
 
 	update(radius, scale) {
@@ -78,44 +77,46 @@ class Tunnel {
 
 		this.near = near;
 		this.far = far;
+
 		this.distance = this.near - this.far;
 
-		this.numSegments = 10;
-		this.segmentPoints = 15;
+		this.numSegments = 20;
+		this.segmentPoints = 25;
+		this.radiusDecrease = 0.7;
 
 		this.segments = this.createSegments();
 	}
 
 	createSegments() {
-		let radiusDecrease = 0.7;
-		let segmentRadius = this.near;
-
 		return new Array(this.numSegments).fill().map((_, i) => {
-			const sizeScale = Math.max(0.001, segmentRadius / this.near);
+			const segmentRadius = this.near * Math.pow(this.radiusDecrease, i);
 
 			const segment = new Segment(
 				{ x: this.center.x, y: this.center.y },
 				segmentRadius,
 				this.segmentPoints,
-				sizeScale
 			);
-
-			segmentRadius *= radiusDecrease;
 
 			return segment;
 		});
 	}
 
 	update(phase) {
-		const speed = 1;
+		const speed = 4;
 
 		this.segments.forEach((segment) => {
-			const segmentSpeed = speed * segment.scale;
+			if (segment.radius >= this.near) {
+				segment.radius =  this.near * Math.pow(this.radiusDecrease, this.numSegments);
+				segment.scale = segment.radius / this.near;
+			}
 
-			const segmentRadius = segment.radius + segmentSpeed;
-			const segmentScale = segmentRadius /  this.near;
+			const segmentScale = segment.radius / this.near;
+			const segmentSpeed = speed * segmentScale;
 
-			segment.update(segmentRadius, segmentScale);
+			const segmentRadiusNew = segment.radius + segmentSpeed;
+			const segmentScaleNew = segmentRadiusNew /  this.near;
+
+			segment.update(segmentRadiusNew, segmentScaleNew);
 		});
 	}
 
@@ -149,7 +150,7 @@ class Scene {
 
 	generate() {
 		const { stage: { center, radius } } = this;
-		const near = radius;
+		const near = radius * 2;
 		const far = 0;
 
 		this.tunnel = new Tunnel({

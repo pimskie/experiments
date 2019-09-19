@@ -57,6 +57,8 @@ class Segment {
 	update(radius, scale) {
 		this.radius = radius;
 		this.scale = scale;
+		const alpha = 1 - this.scale;
+		this.color =  `hsl(0, 0%, ${alpha * 100}%)`;
 
 		this.pointRadius = 8 * this.scale;
 
@@ -67,8 +69,7 @@ class Segment {
 	}
 
 	connect(segment, ctx) {
-		const alpha = this.scale;
-		const color = `rgba(0, 0, 0, ${alpha})`;
+		const color = this.color;
 
 		const { points: pointsSelf } = this;
 		const { points: pointsOther } = segment;
@@ -88,22 +89,17 @@ class Segment {
 			ctx.lineTo(point2.x, point2.y);
 			ctx.lineTo(point3.x, point3.y);
 			ctx.lineTo(point4.x, point4.y);
-			// ctx.stroke();
+			ctx.stroke();
 			ctx.fill();
 			ctx.closePath();
-		}
-	}
-
-	draw(ctx) {
-		this.points.forEach((point) => {
-			const { x, y } = point;
 
 			ctx.beginPath();
-			ctx.fillStyle = `rgba(0, 0, 0, ${this.scale})`;
-			ctx.arc(x, y, this.pointRadius, 0, TAU, false);
-			ctx.fill();
+			ctx.strokeStyle = '#fff';
+			ctx.moveTo(point1.x, point1.y);
+			ctx.lineTo(point4.x, point4.y);
+			ctx.stroke();
 			ctx.closePath();
-		});
+		}
 	}
 }
 
@@ -120,36 +116,21 @@ class Tunnel {
 		this.segmentPoints = 25;
 		this.radiusDecrease = 0.8;
 
-		this.segments = this.createSegments();
+		this.segments = [];
 	}
 
-	createSegments() {
-		return new Array(this.numSegments).fill().map((_, i) => {
-			const segmentRadius = this.near * Math.pow(this.radiusDecrease, i);
-
-			const segment = new Segment(
-				{ x: this.center.x, y: this.center.y },
-				segmentRadius,
-				this.segmentPoints,
-			);
-
-			return segment;
-		});
+	add(center) {
+		this.segments.unshift(new Segment(
+			{ x: center.x,y: center.y },
+			10,
+			this.segmentPoints,
+		));
 	}
 
-	update(phase) {
-		const speed = 4;
+	update() {
+		const speed = 10;
 
-		// this.segments[this.segments.length - 1].position.x += 1;
-
-		this.segments.forEach((segment) => {
-			if (segment.radius >= this.near) {
-				segment.radius =  this.near * Math.pow(this.radiusDecrease, this.numSegments);
-				segment.scale = segment.radius / this.near;
-			}
-		});
-
-		this.segments.sort((s1, s2) => s1.scale - s2.scale);
+		this.segments = this.segments.filter(s => s.radius <= this.near)
 
 		this.segments.forEach((segment) => {
 			const segmentScale = segment.radius / this.near;
@@ -166,22 +147,21 @@ class Tunnel {
 		for (let i = 0; i < this.segments.length; i++) {
 			const segment = this.segments[i];
 
-			// if (i < this.segments.length - 1) {
-			// 	const segmentNext = this.segments[i + 1];
+			if (i < this.segments.length - 1) {
+				const segmentNext = this.segments[i + 1];
 
-			// 	segment.connect(segmentNext, ctx);
-			// }
-
-			segment.draw(ctx);
+				segment.connect(segmentNext, ctx);
+			}
 		}
 	}
 }
 
 class Scene {
 	constructor(stage) {
-		this.phase = 0;
-
 		this.stage = stage;
+
+		this.frame = 0;
+		this.phase = 0;
 
 		this.padding = 50;
 		this.radius = (stage.width - (this.padding * 2)) * 0.5;
@@ -190,6 +170,7 @@ class Scene {
 		this.rafId = null;
 
 		this.automated = true;
+		this.setFocusPoint(this.stage.center);
 	}
 
 	reset() {
@@ -198,27 +179,44 @@ class Scene {
 		this.generate();
 	}
 
+	setFocusPoint(point) {
+		this.focusPoint = { x: point.x, y: point.y };
+	}
+
 	generate() {
 		const { stage: { center, radius } } = this;
-		const near = radius * 1.5;
+		const near = radius * 2;
 		const far = 0;
 
-		this.tunnel = new Tunnel({
-			center,
-			near,
-			far,
-		});
+		this.tunnel = new Tunnel({ center, near, far });
 	}
 
 	run() {
-		const { stage } = this;
+		this.stage.clear();
 
-		stage.clear();
+		if (this.automated) {
+			const radiusNoise = simplex.noise2D(this.phase, this.phase);
+			const angleNoise = simplex.noise3D(this.phase,this.phase, this.phase);
 
-		this.tunnel.update(this.phase);
-		this.tunnel.draw(stage.context);
+			const radius = (this.stage.radius * 0.5) * radiusNoise;
+			const angle = TAU * angleNoise;
 
-		this.phase += 0.03;
+			this.setFocusPoint({
+				x: this.stage.center.x + (Math.cos(angle) * radius),
+				y: this.stage.center.y + (Math.sin(angle) * radius),
+			});
+		}
+
+		if (this.frame % 10 === 0) {
+			this.tunnel.add(this.focusPoint);
+		}
+
+		this.tunnel.update();
+		this.tunnel.draw(this.stage.context);
+
+		this.phase += 0.001;
+		this.frame += 1;
+
 		this.rafId = requestAnimationFrame(() => this.run());
 	}
 }
@@ -229,10 +227,10 @@ const scene = new Scene(stage);
 const onPointerMove = (e) => {
 	const target = (e.touches && e.touches.length) ? e.touches[0] : e;
 
-	// scene.setFocusPoint({
-	// 	x: target.clientX - e.target.offsetLeft,
-	// 	y: target.clientY - e.target.offsetTop,
-	// });
+	scene.setFocusPoint({
+		x: target.clientX - e.target.offsetLeft,
+		y: target.clientY - e.target.offsetTop,
+	});
 };
 
 const onPointerOver = () => {
@@ -243,14 +241,14 @@ const onPointerLeave = () => {
 	scene.automated = true;
 };
 
-// stage.canvas.addEventListener('mousemove', onPointerMove);
-// stage.canvas.addEventListener('touchmove', onPointerMove);
+stage.canvas.addEventListener('mousemove', onPointerMove);
+stage.canvas.addEventListener('touchmove', onPointerMove);
 
-// stage.canvas.addEventListener('mouseenter', onPointerOver);
-// stage.canvas.addEventListener('touchstart', onPointerOver);
+stage.canvas.addEventListener('mouseenter', onPointerOver);
+stage.canvas.addEventListener('touchstart', onPointerOver);
 
-// stage.canvas.addEventListener('mouseleave', onPointerLeave);
-// stage.canvas.addEventListener('touchend', onPointerLeave);
+stage.canvas.addEventListener('mouseleave', onPointerLeave);
+stage.canvas.addEventListener('touchend', onPointerLeave);
 
 scene.generate();
 scene.run();

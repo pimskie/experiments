@@ -69,8 +69,6 @@ class Segment {
 	}
 
 	connect(segment, ctx) {
-		const color = this.color;
-
 		const { points: pointsSelf } = this;
 		const { points: pointsOther } = segment;
 
@@ -83,20 +81,13 @@ class Segment {
 			const point4 = pointsOther[index];
 
 			ctx.beginPath();
-			ctx.fillStyle = color;
-			ctx.strokeStyle = color;
+			ctx.fillStyle = '#fff';
+			ctx.strokeStyle =`rgba(0, 0, 0, ${this.scale})`;
 			ctx.moveTo(point1.x, point1.y);
 			ctx.lineTo(point2.x, point2.y);
 			ctx.lineTo(point3.x, point3.y);
 			ctx.lineTo(point4.x, point4.y);
-			ctx.stroke();
 			ctx.fill();
-			ctx.closePath();
-
-			ctx.beginPath();
-			ctx.strokeStyle = '#fff';
-			ctx.moveTo(point1.x, point1.y);
-			ctx.lineTo(point4.x, point4.y);
 			ctx.stroke();
 			ctx.closePath();
 		}

@@ -1,69 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Test</title>
+	<meta charset="UTF-8">
+	<title>Template</title>
 
-    <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-        }
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
 
-        body {
+			overflow: hidden;
+		}
+
+        .container {
             width: 100vw;
-            min-height: 100vh;
+            height: 100vh;
+
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
-        .ui {
-            margin: 0 0 20px;
+        .canvas {
         }
-
-        button {
-            padding: 10px;
-            background: transparent;
-            border: 1px solid #000;
-        }
-
-        button:hover {
-            background: #000;
-            color: #fff;
-        }
-
-        canvas {
-            box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 2px 4px rgba(0, 0, 0, .125), 0 1px 4px rgba(0, 0, 0, .05);
-        }
-
-        img {
-            display: none;
-        }
-
-        .is-hidden {
-            display: none;
-        }
-    </style>
+	</style>
 </head>
-
 <body>
-    <div class="ui">
-        <button class="js-camera">Camera</button>
-        <button class="js-capture is-hidden">Capture</button>
-        <button class="js-cancel is-hidden">Cancel</button>
-    </div>
 
-    <video width="500" height="500" class="js-video is-hidden"></video>
+<div class="container">
+    <canvas class="canvas js-canvas" width="500" height="500"></canvas>
+</div>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.1/tinycolor.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
-    <script src="main.js" type="module"></script>
+<script src="https://unpkg.com/dat.gui@0.7.6/build/dat.gui.js"></script>
+<script src="main.js" type="module"></script>
+
 </body>
-
 </html>

@@ -1,206 +1,119 @@
-let simplex = new SimplexNoise(Math.random());
-
-const TAU = Math.PI * 2;
-
-const canvasDraw = document.createElement('canvas');
-const ctxDraw = canvasDraw.getContext('2d');
-
-const canvasImage = document.createElement('canvas');
-const ctxImage = canvasImage.getContext('2d');
-document.body.appendChild(canvasDraw);
-
-const btnCamera = document.querySelector('.js-camera');
-const btnCapture = document.querySelector('.js-capture');
-const btnCancel = document.querySelector('.js-cancel');
-const video = document.querySelector('.js-video');
+const lerp = (norm, min, max) => (max - min) * norm + min;
+const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+const angleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
 
 const width = 500;
 const height = 500;
+const cx = width * 0.5;
+const cy = height * 0.5;
 
-const midX = width * 0.5;
-const midY = height * 0.5;
+const ctx = document.querySelector('.js-canvas').getContext('2d');
+const { canvas } = ctx;
 
-const painters = [];
+canvas.width = width;
+canvas.height = height;
 
-let phase = 0;
-let rafId;
-
-let pixelData;
-
-
-canvasDraw.width = width;
-canvasDraw.height = height;
-
-canvasImage.width = width;
-canvasImage.height = height;
-
-class Painter {
-	constructor(radius, angle, speed) {
-		this.radius = radius;
-		this.radiusBase = this.radius;
-
-		this.angle = angle;
-		this.speed = speed;
-
-		this.width = 1;
-		this.position = { x: 0, y: 0 };
-
-		this.setPosition();
-	}
-
-	setPosition() {
-		this.position.x = Math.cos(this.angle) * this.radius;
-		this.position.y = Math.sin(this.angle) * this.radius;
-	}
-
-	get positionClean() {
-		const x = Math.cos(this.angle) * this.radiusBase;
-		const y = Math.sin(this.angle) * this.radiusBase;
-
-		return { x, y };
-	}
-
-	getNoiseValue(frame) {
-		const scale = 0.01;
-		const { position } = this;
-		const z = frame * scale;
-
-		return simplex.noise2D(position.x * scale, position.y * scale);
-		// return simplex.noise3D(position.x * scale, position.y * scale, z);
-	}
-
-	update(frame = 1) {
-		const noiseValue = this.getNoiseValue(frame);
-
-		this.angle += this.speed;
-		this.radius = this.radiusBase + (20 * noiseValue);
-		this.width = 1; //4 + (2 * noiseValue);
-
-		this.setPosition();
-	}
-}
-
-const getPixelIndex = (x, y, imageData) => (~~x + ~~y * imageData.width) * 4;
-const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
-
-const getColor = (position, ctx) => {
-	const pixelIndex = getPixelIndex(position.x, position.y, pixelData);
-
-	const r = pixelData.data[pixelIndex] || 0;
-	const g = pixelData.data[pixelIndex + 1] || 0;
-	const b = pixelData.data[pixelIndex + 2] || 0;
-
-	const sum = r + g + b;
-	const a = sum <= 50 ? 0 : 1;
-	const color = `rgba(${r}, ${g}, ${b}, ${a})`;
-
-	return { sum, color };
-}
-
-const gogogo = (source) => {
-	simplex = new SimplexNoise(Math.random());
-
-	cancelAnimationFrame(rafId);
-
-	painters.splice(0, painters.length);
-	ctxImage.drawImage(source, 0, 0);
-	ctxDraw.drawImage(source, 0, 0);
-
-	pixelData = ctxImage.getImageData(0, 0, width, height);
-
-	const numBrushes = 2000;
-
-	for (let i = 0; i < numBrushes; i++) {
-		const r = Math.random() * (source.width);
-		const a = Math.random() * TAU;
-		const s = -0.02 + (Math.random() * 0.04);
-
-		painters.push(new Painter(r, a, s));
-	}
-
-	loop();
+const settings = {
+	count: 100,
+	scaleNormal: 0,
+	scaleFactor: 200,
+	radiusScaleFactor: 0.1,
+	scaleMax: 7,
+	rotateNormal: -1,
+	rotateMax: 2,
+	rotateAlternate: false,
+	pointerAngle: 0,
 };
 
-const loop = () => {
-	painters.forEach((p, i) => {
-		const { x: x1, y: y1 } = p.position;
+const loadImage = (url) => {
+	const image = new Image();
 
-		p.update(phase);
+	return new Promise((resolve, reject) => {
+		image.addEventListener('load', e => resolve(e.target));
+		image.addEventListener('error', e => reject(new Error('error :(')));
 
-		const { x: x2, y: y2 } = p.position;
-
-		const colorData = getColor({ x: midX + p.positionClean.x, y: midY + p.positionClean.y, }, ctxImage)
-		const colorTo = colorData.color;
-		const brightness = map(colorData.sum, 0, 600, -10, 20);
-
-		const colorAverage = tinycolor(colorTo)
-			.brighten(brightness)
-			.toHexString();
-
-		ctxDraw.beginPath();
-		ctxDraw.strokeStyle = colorAverage;
-		ctxDraw.lineWidth = p.width;
-
-		ctxDraw.moveTo(midX + x1, midY + y1);
-		ctxDraw.lineTo(midX + x2, midY + y2);
-
-		ctxDraw.stroke();
-		ctxDraw.closePath();
+		image.src = url;
 	});
-
-	phase += 1;
-	rafId = requestAnimationFrame(loop);
 };
 
-const img = document.createElement('img');
+const drawImage = (img, { radius = cx, scale = 1, rotation = 0, angle = 0 }) => {
+	const focusX = 0.5;
+	const focusY = 0.5;
 
-img.crossOrigin = 'Anonymous';
-img.addEventListener('load', () => {
-	gogogo(img);
+	const offsetX = (width * scale - width) * focusX;
+	const offsetY = (width * scale - width) * focusY;
 
-	canvasDraw.addEventListener('mouseup', () => gogogo(img));
-});
+	ctx.save();
+	ctx.beginPath();
+	ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+	ctx.closePath();
 
-img.src = 'https://pimskie.dev/public/assets/mona-lisa-500.jpg';
+	ctx.clip();
 
-const toggleVideo = (isRecording) => {
-	video.classList.toggle('is-hidden', !isRecording);
-	btnCapture.classList.toggle('is-hidden', !isRecording);
-	btnCancel.classList.toggle('is-hidden', !isRecording);
-	btnCamera.classList.toggle('is-hidden', isRecording);
+	ctx.translate(cx, cy);
+	ctx.rotate(rotation);
+	ctx.drawImage(img, -offsetX - cx, -offsetY - cy, width * scale, height * scale);
+	ctx.restore();
 };
 
-const stopRecording = (stream) => {
-	stream.getTracks().forEach(track => track.stop());
+const setupControls = (canvas, settings) => {
+	const gui = new dat.GUI();
+	gui.add(settings, 'count').min(2).max(200);
+	gui.add(settings, 'rotateAlternate');
+	gui.add(settings, 'scaleFactor').min(1).max(100).step(1);
+
+	canvas.addEventListener('pointermove', (e) => {
+		const { width, height, offsetLeft, offsetTop } = canvas;
+		const x = e.clientX - offsetLeft;
+		const y = e.clientY - offsetTop;
+		const angle = angleBetween({ x: cx, y: cy }, { x, y });
+
+		settings.scaleNormal = y / height;
+		settings.rotateNormal = x / width;
+		settings.pointerAngle = angle;
+	});
 };
 
-btnCamera.addEventListener('click', () => {
-	const constraints = { video: { width: 500, height: 500 }, audio: false };
+const setup = async () => {
+	const image = await loadImage('img.jpg');
 
-	navigator.mediaDevices.getUserMedia(constraints)
-		.then(function (stream) {
-			toggleVideo(true);
+	setupControls(ctx.canvas, settings)
 
-			video.srcObject = stream;
+	run(image, settings, 0);
+};
 
-			video.onloadedmetadata = function (e) {
-				video.play();
-			};
+const run = (image, settings, phase) => {
+	ctx.clearRect(0, 0, width, height);
 
-			btnCancel.addEventListener('click', () => {
-				stopRecording(stream);
-				toggleVideo(false);
-			});
+	const { count, scaleMax, radiusScaleFactor, scaleNormal, rotateNormal, rotateMax, rotateAlternate } = settings;
 
-			btnCapture.addEventListener('click', () => {
-				gogogo(video);
+	const radiusEnd = cx * radiusScaleFactor;
+	const radiusStep = (cx - radiusEnd) / count;
+	const scaleStep = (scaleMax - 1) / count;
 
-				stopRecording(stream);
-				toggleVideo(false);
-			});
-		})
-		.catch(function (err) {
-			console.log(err.name + ": " + err.message);
-		});
+	const rotateFactor = map(rotateNormal, 0, 1, -rotateMax, rotateMax);
+	const scaleFactor = lerp(scaleNormal, 0.001, 0.4)
 
-});
+	for (let i = 0; i < count; i++) {
+		const isEven = i % 2 == 0;
+		const rotateInverse = isEven && rotateAlternate ? -1 : 1;
+		const rotation = (rotateFactor / count) * i * rotateInverse;
+
+		const scale = 1 + ((i + 1) * scaleStep * scaleNormal);
+		// const scale = 1 + (Math.pow(scaleStep, i * scaleFactor));
+		const options = {
+			scale,
+			rotation,
+			radius: cx - (radiusStep * i),
+			angle: settings.pointerAngle,
+		};
+
+		drawImage(image, options);
+	}
+
+	phase += 0.01;
+
+	requestAnimationFrame(() => run(image, settings, phase));
+};
+
+setup();

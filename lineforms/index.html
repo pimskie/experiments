@@ -23,12 +23,7 @@
         }
 
         .canvas {
-            position: absolute;
             border: 1px solid #000;
-        }
-
-        .canvas--draw {
-            z-index: 10;
         }
 	</style>
 </head>
@@ -36,8 +31,9 @@
 
 <div class="container">
     <canvas class="canvas canvas--draw js-canvas" width="500" height="500"></canvas>
-    <canvas class="canvas js-canvas-trail" width="500" height="500"></canvas>
 </div>
+
+<script src="https://unpkg.com/simplex-noise@2.4.0/simplex-noise.js"></script>
 <script src="main.js" type="module"></script>
 
 </body>

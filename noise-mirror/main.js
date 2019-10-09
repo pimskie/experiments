@@ -1,8 +1,9 @@
-/* global noise: false, */
-
 noise.seed(Math.random());
 
-const q = (sel) => document.querySelector(sel);
+const q = sel => document.querySelector(sel);
+
+const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+const distanceBetween = (v1, v2) => Math.sqrt((v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y));
 
 const canvas = q('canvas');
 const ctx = canvas.getContext('2d');
@@ -25,9 +26,6 @@ const getCoordsByIndex = (index, width) => {
 
 	return { x, y };
 };
-
-const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
-const distanceBetween = (v1, v2) => Math.sqrt((v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y));
 
 const distort = (tick, scale = 0.03) => {
 	const imagedata = ctx.getImageData(0, 0, dim >> 1, dim >> 1);

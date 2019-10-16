@@ -9,14 +9,7 @@
 // 4: soft-light
 
 const simplex = new SimplexNoise(Math.random());
-
 const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
-
-const settings = {
-	operationBefore: 'soft-light',
-	operationAfter: 'source-over',
-	operations: ["source-over", "source-in", "source-out", "source-atop", "destination-over", "destination-in", "destination-out", "destination-atop", "lighter", "copy", "xor", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"],
-};
 
 const ctx = document.querySelector('.js-canvas').getContext('2d');
 const { canvas } = ctx;
@@ -42,15 +35,6 @@ const loadImage = (url) => {
 
 		image.src = url;
 	});
-};
-
-const setupControls = (settings) => {
-	const gui = new dat.GUI();
-
-	gui.add(settings, 'operationBefore', settings.operations);
-	gui.add(settings, 'operationAfter', settings.operations);
-
-	document.querySelector('.js-gui').appendChild(gui.domElement);
 };
 
 const calcAlpha = (min, max, scale) => {
@@ -118,10 +102,10 @@ const drawPath = (ctx, path) => {
 };
 
 
-const drawWaveShape = (ctx, y, path) => {
+const drawWaveShape = (ctx, y, path, alpha) => {
 	const fill = ctx.createLinearGradient(0, 0, 0, y);
-	fill.addColorStop(0, '#f6710d');
-	fill.addColorStop(0.75, '#2f81a9');
+	fill.addColorStop(0, `rgba(245, 113, 13, ${alpha})`);
+	fill.addColorStop(0.5, `rgba(47, 130, 170, 1)`);
 
 	ctx.save();
 	ctx.translate(0, y);
@@ -132,13 +116,13 @@ const drawWaveShape = (ctx, y, path) => {
 };
 
 const drawWaveImage = (ctx, y, path, images) => {
-	ctx.globalCompositeOperation = settings.operationBefore;
+	ctx.globalCompositeOperation = 'soft-light';
 
 	const scaleStart = 1;
 	const scaleEnd = 2;
 
 	images.forEach((image, i) => {
-		image.scale += 0.001;
+		image.scale += 0.0002;
 
 		const imageScale = image.scale;
 		const imageWidth = width * imageScale;
@@ -162,30 +146,70 @@ const drawWaveImage = (ctx, y, path, images) => {
 
 	});
 
-	ctx.globalCompositeOperation = settings.operationAfter;
+	ctx.globalCompositeOperation = 'source-over';
 };
+
+const drawSunReflection = (ctx, y, height, radius, path, phase) => {
+	const noise = simplex.noise2D(phase, phase);
+	const blur = 15 + (5 * noise);
+
+	const fill = ctx.createLinearGradient(cx, 0, cx, y + height);
+	fill.addColorStop(0, 'rgba(209, 110, 40, 0.5)');
+	fill.addColorStop(0.75, 'rgba(209, 110, 40, 0)');
+
+	ctx.save();
+	ctx.translate(0, y);
+	drawPath(ctx, path);
+
+	ctx.clip();
+
+	ctx.fillStyle = fill;
+	ctx.filter = `blur(${blur}px)`;
+	ctx.beginPath();
+	ctx.moveTo(cx - radius, -100);
+	ctx.lineTo(cx + radius, -100);
+	ctx.lineTo(cx + (radius * 3), height);
+	ctx.lineTo(cx - (radius * 3), height);
+	ctx.closePath();
+	ctx.fill();
+
+	ctx.restore();
+};
+
 
 const clear = () => {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
-const loop = (images, settings) => {
-	const padding = 50;
-	const path = generatePath(numPoints, width, padding, cy, phase);
-
+const loop = (images) => {
 	clear();
 
 	drawSky(ctx, width, height);
 	drawSun(ctx, 150, cx, cy - 50);
-	drawWaveShape(ctx, cy, path);
-	drawWaveImage(ctx, cy, path, images, phase);
 
+	const padding = 50;
+	const numWaves = 3;
+	let wavesSpacing = 20;
+
+	for (let i = 0; i < numWaves; i++) {
+		const path = generatePath(numPoints, width, padding, cy, phase + (i * 0.5));
+
+		drawWaveShape(ctx, cy + (i * wavesSpacing), path, 1 - (i / (numWaves + 2)));
+		drawWaveImage(ctx, cy + (i * wavesSpacing), path, images, phase);
+
+		wavesSpacing *= 1.5;
+	}
+
+	const path = generatePath(numPoints, width, padding, cy, phase);
+
+	drawSunReflection(ctx, cy, cy, 100, path, phase);
 	phase += 0.005;
-	requestAnimationFrame(() => loop(images, settings));
+
+	requestAnimationFrame(() => loop(images));
 };
 
 const setup = async () => {
-	const image = await loadImage('bump4.png');
+	const image = await loadImage('https://pimskie.dev/public/assets/water-bump.png');
 	const numImages = 5;
 
 	const images = new Array(numImages).fill().map((_, i) => {
@@ -198,9 +222,7 @@ const setup = async () => {
 		return setting;
 	});
 
-	setupControls(settings)
-
-	loop(images, settings);
+	loop(images);
 };
 
 setup();

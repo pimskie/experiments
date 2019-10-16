@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>BO</title>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gui {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="js-gui gui"></div>
+    <div class="container">
+        <canvas class="canvas js-canvas"></canvas>
+    </div>
+
+    <script src="https://unpkg.com/dat.gui@0.7.6/build/dat.gui.js"></script>
+    <script src="//unpkg.com/simplex-noise@2.4.0/simplex-noise.js"></script>
+    <script src="main.js" type="module"></script>
+</body>
+</html>

@@ -10,7 +10,6 @@ let width;
 let height;
 let isDrawing = false;
 let hue = 140;
-let lightness = 50;
 
 const brushDetail = 500;
 
@@ -70,8 +69,6 @@ const draw = (brush, from, to) => {
 
 const onMouseDown = () => {
 	hue = Math.random() * 360;
-	// lightness = 60 + (Math.random() * 40);
-
 	isDrawing = true;
 };
 

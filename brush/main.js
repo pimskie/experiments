@@ -12,6 +12,7 @@ let isDrawing = false;
 let hue = 140;
 
 const brushDetail = 500;
+let brushRadius = 50;
 
 const drops = new Array(brushDetail).fill().map((_, i) => {
 	const radius = 1 + (Math.random() * 3);
@@ -89,8 +90,12 @@ const onPointerMove = (e) => {
 	if (isDrawing) {
 		const distance = Math.hypot(to.y - from.y, to.x - from.y);
 		const distanceNorm = clamp((distance / 500), 0, 1);
-		const radius = 25 + (25 * distanceNorm);
-		const brush = generateBrush(drops, radius);
+		const brushRadiusDestination = 25 + (25 * distanceNorm);
+
+		brushRadius += (brushRadiusDestination - brushRadius) / 10;
+
+
+		const brush = generateBrush(drops, brushRadius);
 
 		draw(brush, from, to);
 	}

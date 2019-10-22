@@ -29,9 +29,51 @@ const HSVToHSL = ({ h, s, v }) => {
 	return { h, s, l };
 }
 
+class Drop {
+	constructor(ctx, position, size, color) {
+		this.from = {
+			x: position.x,
+			y: position.y,
+		};
+
+		this.ctx = ctx;
+		this.color = color;
+		this.size = size;
+		this.velocity = 0.5;
+
+		this.draw();
+	}
+
+	draw() {
+		const toX = this.from.x;
+		const toY = this.from.y + this.velocity;
+
+		ctx.beginPath();
+		ctx.fillStyle = this.color;
+		ctx.lineWidth = this.size;
+		ctx.lineCap = 'round';
+
+		ctx.moveTo(this.from.x, this.from.y);
+		ctx.lineTo(toX, toY);
+		ctx.stroke();
+		ctx.closePath();
+
+
+		this.from.x = toX;
+		this.from.y = toY;
+
+		this.velocity *= 0.99;
+
+		if (this.velocity > 0.1) {
+			requestAnimationFrame(() => this.draw());
+		}
+	}
+}
+
 class Brush {
 	constructor(canvas, { detail, size, color, isSpraying }) {
 		this.isPainting = false;
+		this.lastPosition = {};
 
 		this.setDetail(detail);
 		this.setSize(size);
@@ -70,7 +112,9 @@ class Brush {
 		this.drops = new Array(this.detail).fill().map((_, i) => {
 			const angle = Math.PI * 2 * Math.random();
 			const radius = 2 + (4 * Math.random());
-			const lightness = simplex.noise2D(i, i) * 10;
+			const noise = simplex.noise2D(i, i);
+			const noiseAmplitude = this.isSpraying ? 2 : 10;
+			const lightness = noise * noiseAmplitude;
 			let amplitude = Math.random();
 
 			if (i % 20 === 0) {
@@ -94,6 +138,11 @@ class Brush {
 
 	onPointerUp() {
 		this.isPainting = false;
+
+		if (Math.random() > 0.1) {
+			this.createDripping();
+
+		}
 	}
 
 	paint(ctx, from, to, distance = 0) {
@@ -101,7 +150,11 @@ class Brush {
 
 		this.drops.forEach((drop, i) => this.paintDrop(ctx, drop, i, from, to, brushSize));
 
-		if (Math.random() > 0.1) {
+		if (Math.random() > 0.5) {
+			this.createDripping();
+		}
+
+		if (this.isSpraying && Math.random() > 0.1) {
 			const angle = Math.PI * 2 * Math.random();
 			const length = this.size * (1.5 + (Math.random() * 0.75));
 			const radius = 1 + Math.random();
@@ -115,6 +168,8 @@ class Brush {
 			ctx.fill();
 			ctx.closePath();
 		}
+
+		this.lastPosition = to;
 	}
 
 	paintDrop(ctx, drop, index, from, to, brushSize) {
@@ -137,6 +192,12 @@ class Brush {
 		ctx.lineTo(to.x + position.x, to.y + position.y);
 		ctx.stroke();
 		ctx.closePath();
+	}
+
+	createDripping() {
+		const radius = 2 + (3 * Math.random());
+
+		new Drop(ctx, this.lastPosition, radius, this.getColor());
 	}
 
 	getColor(lightnessModifier = 0) {
@@ -188,7 +249,7 @@ const setup = () => {
 		size: 25,
 		detail: 120,
 		color: { h: 0, s: 1, v: 1 },
-		isSpraying: true,
+		isSpraying: false,
 		clear() { clear(ctx); },
 	};
 

@@ -5,24 +5,39 @@ const ctx = canvas.getContext('2d');
 
 let width;
 let height;
+let brush;
 let phase = 0;
 
 const from = {};
 const to = {};
 const target = {};
 
-const settings = { size: 50, detail: 200, hue: 0 };
-
 class Brush {
-	constructor({ detail, size, hue }) {
-		this.detail = detail;
-		this.size = size;
-		this.hue = hue;
-
+	constructor(canvas, { detail, size, color }) {
 		this.isPainting = false;
 
+		this.setDetail(detail);
+		this.setSize(size);
+		this.setColor(color);
+
+		this.initEvents(canvas);
+	}
+
+	setSize(size) {
+		this.size = size;
+	}
+
+	setDetail(detail) {
+		this.detail = detail;
+
 		this.generateDrops(detail);
-		this.initEvents();
+	}
+
+	// https://workshop.chromeexperiments.com/examples/gui/#4--Color-Controllers
+	setColor({ h, s, v }) {
+		this.hue = h;
+		this.saturation = s * 100;
+		this.lightness = v * 100;
 	}
 
 	generateDrops(detail) {
@@ -30,27 +45,19 @@ class Brush {
 			const angle = Math.PI * 2 * Math.random();
 			const radius = 2 + (4 * Math.random());
 			let length = Math.random();
-			let lightness = 40 + (Math.random() * 5);
+			let lightness = simplex.noise2D(i, i) * 10;
 
 			if (i  % 20 === 0) {
 				length *= 1.2;
-			}
-
-			if (i % 5 === 0) {
-				lightness *= 0.9;
-			}
-
-			if (i % 20 === 0) {
-				lightness *= 0.75;
 			}
 
 			return { angle, radius, lightness, length };
 		});
 	}
 
-	initEvents() {
-		document.body.addEventListener('pointerdown', e => this.onPointerDown(e));
-		document.body.addEventListener('pointerup', e => this.onPointerUp(e));
+	initEvents(canvas) {
+		canvas.addEventListener('pointerdown', e => this.onPointerDown(e));
+		canvas.addEventListener('pointerup', e => this.onPointerUp(e));
 	}
 
 	onPointerDown() {
@@ -74,11 +81,11 @@ class Brush {
 		const y = Math.sin(angle);
 
 		const position = {
-			x: x * (brushSize * length),
-			y: y * (brushSize * length),
+			x: x * brushSize * length,
+			y: y * brushSize * length,
 		};
 
-		ctx.strokeStyle = `hsla(0, 100%, ${lightness}%, 0.3)`;
+		ctx.strokeStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness + lightness}%, 1)`;
 		ctx.lineWidth = radius;
 		ctx.lineCap = 'round';
 
@@ -128,28 +135,28 @@ const onPointerDown = (e) => {
 	brush.generateDrops(brush.detail);
 };
 
-const onPointerUp = () => {};
-
-const onKeyDown = (e) => {
-	if (e.code === 'Space') {
-		clear(ctx);
-	}
-};
-
-
 const setup = () => {
 	resize();
+
+	const settings = { size: 50, detail: 200, color: { h: 0, s: 0, v: 1 }, clear() { clear(ctx); }, };
+
+	brush = new Brush(canvas, settings);
+
+	const gui = new dat.GUI();
+
+	gui.addColor(settings, 'color').onChange(color => brush.setColor(color));
+	gui.add(settings, 'size').min(1).max(50).step(1).onChange(size => brush.setSize(size));
+	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
+	gui.add(settings, 'clear')
+
+	document.querySelector('.js-ui').appendChild(gui.domElement);
+
 
 	window.addEventListener('resize', resize);
 	canvas.addEventListener('mousemove', onPointerMove);
 	canvas.addEventListener('touchmove', onPointerMove);
 	canvas.addEventListener('pointerdown', onPointerDown);
-	canvas.addEventListener('pointerup', onPointerUp);
-
-	document.body.addEventListener('keydown', onKeyDown);
 };
-
-const brush = new Brush(settings);
 
 const loop = () => {
 	if (!brush.isPainting) {
@@ -165,6 +172,9 @@ const loop = () => {
 
 	target.x += (to.x - target.x) / 3;
 	target.y += (to.y - target.y) / 3;
+
+	target.x = to.x;
+	target.y = to.y;
 
 	brush.paint(ctx, from, target);
 

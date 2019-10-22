@@ -7,9 +7,23 @@
     <title>Document</title>
 
     <style>
+        :root {
+            --distance-s: 0.5rem;
+            --distance: 1rem;
+
+            --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
         html, body {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
@@ -25,21 +39,17 @@
 
         .ui {
             position: absolute;
-            width: 500px;
-            right: 0;
             top: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.95);
+            left: 0;
         }
     </style>
 </head>
 <body>
 
     <canvas class="canvas js-canvas"></canvas>
-    <div class="ui">
+    <div class="ui js-ui"></div>
 
-    </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
     <script src="https://unpkg.com/simplex-noise@2.4.0/simplex-noise.js"></script>
     <script src="main2.js"></script>
 </body>

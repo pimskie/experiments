@@ -5,7 +5,6 @@ const ctx = canvas.getContext('2d');
 
 let width;
 let height;
-let isPainting = false;
 let phase = 0;
 
 const from = {};
@@ -19,8 +18,10 @@ class Brush {
 		this.size = size;
 		this.hue = hue;
 
+		this.isPainting = false;
 
 		this.generateDrops(detail);
+		this.initEvents();
 	}
 
 	generateDrops(detail) {
@@ -46,6 +47,19 @@ class Brush {
 		});
 	}
 
+	initEvents() {
+		document.body.addEventListener('pointerdown', e => this.onPointerDown(e));
+		document.body.addEventListener('pointerup', e => this.onPointerUp(e));
+	}
+
+	onPointerDown() {
+		this.isPainting = true;
+	}
+
+	onPointerUp() {
+		this.isPainting = false;
+	}
+
 	paint(ctx, from, to, distance = 0) {
 		const brushSize = this.size + (5 * distance);
 
@@ -66,6 +80,7 @@ class Brush {
 		ctx.strokeStyle = `hsla(0, 100%, ${lightness}%, 0.3)`;
 		ctx.lineWidth = radius;
 		ctx.lineCap = 'round';
+
 		ctx.beginPath();
 		ctx.moveTo(from.x + position.x, from.y + position.y);
 		ctx.lineTo(to.x + position.x, to.y + position.y);
@@ -107,12 +122,9 @@ const onPointerDown = (e) => {
 	from.y = y;
 
 	brush.generateDrops(brush.detail);
-	isPainting = true;
 };
 
-const onPointerUp = () => {
-	isPainting = false;
-};
+const onPointerUp = () => {};
 
 const onKeyDown = (e) => {
 	if (e.code === 'Space') {
@@ -135,7 +147,16 @@ const setup = () => {
 const brush = new Brush(settings);
 
 const loop = () => {
-	if (!isPainting) {
+	if (!to.x) {
+		to.x = from.x;
+		to.y = from.y;
+
+		requestAnimationFrame(loop);
+
+		return;
+	}
+
+	if (!brush.isPainting) {
 		requestAnimationFrame(loop);
 
 		return;

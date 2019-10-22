@@ -12,19 +12,39 @@ const from = {};
 const to = {};
 const target = {};
 
+const HSVToHSL = ({ h, s, v }) => {
+	// both hsv and hsl values are in [0, 1]
+	var l = (2 - s) * v / 2;
+
+	if (l != 0) {
+		if (l == 1) {
+			s = 0;
+		} else if (l < 0.5) {
+			s = s * v / (l * 2);
+		} else {
+			s = s * v / (2 - l * 2);
+		}
+	}
+
+	return { h, s, l };
+}
+
 class Brush {
-	constructor(canvas, { detail, size, color }) {
+	constructor(canvas, { detail, size, color, isSpraying }) {
 		this.isPainting = false;
 
 		this.setDetail(detail);
 		this.setSize(size);
 		this.setColor(color);
+		this.setSpraying(isSpraying);
 
 		this.initEvents(canvas);
 	}
 
 	setSize(size) {
 		this.size = size;
+
+		this.generateDrops(this.detail);
 	}
 
 	setDetail(detail) {
@@ -33,25 +53,31 @@ class Brush {
 		this.generateDrops(detail);
 	}
 
-	// https://workshop.chromeexperiments.com/examples/gui/#4--Color-Controllers
-	setColor({ h, s, v }) {
-		this.hue = h;
-		this.saturation = s * 100;
-		this.lightness = v * 100;
+	setSpraying(spraying) {
+		this.isSpraying = spraying;
 	}
 
-	generateDrops(detail) {
-		this.drops = new Array(detail).fill().map((_, i) => {
+	// https://workshop.chromeexperiments.com/examples/gui/#4--Color-Controllers
+	setColor(hsvColor) {
+		const { h, s, l } = HSVToHSL(hsvColor);
+
+		this.hue = h;
+		this.saturation = s * 100;
+		this.lightness = l * 100;
+	}
+
+	generateDrops() {
+		this.drops = new Array(this.detail).fill().map((_, i) => {
 			const angle = Math.PI * 2 * Math.random();
 			const radius = 2 + (4 * Math.random());
-			let length = Math.random();
-			let lightness = simplex.noise2D(i, i) * 10;
+			const lightness = simplex.noise2D(i, i) * 10;
+			let amplitude = Math.random();
 
-			if (i  % 20 === 0) {
-				length *= 1.2;
+			if (i % 20 === 0) {
+				amplitude *= 1.2;
 			}
 
-			return { angle, radius, lightness, length };
+			return { angle, radius, lightness, amplitude };
 		});
 	}
 
@@ -61,6 +87,8 @@ class Brush {
 	}
 
 	onPointerDown() {
+		this.generateDrops(this.detail);
+
 		this.isPainting = true;
 	}
 
@@ -71,21 +99,36 @@ class Brush {
 	paint(ctx, from, to, distance = 0) {
 		const brushSize = this.size + (5 * distance);
 
-		this.drops.forEach(drop => this.paintDrop(ctx, drop, from, to, brushSize));
+		this.drops.forEach((drop, i) => this.paintDrop(ctx, drop, i, from, to, brushSize));
+
+		if (Math.random() > 0.1) {
+			const angle = Math.PI * 2 * Math.random();
+			const length = this.size * (1.5 + (Math.random() * 0.75));
+			const radius = 1 + Math.random();
+
+			ctx.fillStyle = this.getColor();
+			ctx.lineWidth = radius;
+			ctx.lineCap = 'round';
+
+			ctx.beginPath();
+			ctx.arc(to.x + (Math.cos(angle) * length), to.y + (Math.sin(angle) * length), radius, 0, Math.PI * 2, false);
+			ctx.fill();
+			ctx.closePath();
+		}
 	}
 
-	paintDrop(ctx, drop, from, to, brushSize) {
-		const { angle, radius, lightness, length } = drop;
+	paintDrop(ctx, drop, index, from, to, brushSize) {
+		const { angle, radius, lightness, amplitude } = drop;
 
 		const x = Math.cos(angle);
 		const y = Math.sin(angle);
 
 		const position = {
-			x: x * brushSize * length,
-			y: y * brushSize * length,
+			x: x * brushSize * amplitude,
+			y: y * brushSize * amplitude,
 		};
 
-		ctx.strokeStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness + lightness}%, 1)`;
+		ctx.strokeStyle = this.getColor(lightness);
 		ctx.lineWidth = radius;
 		ctx.lineCap = 'round';
 
@@ -94,6 +137,10 @@ class Brush {
 		ctx.lineTo(to.x + position.x, to.y + position.y);
 		ctx.stroke();
 		ctx.closePath();
+	}
+
+	getColor(lightnessModifier = 0) {
+		return `hsla(${this.hue}, ${this.saturation}%, ${this.lightness + lightnessModifier}%, 0.5)`;
 	}
 }
 
@@ -131,22 +178,28 @@ const onPointerDown = (e) => {
 
 	target.x = x;
 	target.y = y;
-
-	brush.generateDrops(brush.detail);
 };
 
 const setup = () => {
 	resize();
 
-	const settings = { size: 50, detail: 200, color: { h: 0, s: 0, v: 1 }, clear() { clear(ctx); }, };
+	// working with hsv color due to dat.GUI
+	const settings = {
+		size: 25,
+		detail: 120,
+		color: { h: 0, s: 1, v: 1 },
+		isSpraying: true,
+		clear() { clear(ctx); },
+	};
 
 	brush = new Brush(canvas, settings);
 
 	const gui = new dat.GUI();
 
 	gui.addColor(settings, 'color').onChange(color => brush.setColor(color));
-	gui.add(settings, 'size').min(1).max(50).step(1).onChange(size => brush.setSize(size));
+	gui.add(settings, 'size').min(10).max(50).step(1).onChange(size => brush.setSize(size));
 	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
+	gui.add(settings, 'isSpraying').onChange(s => brush.setSpraying(s));
 	gui.add(settings, 'clear')
 
 	document.querySelector('.js-ui').appendChild(gui.domElement);
@@ -170,11 +223,12 @@ const loop = () => {
 		target.y = from.y;
 	}
 
-	target.x += (to.x - target.x) / 3;
-	target.y += (to.y - target.y) / 3;
+	target.x += (to.x - target.x) / 2;
+	target.y += (to.y - target.y) / 2;
 
-	target.x = to.x;
-	target.y = to.y;
+	if (brush.isSpraying) {
+		brush.generateDrops();
+	}
 
 	brush.paint(ctx, from, target);
 

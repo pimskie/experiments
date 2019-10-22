@@ -12,7 +12,7 @@ let isDrawing = false;
 let hue = 140;
 let phase = 0;
 
-const brushDetail = 500;
+const brushDetail = 200;
 let brushRadius = 50;
 
 const drops = new Array(brushDetail).fill().map((_, i) => {
@@ -85,7 +85,7 @@ const draw = (brush, from, to) => {
 	});
 };
 
-const onMouseDown = (e) => {
+const onPointerDown = (e) => {
 	const pointerPosition = getPointerPosition(e);
 
 	from.x = pointerPosition.x;
@@ -94,7 +94,7 @@ const onMouseDown = (e) => {
 	isDrawing = true;
 };
 
-const onMouseUp = () => {
+const onPointerUp = () => {
 	isDrawing = false;
 };
 
@@ -126,8 +126,8 @@ const setup = () => {
 	window.addEventListener('resize', setSize);
 	canvas.addEventListener('mousemove', onPointerMove);
 	canvas.addEventListener('touchmove', onPointerMove);
-	canvas.addEventListener('mousedown', onMouseDown);
-	canvas.addEventListener('mouseup', onMouseUp);
+	canvas.addEventListener('mousedown', onPointerDown);
+	canvas.addEventListener('mouseup', onPointerUp);
 	document.body.addEventListener('keydown', onKeyDown);
 };
 

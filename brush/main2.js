@@ -9,6 +9,7 @@ let phase = 0;
 
 const from = {};
 const to = {};
+const target = {};
 
 const settings = { size: 50, detail: 200, hue: 0 };
 
@@ -121,6 +122,9 @@ const onPointerDown = (e) => {
 	from.x = x;
 	from.y = y;
 
+	target.x = x;
+	target.y = y;
+
 	brush.generateDrops(brush.detail);
 };
 
@@ -141,31 +145,31 @@ const setup = () => {
 	canvas.addEventListener('touchmove', onPointerMove);
 	canvas.addEventListener('pointerdown', onPointerDown);
 	canvas.addEventListener('pointerup', onPointerUp);
+
 	document.body.addEventListener('keydown', onKeyDown);
 };
 
 const brush = new Brush(settings);
 
 const loop = () => {
-	if (!to.x) {
-		to.x = from.x;
-		to.y = from.y;
-
-		requestAnimationFrame(loop);
-
-		return;
-	}
-
 	if (!brush.isPainting) {
 		requestAnimationFrame(loop);
 
 		return;
 	}
 
-	brush.paint(ctx, from, to);
+	if (!target.x) {
+		target.x = from.x;
+		target.y = from.y;
+	}
 
-	from.x = to.x;
-	from.y = to.y;
+	target.x += (to.x - target.x) / 3;
+	target.y += (to.y - target.y) / 3;
+
+	brush.paint(ctx, from, target);
+
+	from.x = target.x;
+	from.y = target.y;
 
 	phase += 0.005;
 

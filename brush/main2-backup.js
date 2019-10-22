@@ -11,7 +11,11 @@ let phase = 0;
 const from = {};
 const to = {};
 
-const settings = { size: 50, detail: 200, hue: 0 };
+const settings = {
+	size: 50,
+	detail: 200,
+	hue: 0,
+};
 
 class Brush {
 	constructor({ detail, size, hue }) {
@@ -39,38 +43,37 @@ class Brush {
 			}
 
 			if (i % 20 === 0) {
-				lightness *= 0.75;
+				lightness *= 1.5;
 			}
 
 			return { angle, radius, lightness, length };
 		});
 	}
 
-	paint(ctx, from, to, distance = 0) {
-		const brushSize = this.size + (5 * distance);
+	paint(ctx, from, to, distance = 0, distortion = 0) {
+		const size = this.size + (5 * distance);
 
-		this.drops.forEach(drop => this.paintDrop(ctx, drop, from, to, brushSize));
-	}
+		this.drops.forEach(({ angle, radius, lightness, length }, i) => {
+			const x = Math.cos(angle);
+			const y = Math.sin(angle);
 
-	paintDrop(ctx, drop, from, to, brushSize) {
-		const { angle, radius, lightness, length } = drop;
+			const growX = distortion * simplex.noise3D(x + phase, x + phase, phase);
+			const growY = distortion * simplex.noise3D(y + phase, y + phase, phase);
 
-		const x = Math.cos(angle);
-		const y = Math.sin(angle);
+			const position = {
+				x: x * ((size * length) + growX),
+				y: y * ((size * length) + growY),
+			};
 
-		const position = {
-			x: x * (brushSize * length),
-			y: y * (brushSize * length),
-		};
-
-		ctx.strokeStyle = `hsla(0, 100%, ${lightness}%, 0.3)`;
-		ctx.lineWidth = radius;
-		ctx.lineCap = 'round';
-		ctx.beginPath();
-		ctx.moveTo(from.x + position.x, from.y + position.y);
-		ctx.lineTo(to.x + position.x, to.y + position.y);
-		ctx.stroke();
-		ctx.closePath();
+			ctx.strokeStyle = `hsla(0, 100%, ${lightness}%)`;
+			ctx.lineWidth = radius;
+			ctx.lineCap = 'round';
+			ctx.beginPath();
+			ctx.moveTo(from.x + position.x, from.y + position.y);
+			ctx.lineTo(to.x + position.x, to.y + position.y);
+			ctx.stroke();
+			ctx.closePath();
+		});
 	}
 }
 

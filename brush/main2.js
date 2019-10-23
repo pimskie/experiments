@@ -11,6 +11,7 @@ let phase = 0;
 const from = {};
 const to = {};
 const target = {};
+let drippings = [];
 
 const HSVToHSL = ({ h, s, v }) => {
 	// both hsv and hsl values are in [0, 1]
@@ -29,22 +30,21 @@ const HSVToHSL = ({ h, s, v }) => {
 	return { h, s, l };
 }
 
-class Drop {
-	constructor(ctx, position, size, color) {
+class Dripping {
+	constructor(position, size, color, velocity) {
 		this.from = {
 			x: position.x,
 			y: position.y,
 		};
 
-		this.ctx = ctx;
 		this.color = color;
 		this.size = size;
-		this.velocity = 0.5;
+		this.velocity = velocity;
 
-		this.draw();
+		this.isDead = false;
 	}
 
-	draw() {
+	draw(ctx) {
 		const toX = this.from.x;
 		const toY = this.from.y + this.velocity;
 
@@ -58,15 +58,18 @@ class Drop {
 		ctx.stroke();
 		ctx.closePath();
 
-
 		this.from.x = toX;
 		this.from.y = toY;
 
 		this.velocity *= 0.99;
 
-		if (this.velocity > 0.1) {
-			requestAnimationFrame(() => this.draw());
+		if (this.velocity < 0.1) {
+			this.isDead = true;
 		}
+	}
+
+	cancel() {
+		cancelAnimationFrame(this.rafId);
 	}
 }
 
@@ -138,21 +141,12 @@ class Brush {
 
 	onPointerUp() {
 		this.isPainting = false;
-
-		if (Math.random() > 0.1) {
-			this.createDripping();
-
-		}
 	}
 
 	paint(ctx, from, to, distance = 0) {
 		const brushSize = this.size + (5 * distance);
 
 		this.drops.forEach((drop, i) => this.paintDrop(ctx, drop, i, from, to, brushSize));
-
-		if (Math.random() > 0.5) {
-			this.createDripping();
-		}
 
 		if (this.isSpraying && Math.random() > 0.1) {
 			const angle = Math.PI * 2 * Math.random();
@@ -194,18 +188,13 @@ class Brush {
 		ctx.closePath();
 	}
 
-	createDripping() {
-		const radius = 2 + (3 * Math.random());
-
-		new Drop(ctx, this.lastPosition, radius, this.getColor());
-	}
-
 	getColor(lightnessModifier = 0) {
 		return `hsla(${this.hue}, ${this.saturation}%, ${this.lightness + lightnessModifier}%, 0.5)`;
 	}
 }
 
 const clear = (ctx) => {
+	drippings = [];
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
@@ -272,7 +261,19 @@ const setup = () => {
 	canvas.addEventListener('pointerdown', onPointerDown);
 };
 
+const createDripping = (position, color) => {
+	const radius = 2 + (3 * Math.random());
+	const velocity = 0.25 + (0.75 * Math.random());
+
+	const dripping = new Dripping(position, radius, color, velocity);
+
+	drippings.push(dripping);
+};
+
 const loop = () => {
+	drippings.forEach(drip => drip.draw(ctx));
+	drippings = drippings.filter(drip => !drip.isDead);
+
 	if (!brush.isPainting) {
 		requestAnimationFrame(loop);
 
@@ -292,6 +293,10 @@ const loop = () => {
 	}
 
 	brush.paint(ctx, from, target);
+
+	if (Math.random() > 0.75) {
+		createDripping(target, brush.getColor());
+	}
 
 	from.x = target.x;
 	from.y = target.y;

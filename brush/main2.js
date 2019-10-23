@@ -3,6 +3,9 @@ const simplex = new SimplexNoise();
 const canvas = document.querySelector('.js-canvas');
 const ctx = canvas.getContext('2d');
 
+const canvasCursor = document.querySelector('.js-canvas-cursor');
+const ctxCursor = canvasCursor.getContext('2d');
+
 let width;
 let height;
 let brush;
@@ -193,8 +196,13 @@ class Brush {
 	}
 }
 
-const clear = (ctx) => {
+const clearAll = () => {
 	drippings = [];
+	clear(ctx);
+	clear(ctxCursor);
+};
+
+const clear = (ctx) => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
@@ -211,6 +219,9 @@ const resize = () => {
 
 	canvas.width = width;
 	canvas.height = height;
+
+	canvasCursor.width = width;
+	canvasCursor.height = height;
 };
 
 const onPointerMove = (e) => {
@@ -239,7 +250,7 @@ const setup = () => {
 		detail: 120,
 		color: { h: 0, s: 1, v: 1 },
 		isSpraying: false,
-		clear() { clear(ctx); },
+		clear() { clearAll(); },
 	};
 
 	brush = new Brush(canvas, settings);
@@ -270,7 +281,21 @@ const createDripping = (position, color) => {
 	drippings.push(dripping);
 };
 
+const drawCursor = (position, size) => {
+	clear(ctxCursor);
+
+	ctxCursor.beginPath();
+	ctxCursor.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+	ctxCursor.lineWidth = 1;
+	ctxCursor.arc(position.x, position.y, size, 0, Math.PI * 2);
+	ctxCursor.stroke();
+	ctxCursor.closePath();
+}
+
 const loop = () => {
+	drawCursor(to, brush.size);
+
+
 	drippings.forEach(drip => drip.draw(ctx));
 	drippings = drippings.filter(drip => !drip.isDead);
 
@@ -294,7 +319,8 @@ const loop = () => {
 
 	brush.paint(ctx, from, target);
 
-	if (Math.random() > 0.75) {
+
+	if (Math.random() > 0.85) {
 		createDripping(target, brush.getColor());
 	}
 

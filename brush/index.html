@@ -31,10 +31,22 @@
             height: 100vh;
 
             overflow: hidden;
+            background: #000;
         }
 
-        canvas {
-            background: #000;
+        .canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            cursor: none;
+        }
+
+        .canvas--cursor {
+            z-index: 1;
+            pointer-events: none;
         }
 
         .ui {
@@ -47,6 +59,7 @@
 <body>
 
     <canvas class="canvas js-canvas"></canvas>
+    <canvas class="canvas canvas--cursor js-canvas-cursor"></canvas>
     <div class="ui js-ui"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>

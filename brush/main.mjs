@@ -1,5 +1,5 @@
 import Brush from './modules/brush.js';
-import Dripping from './modules/dripping.js';
+import { createDripping } from './modules/dripping.js';
 
 const canvas = document.querySelector('.js-canvas');
 const ctx = canvas.getContext('2d');
@@ -95,15 +95,6 @@ const setup = () => {
 	canvas.addEventListener('pointerdown', onPointerDown);
 };
 
-const createDripping = (position, color) => {
-	const radius = 2 + (3 * Math.random());
-	const velocity = 0.25 + (0.75 * Math.random());
-
-	const dripping = new Dripping(position, radius, color, velocity);
-
-	drippings.push(dripping);
-};
-
 const drawCursor = (position, size) => {
 	clear(ctxCursor);
 
@@ -118,7 +109,6 @@ const drawCursor = (position, size) => {
 const loop = () => {
 	drawCursor(to, brush.size);
 
-
 	drippings.forEach(drip => drip.draw(ctx));
 	drippings = drippings.filter(drip => !drip.isDead);
 
@@ -126,11 +116,6 @@ const loop = () => {
 		requestAnimationFrame(loop);
 
 		return;
-	}
-
-	if (!target.x) {
-		target.x = from.x;
-		target.y = from.y;
 	}
 
 	target.x += (to.x - target.x) / (settings.tipDelay + 1);
@@ -144,13 +129,13 @@ const loop = () => {
 
 
 	if (Math.random() > 0.85) {
-		createDripping(target, brush.getColor());
+		const dripping = createDripping(target, brush.getColor());
+
+		drippings.push(dripping);
 	}
 
 	from.x = target.x;
 	from.y = target.y;
-
-	phase += 0.005;
 
 	requestAnimationFrame(loop);
 };

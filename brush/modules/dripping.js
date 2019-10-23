@@ -37,4 +37,13 @@ class Dripping {
 	}
 }
 
+const createDripping = (position, color) => {
+	const radius = 2 + (3 * Math.random());
+	const velocity = 0.25 + (0.75 * Math.random());
+
+	return new Dripping(position, radius, color, velocity);
+};
+
 export default Dripping;
+
+export { createDripping };

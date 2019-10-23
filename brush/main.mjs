@@ -66,11 +66,13 @@ const setup = () => {
 	resize();
 
 	// working with hsv color due to dat.GUI
+	const types = ['marker', 'spray'];
+
 	settings = {
 		size: 25,
 		detail: 120,
 		color: { h: 0, s: 1, v: 1 },
-		isSpraying: false,
+		type: types[1],
 		tipDelay: 2,
 		clear() { clearAll(); },
 	};
@@ -83,7 +85,7 @@ const setup = () => {
 	gui.add(settings, 'tipDelay').min(0).max(7).step(1);
 	gui.add(settings, 'size').min(10).max(50).step(1).onChange(size => brush.setSize(size));
 	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
-	gui.add(settings, 'isSpraying').onChange(s => brush.setSpraying(s));
+	gui.add(settings, 'type', types).onChange(type => brush.setType(type));
 	gui.add(settings, 'clear')
 
 	document.querySelector('.js-ui').appendChild(gui.domElement);
@@ -121,12 +123,7 @@ const loop = () => {
 	target.x += (to.x - target.x) / (settings.tipDelay + 1);
 	target.y += (to.y - target.y) / (settings.tipDelay + 1);
 
-	if (brush.isSpraying) {
-		brush.generateTip();
-	}
-
 	brush.paint(ctx, from, target);
-
 
 	if (Math.random() > 0.85) {
 		const dripping = createDripping(target, brush.getColor());

@@ -4,10 +4,10 @@ import hsvToHsl from '../utils/hsvToHsl.js';
 const simplex = new SimplexNoise();
 
 class Brush {
-	constructor(canvas, { detail, size, color, isSpraying }) {
+	constructor(canvas, { type = 'marker', detail, size, color, isSpraying }) {
 		this.isPainting = false;
-		this.lastPosition = {};
 
+		this.setType(type);
 		this.setDetail(detail);
 		this.setSize(size);
 		this.setColor(color);
@@ -28,6 +28,10 @@ class Brush {
 		this.generateTip(detail);
 	}
 
+	setType(type) {
+		this.type = type;
+	}
+
 	setSpraying(spraying) {
 		this.isSpraying = spraying;
 	}
@@ -42,19 +46,59 @@ class Brush {
 	}
 
 	generateTip() {
-		this.tip = new Array(this.detail).fill().map((_, i) => {
+		if (this.type === 'marker') {
+			this.tip = this.createMarkerTip(this.detail);
+		} else {
+			this.tip = this.createSprayTip(this.detail);
+		}
+	}
+
+	createMarkerTip() {
+		const width = this.size;
+		const widthHalf = width * 0.5;
+		const height = this.size * 0.5;
+		const heightHalf = height * 0.5;
+
+		const tip = [];
+
+		while (tip.length < this.detail) {
+			const i = tip.length;
+			const lightness = this.getDropLightness(i, i, true);
+			const radius = 2 + (4 * Math.random());;
+
+			const point = {
+				position: {
+					x: (Math.random() * width) - widthHalf,
+					y: (Math.random() * height) - heightHalf,
+				},
+				radius,
+				lightness,
+			};
+
+			tip.push(point);
+		}
+
+		return tip;
+	}
+
+	createSprayTip() {
+		return new Array(this.detail).fill().map((_, i) => {
+			const radius = 2 + (6 * Math.random());
+			const lightness = this.getDropLightness(i, i, false);
+
 			const angle = Math.PI * 2 * Math.random();
-			const radius = 2 + (4 * Math.random());
-			const noise = simplex.noise2D(i, i);
-			const noiseAmplitude = this.isSpraying ? 2 : 10;
-			const lightness = noise * noiseAmplitude;
-			let amplitude = Math.random();
+			let length = this.size * Math.random();
 
 			if (i % 20 === 0) {
-				amplitude *= 1.2;
+				length *= 1.2;
 			}
 
-			return { angle, radius, lightness, amplitude };
+			const position = {
+				x: Math.cos(angle) * length,
+				y: Math.sin(angle) * length,
+			};
+
+			return { position, radius, lightness };
 		});
 	}
 
@@ -76,9 +120,9 @@ class Brush {
 	paint(ctx, from, to, distance = 0) {
 		const brushSize = this.size + (5 * distance);
 
-		this.tip.forEach((drop, i) => this.paintDrop(ctx, drop, i, from, to, brushSize));
+		this.tip.forEach((drop, i) => this.paintDrop(ctx, drop, from, to, brushSize));
 
-		if (this.isSpraying && Math.random() > 0.1) {
+		if (this.type === 'spray') {
 			const angle = Math.PI * 2 * Math.random();
 			const length = this.size * (1.5 + (Math.random() * 0.75));
 			const radius = 1 + Math.random();
@@ -91,21 +135,13 @@ class Brush {
 			ctx.arc(to.x + (Math.cos(angle) * length), to.y + (Math.sin(angle) * length), radius, 0, Math.PI * 2, false);
 			ctx.fill();
 			ctx.closePath();
-		}
 
-		this.lastPosition = to;
+			this.generateTip();
+		}
 	}
 
-	paintDrop(ctx, drop, index, from, to, brushSize) {
-		const { angle, radius, lightness, amplitude } = drop;
-
-		const x = Math.cos(angle);
-		const y = Math.sin(angle);
-
-		const position = {
-			x: x * brushSize * amplitude,
-			y: y * brushSize * amplitude,
-		};
+	paintDrop(ctx, drop, from, to) {
+		const { position, radius, lightness } = drop;
 
 		ctx.strokeStyle = this.getColor(lightness);
 		ctx.lineWidth = radius;
@@ -120,6 +156,14 @@ class Brush {
 
 	getColor(lightnessModifier = 0) {
 		return `hsla(${this.hue}, ${this.saturation}%, ${this.lightness + lightnessModifier}%, 0.5)`;
+	}
+
+	getDropLightness(x, y, bevelMore = true) {
+		const noise = simplex.noise2D(x, y);
+		const noiseAmplitude = bevelMore ? 10 : 2;
+		const lightness = noise * noiseAmplitude;
+
+		return lightness;
 	}
 }
 

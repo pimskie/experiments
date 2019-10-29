@@ -27,13 +27,13 @@ class Brush {
 	setSize(size) {
 		this.size = size;
 
-		this.generateTip(this.detail);
+		this.generateTip();
 	}
 
 	setDetail(detail) {
 		this.detail = detail;
 
-		this.generateTip(detail);
+		this.generateTip();
 	}
 
 	setType(type) {
@@ -49,10 +49,10 @@ class Brush {
 		this.lightness = l * 100;
 	}
 
-	generateTip() {
+	generateTip(grow = 0) {
 		this.tip = this.type === 'marker'
-			? this.createMarkerTip(this.detail)
-			: this.createSprayTip(this.detail);
+			? this.createMarkerTip()
+			: this.createSprayTip(grow);
 	}
 
 	createMarkerTip() {
@@ -83,9 +83,9 @@ class Brush {
 		return tip;
 	}
 
-	createSprayTip() {
+	createSprayTip(grow = 0) {
 		return new Array(10).fill().map((_, i) => {
-			const radius = (this.size * 1.5) - (this.size * (Math.random() * 0.5));
+			const radius = (this.size + (10 * grow)) - (this.size * (Math.random() * 0.5));
 			const length = this.size * (0.2 * randomValue());
 
 			const lightness = this.getPointLightness(i, i, false);
@@ -107,7 +107,7 @@ class Brush {
 	}
 
 	onPointerDown() {
-		this.generateTip(this.detail);
+		this.generateTip();
 
 		this.isPainting = true;
 	}
@@ -116,17 +116,15 @@ class Brush {
 		this.isPainting = false;
 	}
 
-	paint(ctx, from, to, distance = 0) {
-		const brushSize = this.size + (5 * distance);
-
-		this.tip.forEach((drop, i) => this.paintDrop(ctx, drop, from, to, brushSize));
+	paint(ctx, from, to, grow = 0) {
+		this.tip.forEach((drop, i) => this.paintDrop(ctx, drop, from, to));
 
 		if (this.type === 'spray') {
 			if (Math.random() > 0.5) {
 				this.paintDiffuse(ctx, to);
 			}
 
-			this.generateTip();
+			this.generateTip(grow);
 		}
 	}
 
@@ -139,7 +137,7 @@ class Brush {
 		ctx.lineWidth = radius;
 		ctx.lineCap = 'round';
 
-		if (this.type === 'marker' || 1) {
+		if (this.type === 'marker') {
 			ctx.beginPath();
 			ctx.moveTo(from.x + position.x, from.y + position.y);
 			ctx.lineTo(to.x + position.x, to.y + position.y);

@@ -1,6 +1,9 @@
 import Brush from './modules/brush.js';
 import { createDripping } from './modules/dripping.js';
 
+const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
+
 const canvas = document.querySelector('.js-canvas');
 const ctx = canvas.getContext('2d');
 
@@ -14,6 +17,7 @@ let brush;
 const from = {};
 const to = {};
 const target = {};
+let speed = 0;
 let drippings = [];
 let settings = {};
 
@@ -127,7 +131,11 @@ const loop = () => {
 	target.x += (to.x - target.x) / (settings.tipDelay + 1);
 	target.y += (to.y - target.y) / (settings.tipDelay + 1);
 
-	brush.paint(ctx, from, target);
+	speed = Math.hypot(to.x - from.x, to.y - from.y);
+
+	const grow = map(speed, 0, width * 0.1, 0, 1);
+
+	brush.paint(ctx, from, target, grow);
 
 	if (brush.isSprayCan && Math.random() > 0.9) {
 		const dripping = createDripping(target, brush.getColor());

@@ -1,19 +1,27 @@
 
+import Ziggurat from '../utils/ziggurat.js';
+import randomGaussian from '../utils/random-gaussian.js';
 import hsvToHsl from '../utils/hsvToHsl.js';
 
 const simplex = new SimplexNoise();
+const ziggurat = new Ziggurat();
+
+const randomValue = () => Math.random(); // ziggurat.nextGaussian();
 
 class Brush {
-	constructor(canvas, { type = 'marker', detail, size, color, isSpraying }) {
+	constructor(canvas, { type = 'marker', detail, size, color }) {
 		this.isPainting = false;
 
 		this.setType(type);
 		this.setDetail(detail);
 		this.setSize(size);
 		this.setColor(color);
-		this.setSpraying(isSpraying);
 
 		this.initEvents(canvas);
+	}
+
+	get isSprayCan() {
+		return this.type === 'spray';
 	}
 
 	setSize(size) {
@@ -32,10 +40,6 @@ class Brush {
 		this.type = type;
 	}
 
-	setSpraying(spraying) {
-		this.isSpraying = spraying;
-	}
-
 	// https://workshop.chromeexperiments.com/examples/gui/#4--Color-Controllers
 	setColor(hsvColor) {
 		const { h, s, l } = hsvToHsl(hsvColor);
@@ -46,25 +50,23 @@ class Brush {
 	}
 
 	generateTip() {
-		if (this.type === 'marker') {
-			this.tip = this.createMarkerTip(this.detail);
-		} else {
-			this.tip = this.createSprayTip(this.detail);
-		}
+		this.tip = this.type === 'marker'
+			? this.createMarkerTip(this.detail)
+			: this.createSprayTip(this.detail);
 	}
 
 	createMarkerTip() {
-		const width = this.size;
+		const width = this.size * 2;
 		const widthHalf = width * 0.5;
-		const height = this.size * 0.5;
+		const height = this.size;
 		const heightHalf = height * 0.5;
 
 		const tip = [];
 
 		while (tip.length < this.detail) {
 			const i = tip.length;
-			const lightness = this.getDropLightness(i, i, true);
-			const radius = 2 + (4 * Math.random());;
+			const lightness = this.getPointLightness(i, i, true);
+			const radius = 2 + (4 * Math.random());
 
 			const point = {
 				position: {
@@ -82,16 +84,13 @@ class Brush {
 	}
 
 	createSprayTip() {
-		return new Array(this.detail).fill().map((_, i) => {
-			const radius = 2 + (6 * Math.random());
-			const lightness = this.getDropLightness(i, i, false);
+		return new Array(10).fill().map((_, i) => {
+			const radius = (this.size * 1.5) - (this.size * (Math.random() * 0.5));
+			const length = this.size * (0.2 * randomValue());
 
-			const angle = Math.PI * 2 * Math.random();
-			let length = this.size * Math.random();
+			const lightness = this.getPointLightness(i, i, false);
 
-			if (i % 20 === 0) {
-				length *= 1.2;
-			}
+			const angle = Math.PI * 2 * randomValue();
 
 			const position = {
 				x: Math.cos(angle) * length,
@@ -123,18 +122,9 @@ class Brush {
 		this.tip.forEach((drop, i) => this.paintDrop(ctx, drop, from, to, brushSize));
 
 		if (this.type === 'spray') {
-			const angle = Math.PI * 2 * Math.random();
-			const length = this.size * (1.5 + (Math.random() * 0.75));
-			const radius = 1 + Math.random();
-
-			ctx.fillStyle = this.getColor();
-			ctx.lineWidth = radius;
-			ctx.lineCap = 'round';
-
-			ctx.beginPath();
-			ctx.arc(to.x + (Math.cos(angle) * length), to.y + (Math.sin(angle) * length), radius, 0, Math.PI * 2, false);
-			ctx.fill();
-			ctx.closePath();
+			if (Math.random() > 0.5) {
+				this.paintDiffuse(ctx, to);
+			}
 
 			this.generateTip();
 		}
@@ -142,15 +132,39 @@ class Brush {
 
 	paintDrop(ctx, drop, from, to) {
 		const { position, radius, lightness } = drop;
+		const color = this.getColor(lightness);
 
-		ctx.strokeStyle = this.getColor(lightness);
+		ctx.strokeStyle = color;
+		ctx.fillStyle = color;
+		ctx.lineWidth = radius;
+		ctx.lineCap = 'round';
+
+		if (this.type === 'marker' || 1) {
+			ctx.beginPath();
+			ctx.moveTo(from.x + position.x, from.y + position.y);
+			ctx.lineTo(to.x + position.x, to.y + position.y);
+			ctx.stroke();
+			ctx.closePath();
+		} else {
+			ctx.beginPath();
+			ctx.arc(to.x + position.x, to.y + position.y, radius, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.closePath();
+		}
+	}
+
+	paintDiffuse(ctx, position) {
+		const angle = Math.PI * 2 * Math.random();
+		const length = this.size * (1.5 + (Math.random() * 0.75));
+		const radius = 1 + Math.random();
+
+		ctx.fillStyle = this.getColor();
 		ctx.lineWidth = radius;
 		ctx.lineCap = 'round';
 
 		ctx.beginPath();
-		ctx.moveTo(from.x + position.x, from.y + position.y);
-		ctx.lineTo(to.x + position.x, to.y + position.y);
-		ctx.stroke();
+		ctx.arc(position.x + (Math.cos(angle) * length), position.y + (Math.sin(angle) * length), radius, 0, Math.PI * 2, false);
+		ctx.fill();
 		ctx.closePath();
 	}
 
@@ -158,9 +172,9 @@ class Brush {
 		return `hsla(${this.hue}, ${this.saturation}%, ${this.lightness + lightnessModifier}%, 0.5)`;
 	}
 
-	getDropLightness(x, y, bevelMore = true) {
+	getPointLightness(x, y, bevelMore = true) {
 		const noise = simplex.noise2D(x, y);
-		const noiseAmplitude = bevelMore ? 10 : 2;
+		const noiseAmplitude = bevelMore ? 5 : 1;
 		const lightness = noise * noiseAmplitude;
 
 		return lightness;

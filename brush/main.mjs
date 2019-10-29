@@ -73,7 +73,7 @@ const setup = () => {
 		detail: 120,
 		color: { h: 0, s: 1, v: 1 },
 		type: types[1],
-		tipDelay: 2,
+		tipDelay: 0,
 		clear() { clearAll(); },
 	};
 
@@ -90,26 +90,30 @@ const setup = () => {
 
 	document.querySelector('.js-ui').appendChild(gui.domElement);
 
-
 	window.addEventListener('resize', resize);
 	canvas.addEventListener('mousemove', onPointerMove);
 	canvas.addEventListener('touchmove', onPointerMove);
 	canvas.addEventListener('pointerdown', onPointerDown);
 };
 
-const drawCursor = (position, size) => {
+const drawCursor = (position, size, isSprayCan) => {
 	clear(ctxCursor);
 
-	ctxCursor.beginPath();
 	ctxCursor.strokeStyle = 'rgba(255, 255, 255, 0.6)';
 	ctxCursor.lineWidth = 1;
-	ctxCursor.arc(position.x, position.y, size, 0, Math.PI * 2);
+
+	ctxCursor.beginPath();
+	if (isSprayCan) {
+		ctxCursor.arc(position.x, position.y, size, 0, Math.PI * 2);
+	} else {
+		ctxCursor.rect(position.x - (size), position.y - (size * 0.5), size * 2, size);
+	}
 	ctxCursor.stroke();
 	ctxCursor.closePath();
 }
 
 const loop = () => {
-	drawCursor(to, brush.size);
+	drawCursor(to, brush.size, brush.isSprayCan);
 
 	drippings.forEach(drip => drip.draw(ctx));
 	drippings = drippings.filter(drip => !drip.isDead);
@@ -125,7 +129,7 @@ const loop = () => {
 
 	brush.paint(ctx, from, target);
 
-	if (Math.random() > 0.85) {
+	if (brush.isSprayCan && Math.random() > 0.9) {
 		const dripping = createDripping(target, brush.getColor());
 
 		drippings.push(dripping);

@@ -17,7 +17,6 @@ let brush;
 const from = {};
 const to = {};
 const target = {};
-let speed = 0;
 let drippings = [];
 let settings = {};
 
@@ -73,11 +72,11 @@ const setup = () => {
 	const types = ['marker', 'spray'];
 
 	settings = {
-		size: 25,
+		size: 15,
 		detail: 120,
 		color: { h: 0, s: 1, v: 1 },
 		type: types[1],
-		tipDelay: 0,
+		tipDelay: 0.5,
 		clear() { clearAll(); },
 	};
 
@@ -86,7 +85,6 @@ const setup = () => {
 	const gui = new dat.GUI();
 
 	gui.addColor(settings, 'color').onChange(color => brush.setColor(color));
-	gui.add(settings, 'tipDelay').min(0).max(7).step(1);
 	gui.add(settings, 'size').min(10).max(50).step(1).onChange(size => brush.setSize(size));
 	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
 	gui.add(settings, 'type', types).onChange(type => brush.setType(type));
@@ -128,16 +126,25 @@ const loop = () => {
 		return;
 	}
 
-	target.x += (to.x - target.x) / (settings.tipDelay + 1);
-	target.y += (to.y - target.y) / (settings.tipDelay + 1);
+	const distance = Math.hypot(to.x - from.x, to.y - from.y);
+	const speed = clamp(map(distance, 0, width * 0.2, 0, 1), 0, 1);
 
-	speed = Math.hypot(to.x - from.x, to.y - from.y);
 
-	const grow = map(speed, 0, width * 0.1, 0, 1);
+	if (brush.isSprayCan) {
+		const delay = 2;
 
-	brush.paint(ctx, from, target, grow);
+		target.x += (to.x - target.x) / delay;
+		target.y += (to.y - target.y) / delay;
+	} else {
+		target.x = to.x;
+		target.y = to.y;
+	}
 
-	if (brush.isSprayCan && Math.random() > 0.9) {
+
+	brush.paint(ctx, from, target, speed);
+
+
+	if (brush.isSprayCan && Math.random() > 0.9 && speed < 0.04) {
 		const dripping = createDripping(target, brush.getColor());
 
 		drippings.push(dripping);

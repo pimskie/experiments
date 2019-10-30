@@ -1,3 +1,5 @@
+// https://unsplash.com/photos/AupdmQ4w_M4
+// https://unsplash.com/photos/Ny7UDRl2LZY
 import Brush from './modules/brush.js';
 import { createDripping } from './modules/dripping.js';
 
@@ -13,6 +15,7 @@ const ctxCursor = canvasCursor.getContext('2d');
 let width;
 let height;
 let brush;
+let image;
 
 const from = {};
 const to = {};
@@ -20,14 +23,29 @@ const target = {};
 let drippings = [];
 let settings = {};
 
+const loadImage = (url) => {
+	const image = new Image();
+
+	return new Promise((resolve, reject) => {
+		image.addEventListener('load', e => resolve(e.target));
+		image.addEventListener('error', e => reject(new Error('error :(')));
+
+		image.src = url;
+	});
+};
+
+
 const clearAll = () => {
 	drippings = [];
 	clear(ctx);
 	clear(ctxCursor);
+
+	drawBackground();
 };
 
 const clear = (ctx) => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
 };
 
 const getPointerPosition = (event) => {
@@ -46,6 +64,26 @@ const resize = () => {
 
 	canvasCursor.width = width;
 	canvasCursor.height = height;
+
+	drawBackground();
+};
+
+const drawBackground = () => {
+	const { width: w1, height: h1 } = image;
+	const { width: w2, height: h2 } = canvas;
+
+	let destinationWidth;
+	let destinationHeight;
+
+	if (w2 > w1) {
+		destinationWidth = w2;
+		destinationHeight = h1 * (w2 / w1);
+	} else {
+		destinationWidth = w1;
+		destinationHeight = h1;
+	}
+
+	ctx.drawImage(image, 0, 0, destinationWidth, destinationHeight);
 };
 
 const onPointerMove = (e) => {
@@ -65,7 +103,9 @@ const onPointerDown = (e) => {
 	target.y = y;
 };
 
-const setup = () => {
+const setup = async () => {
+	image = await loadImage('https://pimskie.dev/public/assets/wall-small.jpg');
+
 	resize();
 
 	// working with hsv color due to dat.GUI
@@ -96,6 +136,8 @@ const setup = () => {
 	canvas.addEventListener('mousemove', onPointerMove);
 	canvas.addEventListener('touchmove', onPointerMove);
 	canvas.addEventListener('pointerdown', onPointerDown);
+
+	loop();
 };
 
 const drawCursor = (position, size, isSprayCan) => {
@@ -157,5 +199,4 @@ const loop = () => {
 };
 
 setup();
-loop();
 

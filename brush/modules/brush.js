@@ -61,10 +61,7 @@ class Brush {
 		const height = this.size;
 		const heightHalf = height * 0.5;
 
-		const tip = [];
-
-		while (tip.length < this.detail) {
-			const i = tip.length;
+		const tip = new Array(this.detail).fill().map((_, i) => {
 			const lightness = this.getPointLightness(i, i, true);
 			const radius = 1 + (1 * Math.random());
 
@@ -77,8 +74,8 @@ class Brush {
 				lightness,
 			};
 
-			tip.push(point);
-		}
+			return point;
+		});
 
 		return tip;
 	}
@@ -186,6 +183,8 @@ class Brush {
 		const noise = simplex.noise2D(x, y);
 		const noiseAmplitude = bevelMore ? 5 : 0;
 		const lightness = noise * noiseAmplitude;
+
+		console.log(lightness)
 
 		return lightness;
 	}

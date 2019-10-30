@@ -112,10 +112,10 @@ const setup = async () => {
 	const types = ['marker', 'spray'];
 
 	settings = {
-		size: 15,
+		size: 40,
 		detail: 120,
-		color: { h: 0, s: 1, v: 1 },
-		type: types[1],
+		color: { h: 0, s: 0, v: 0 },
+		type: types[0],
 		tipDelay: 0.5,
 		clear() { clearAll(); },
 	};
@@ -186,7 +186,7 @@ const loop = () => {
 	brush.paint(ctx, from, target, speed);
 
 
-	if (brush.isSprayCan && Math.random() > 0.9 && speed < 0.04) {
+	if (brush.isSprayCan && Math.random() > 0.8 && speed < 0.04) {
 		const dripping = createDripping(target, brush.getColor());
 
 		drippings.push(dripping);

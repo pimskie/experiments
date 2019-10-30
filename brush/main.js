@@ -6,8 +6,15 @@ import { createDripping } from './modules/dripping.js';
 const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
 
-const canvas = document.querySelector('.js-canvas');
-const ctx = canvas.getContext('2d');
+const canvasPaint = document.querySelector('.js-canvas-paint');
+const ctxPaint = canvasPaint.getContext('2d');
+
+const canvasComposition = document.querySelector('.js-canvas-composition');
+const ctxComposition = canvasComposition.getContext('2d');
+
+const canvasComposition2 = document.querySelector('.js-canvas-composition-2');
+const ctxComposition2 = canvasComposition2.getContext('2d');
+
 
 const canvasCursor = document.querySelector('.js-canvas-cursor');
 const ctxCursor = canvasCursor.getContext('2d');
@@ -15,7 +22,8 @@ const ctxCursor = canvasCursor.getContext('2d');
 let width;
 let height;
 let brush;
-let image;
+let imageNormal;
+let imageMap;
 
 const from = {};
 const to = {};
@@ -37,10 +45,10 @@ const loadImage = (url) => {
 
 const clearAll = () => {
 	drippings = [];
-	clear(ctx);
-	clear(ctxCursor);
 
-	drawBackground();
+	clear(ctxPaint);
+	clear(ctxCursor);
+	clear(ctxComposition);
 };
 
 const clear = (ctx) => {
@@ -59,18 +67,15 @@ const resize = () => {
 	width = window.innerWidth;
 	height = window.innerHeight;
 
-	canvas.width = width;
-	canvas.height = height;
-
-	canvasCursor.width = width;
-	canvasCursor.height = height;
-
-	drawBackground();
+	[canvasPaint, canvasCursor, canvasComposition, canvasComposition2].forEach((canvas) => {
+		canvas.width = width;
+		canvas.height = height;
+	});
 };
 
-const drawBackground = () => {
-	const { width: w1, height: h1 } = image;
-	const { width: w2, height: h2 } = canvas;
+const drawBackground = (img, destinationCtx) => {
+	const { width: w1, height: h1 } = img;
+	const { width: w2, height: h2 } = destinationCtx.canvas;
 
 	let destinationWidth;
 	let destinationHeight;
@@ -83,7 +88,7 @@ const drawBackground = () => {
 		destinationHeight = h1;
 	}
 
-	ctx.drawImage(image, 0, 0, destinationWidth, destinationHeight);
+	destinationCtx.drawImage(img, 0, 0, destinationWidth, destinationHeight);
 };
 
 const onPointerMove = (e) => {
@@ -104,23 +109,28 @@ const onPointerDown = (e) => {
 };
 
 const setup = async () => {
-	image = await loadImage('https://pimskie.dev/public/assets/wall-small.jpg');
+	// image = await loadImage('https://pimskie.dev/public/assets/wall-small.jpg');
+	imageNormal = await loadImage('./wall-small.jpg');
+	imageMap = await loadImage('./wall-small-curve-black.jpg');
 
 	resize();
 
 	// working with hsv color due to dat.GUI
 	const types = ['marker', 'spray'];
+	const compos = ["source-over", "source-in", "source-out", "source-atop", "destination-over", "destination-in", "destination-out", "destination-atop", "lighter", "copy", "xor", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"];
 
 	settings = {
 		size: 40,
 		detail: 120,
-		color: { h: 0, s: 0, v: 0 },
-		type: types[0],
+		color: { h: 0, s: 1, v: 1 },
+		type: types[1],
+		composition: compos[8],
+		composition2: compos[10],
 		tipDelay: 0.5,
 		clear() { clearAll(); },
 	};
 
-	brush = new Brush(canvas, settings);
+	brush = new Brush(canvasPaint, settings);
 
 	const gui = new dat.GUI();
 
@@ -128,14 +138,16 @@ const setup = async () => {
 	gui.add(settings, 'size').min(10).max(50).step(1).onChange(size => brush.setSize(size));
 	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
 	gui.add(settings, 'type', types).onChange(type => brush.setType(type));
+	gui.add(settings, 'composition', compos);
+	gui.add(settings, 'composition2', compos);
 	gui.add(settings, 'clear')
 
 	document.querySelector('.js-ui').appendChild(gui.domElement);
 
 	window.addEventListener('resize', resize);
-	canvas.addEventListener('mousemove', onPointerMove);
-	canvas.addEventListener('touchmove', onPointerMove);
-	canvas.addEventListener('pointerdown', onPointerDown);
+	canvasPaint.addEventListener('mousemove', onPointerMove);
+	canvasPaint.addEventListener('touchmove', onPointerMove);
+	canvasPaint.addEventListener('pointerdown', onPointerDown);
 
 	loop();
 };
@@ -143,7 +155,7 @@ const setup = async () => {
 const drawCursor = (position, size, isSprayCan) => {
 	clear(ctxCursor);
 
-	ctxCursor.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+	ctxCursor.strokeStyle = 'rgba(200, 200, 200, 0.6)';
 	ctxCursor.lineWidth = 1;
 
 	ctxCursor.beginPath();
@@ -156,13 +168,33 @@ const drawCursor = (position, size, isSprayCan) => {
 	ctxCursor.closePath();
 }
 
+const composite = () => {
+	clear(ctxComposition);
+	clear(ctxComposition2);
+
+
+	ctxComposition.drawImage(imageNormal, 0, 0);
+	ctxComposition.globalCompositeOperation = settings.composition;
+	ctxComposition.drawImage(ctxPaint.canvas, 0, 0);
+};
+
 const loop = () => {
+	// Works best with bright color spray
+	// ctx.globalCompositeOperation = 'color';
+
+	// single layer of spray paint
+	// ctx.globalCompositeOperation = 'overlay';
+
+	// ctxPaint.globalCompositeOperation = settings.composition;
+
 	drawCursor(to, brush.size, brush.isSprayCan);
 
-	drippings.forEach(drip => drip.draw(ctx));
+	drippings.forEach(drip => drip.draw(ctxPaint));
 	drippings = drippings.filter(drip => !drip.isDead);
 
 	if (!brush.isPainting) {
+		composite();
+
 		requestAnimationFrame(loop);
 
 		return;
@@ -183,7 +215,7 @@ const loop = () => {
 	}
 
 
-	brush.paint(ctx, from, target, speed);
+	brush.paint(ctxPaint, from, target, speed);
 
 
 	if (brush.isSprayCan && Math.random() > 0.8 && speed < 0.04) {
@@ -195,8 +227,15 @@ const loop = () => {
 	from.x = target.x;
 	from.y = target.y;
 
+	composite();
+
 	requestAnimationFrame(loop);
 };
 
 setup();
 
+document.body.addEventListener('keydown', (e) => {
+	if (e.code === 'Space') {
+		canvasComposition.classList.toggle('is-see-through');
+	}
+});

@@ -31,7 +31,7 @@
             height: 100vh;
 
             overflow: hidden;
-            background: #000;
+            background: #fff;
         }
 
         .canvas {
@@ -44,8 +44,23 @@
             cursor: none;
         }
 
+        .canvas--paint {
+            opacity: 0.1;
+        }
+
+        .canvas--composite {
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .canvas--composite-2 {
+            z-index: 7;
+            pointer-events: none;
+        }
+
+
         .canvas--cursor {
-            z-index: 1;
+            z-index: 10;
             pointer-events: none;
         }
 
@@ -53,13 +68,22 @@
             position: absolute;
             top: 0;
             left: 0;
+
+            z-index: 100;
+        }
+
+        .is-see-through {
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
 
-    <canvas class="canvas js-canvas"></canvas>
+    <canvas class="canvas canvas--paint js-canvas-paint"></canvas>
+    <canvas class="canvas canvas--composite js-canvas-composition"></canvas>
+    <canvas class="canvas canvas--composite-2 js-canvas-composition-2"></canvas>
     <canvas class="canvas canvas--cursor js-canvas-cursor"></canvas>
+
     <div class="ui js-ui"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>

@@ -23,7 +23,9 @@ let width;
 let height;
 let brush;
 let imageNormal;
-let imageMap;
+let imageMapDark;
+let imageMapLight;
+let imageMapThreshold;
 
 const from = {};
 const to = {};
@@ -111,7 +113,9 @@ const onPointerDown = (e) => {
 const setup = async () => {
 	// image = await loadImage('https://pimskie.dev/public/assets/wall-small.jpg');
 	imageNormal = await loadImage('./wall-small.jpg');
-	imageMap = await loadImage('./wall-small-curve-black.jpg');
+	imageMapDark = await loadImage('./wall-small-curve-black.jpg');
+	imageMapLight = await loadImage('./wall-small-curve-white.jpg');
+	imageMapThreshold = await loadImage('./wall-small-threshold.jpg');
 
 	resize();
 
@@ -122,10 +126,9 @@ const setup = async () => {
 	settings = {
 		size: 40,
 		detail: 120,
-		color: { h: 0, s: 1, v: 1 },
+		color: { h: 0, s: 0, v: 1 },
 		type: types[1],
-		composition: compos[8],
-		composition2: compos[10],
+		composition: compos[17],
 		tipDelay: 0.5,
 		clear() { clearAll(); },
 	};
@@ -139,7 +142,6 @@ const setup = async () => {
 	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
 	gui.add(settings, 'type', types).onChange(type => brush.setType(type));
 	gui.add(settings, 'composition', compos);
-	gui.add(settings, 'composition2', compos);
 	gui.add(settings, 'clear')
 
 	document.querySelector('.js-ui').appendChild(gui.domElement);
@@ -172,10 +174,9 @@ const composite = () => {
 	clear(ctxComposition);
 	clear(ctxComposition2);
 
-
-	ctxComposition.drawImage(imageNormal, 0, 0);
-	ctxComposition.globalCompositeOperation = settings.composition;
 	ctxComposition.drawImage(ctxPaint.canvas, 0, 0);
+	ctxComposition.globalCompositeOperation = settings.composition;
+	ctxComposition.drawImage(imageNormal, 0, 0);
 };
 
 const loop = () => {

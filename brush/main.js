@@ -15,6 +15,8 @@ const ctxComposition = canvasComposition.getContext('2d');
 const canvasComposition2 = document.querySelector('.js-canvas-composition-2');
 const ctxComposition2 = canvasComposition2.getContext('2d');
 
+const canvasComposition3 = document.querySelector('.js-canvas-composition-3');
+const ctxComposition3 = canvasComposition3.getContext('2d');
 
 const canvasCursor = document.querySelector('.js-canvas-cursor');
 const ctxCursor = canvasCursor.getContext('2d');
@@ -23,8 +25,6 @@ let width;
 let height;
 let brush;
 let imageNormal;
-let imageMapDark;
-let imageMapLight;
 let imageMapThreshold;
 
 const from = {};
@@ -66,10 +66,10 @@ const getPointerPosition = (event) => {
 }
 
 const resize = () => {
-	width = window.innerWidth;
-	height = window.innerHeight;
+	width = 500; //window.innerWidth;
+	height = 500; // window.innerHeight;
 
-	[canvasPaint, canvasCursor, canvasComposition, canvasComposition2].forEach((canvas) => {
+	[canvasPaint, canvasCursor, canvasComposition, canvasComposition2, canvasComposition3].forEach((canvas) => {
 		canvas.width = width;
 		canvas.height = height;
 	});
@@ -111,11 +111,8 @@ const onPointerDown = (e) => {
 };
 
 const setup = async () => {
-	// image = await loadImage('https://pimskie.dev/public/assets/wall-small.jpg');
 	imageNormal = await loadImage('./wall-small.jpg');
-	imageMapDark = await loadImage('./wall-small-curve-black.jpg');
-	imageMapLight = await loadImage('./wall-small-curve-white.jpg');
-	imageMapThreshold = await loadImage('./wall-small-threshold.jpg');
+	imageMapThreshold = await loadImage('./wall-threshold-200.png');
 
 	resize();
 
@@ -124,11 +121,12 @@ const setup = async () => {
 	const compos = ["source-over", "source-in", "source-out", "source-atop", "destination-over", "destination-in", "destination-out", "destination-atop", "lighter", "copy", "xor", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"];
 
 	settings = {
-		size: 40,
+		size: 20,
 		detail: 120,
-		color: { h: 0, s: 0, v: 1 },
+		color: { h: 0, s: 1, v: 1 },
 		type: types[1],
-		composition: compos[17],
+		composition: compos[15],
+		composition2: compos[10],
 		tipDelay: 0.5,
 		clear() { clearAll(); },
 	};
@@ -142,6 +140,7 @@ const setup = async () => {
 	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
 	gui.add(settings, 'type', types).onChange(type => brush.setType(type));
 	gui.add(settings, 'composition', compos);
+	gui.add(settings, 'composition2', compos);
 	gui.add(settings, 'clear')
 
 	document.querySelector('.js-ui').appendChild(gui.domElement);
@@ -161,11 +160,13 @@ const drawCursor = (position, size, isSprayCan) => {
 	ctxCursor.lineWidth = 1;
 
 	ctxCursor.beginPath();
+
 	if (isSprayCan) {
 		ctxCursor.arc(position.x, position.y, size, 0, Math.PI * 2);
 	} else {
 		ctxCursor.rect(position.x - (size), position.y - (size * 0.5), size * 2, size);
 	}
+
 	ctxCursor.stroke();
 	ctxCursor.closePath();
 }
@@ -173,21 +174,23 @@ const drawCursor = (position, size, isSprayCan) => {
 const composite = () => {
 	clear(ctxComposition);
 	clear(ctxComposition2);
+	clear(ctxComposition3);
 
-	ctxComposition.drawImage(ctxPaint.canvas, 0, 0);
+	drawBackground(imageMapThreshold, ctxComposition);
 	ctxComposition.globalCompositeOperation = settings.composition;
-	ctxComposition.drawImage(imageNormal, 0, 0);
+	ctxComposition.drawImage(ctxPaint.canvas, 0, 0);
+
+	drawBackground(imageNormal, ctxComposition2);
+	ctxComposition2.drawImage(ctxPaint.canvas, 0, 0);
+
+	ctxComposition2.globalCompositeOperation = settings.composition2;
+	ctxComposition2.drawImage(ctxComposition.canvas, 0, 0);
+
+	drawBackground(imageNormal, ctxComposition3);
+	ctxComposition3.drawImage(ctxComposition2.canvas, 0, 0);
 };
 
 const loop = () => {
-	// Works best with bright color spray
-	// ctx.globalCompositeOperation = 'color';
-
-	// single layer of spray paint
-	// ctx.globalCompositeOperation = 'overlay';
-
-	// ctxPaint.globalCompositeOperation = settings.composition;
-
 	drawCursor(to, brush.size, brush.isSprayCan);
 
 	drippings.forEach(drip => drip.draw(ctxPaint));
@@ -215,9 +218,7 @@ const loop = () => {
 		target.y = to.y;
 	}
 
-
 	brush.paint(ctxPaint, from, target, speed);
-
 
 	if (brush.isSprayCan && Math.random() > 0.8 && speed < 0.04) {
 		const dripping = createDripping(target, brush.getColor());

@@ -66,8 +66,8 @@ const getPointerPosition = (event) => {
 }
 
 const resize = () => {
-	width = 500; //window.innerWidth;
-	height = 500; // window.innerHeight;
+	width = window.innerWidth;
+	height = window.innerHeight;
 
 	[canvasPaint, canvasCursor, canvasComposition, canvasComposition2, canvasComposition3].forEach((canvas) => {
 		canvas.width = width;
@@ -112,7 +112,7 @@ const onPointerDown = (e) => {
 
 const setup = async () => {
 	imageNormal = await loadImage('./wall-small.jpg');
-	imageMapThreshold = await loadImage('./wall-threshold-200.png');
+	imageMapThreshold = await loadImage('./wall-threshold-180-levels.png');
 
 	resize();
 

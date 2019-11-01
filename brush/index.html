@@ -45,27 +45,22 @@
         .canvas--paint {
             z-index: 100;
             opacity: 0;
+            cursor: pointer;
         }
 
-        .canvas--composite {
-            z-index: 5;
-            /* pointer-events: none; */
-        }
-
+        .canvas--composite,
         .canvas--composite-2 {
-            z-index: 7;
-            /* pointer-events: none; */
+            display: none;
         }
 
         .canvas--composite-3 {
             z-index: 10;
-            /* pointer-events: none; */
         }
 
 
         .canvas--cursor {
             z-index: 20;
-            /* pointer-events: none; */
+            pointer-events: none;
         }
 
         .ui {
@@ -74,10 +69,6 @@
             left: 0;
 
             z-index: 100;
-        }
-
-        .is-see-through {
-            opacity: 0.5;
         }
     </style>
 </head>

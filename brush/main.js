@@ -2,6 +2,7 @@
 // https://unsplash.com/photos/Ny7UDRl2LZY
 import Brush from './modules/brush.js';
 import { createDripping } from './modules/dripping.js';
+import spraySound from './modules/sound.js';
 
 const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
@@ -108,6 +109,20 @@ const onPointerDown = (e) => {
 
 	target.x = x;
 	target.y = y;
+
+	if (brush.isSprayCan) {
+		spraySound.play();
+	}
+};
+
+const onPointerUp = () => {
+	if (brush.isSprayCan) {
+		spraySound.stop();
+	}
+};
+
+const toggleSound = (on) => {
+	spraySound.toggle(on);
 };
 
 const setup = async () => {
@@ -128,6 +143,7 @@ const setup = async () => {
 		composition: compos[15],
 		composition2: compos[10],
 		tipDelay: 0.5,
+		pssssh: true,
 		clear() { clearAll(); },
 	};
 
@@ -139,8 +155,7 @@ const setup = async () => {
 	gui.add(settings, 'size').min(10).max(50).step(1).onChange(size => brush.setSize(size));
 	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
 	gui.add(settings, 'type', types).onChange(type => brush.setType(type));
-	gui.add(settings, 'composition', compos);
-	gui.add(settings, 'composition2', compos);
+	gui.add(settings, 'pssssh').onChange(toggleSound);
 	gui.add(settings, 'clear')
 
 	document.querySelector('.js-ui').appendChild(gui.domElement);
@@ -149,6 +164,7 @@ const setup = async () => {
 	canvasPaint.addEventListener('mousemove', onPointerMove);
 	canvasPaint.addEventListener('touchmove', onPointerMove);
 	canvasPaint.addEventListener('pointerdown', onPointerDown);
+	canvasPaint.addEventListener('pointerup', onPointerUp);
 
 	loop();
 };
@@ -234,9 +250,3 @@ const loop = () => {
 };
 
 setup();
-
-document.body.addEventListener('keydown', (e) => {
-	if (e.code === 'Space') {
-		canvasComposition.classList.toggle('is-see-through');
-	}
-});

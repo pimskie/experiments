@@ -193,8 +193,6 @@ class Brush {
 		const noiseAmplitude = bevelMore ? 5 : 0;
 		const lightness = noise * noiseAmplitude;
 
-		console.log(lightness)
-
 		return lightness;
 	}
 }

@@ -34,6 +34,10 @@ const target = {};
 let drippings = [];
 let settings = {};
 
+const sizeMin = 10;
+const sizeMax = 75;
+const sizeStart = 50;
+
 const loadImage = (url) => {
 	const image = new Image();
 
@@ -99,6 +103,12 @@ const onPointerMove = (e) => {
 
 	to.x = x;
 	to.y = y;
+
+	const mid = width * 0.5;
+	const amplitude = (x - mid) / mid;
+	const panning = amplitude * 0.75;
+
+	spraySound.pan(panning);
 };
 
 const onPointerDown = (e) => {
@@ -125,23 +135,22 @@ const toggleSound = (on) => {
 	spraySound.toggle(on);
 };
 
+const getBrushSizeRatio = size => (size - sizeMin) / (sizeMax - sizeMin);;
+
 const setup = async () => {
 	imageNormal = await loadImage('./wall-small.jpg');
 	imageMapThreshold = await loadImage('./wall-threshold-180-levels.png');
 
 	resize();
 
-	// working with hsv color due to dat.GUI
 	const types = ['marker', 'spray'];
-	const compos = ["source-over", "source-in", "source-out", "source-atop", "destination-over", "destination-in", "destination-out", "destination-atop", "lighter", "copy", "xor", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"];
+
 
 	settings = {
-		size: 50,
+		size: sizeStart,
 		detail: 120,
 		color: { h: 0, s: 1, v: 1 },
 		type: types[1],
-		composition: compos[15],
-		composition2: compos[10],
 		tipDelay: 0.5,
 		pssssh: true,
 		clear() { clearAll(); },
@@ -149,10 +158,19 @@ const setup = async () => {
 
 	brush = new Brush(canvasPaint, settings);
 
+	const sizeRatio = getBrushSizeRatio(settings.size);
+	spraySound.setFrequency(sizeRatio);
+
 	const gui = new dat.GUI();
 
 	gui.addColor(settings, 'color').onChange(color => brush.setColor(color));
-	gui.add(settings, 'size').min(10).max(50).step(1).onChange(size => brush.setSize(size));
+	gui.add(settings, 'size').min(sizeMin).max(sizeMax).step(1).onChange((size) => {
+		const ratio = getBrushSizeRatio(size);
+
+		brush.setSize(size);
+		spraySound.setFrequency(ratio);
+	});
+
 	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
 	gui.add(settings, 'type', types).onChange(type => brush.setType(type));
 	gui.add(settings, 'pssssh').onChange(toggleSound);
@@ -193,13 +211,13 @@ const composite = () => {
 	clear(ctxComposition3);
 
 	drawBackground(imageMapThreshold, ctxComposition);
-	ctxComposition.globalCompositeOperation = settings.composition;
+	ctxComposition.globalCompositeOperation = 'lighten';
 	ctxComposition.drawImage(ctxPaint.canvas, 0, 0);
 
 	drawBackground(imageNormal, ctxComposition2);
 	ctxComposition2.drawImage(ctxPaint.canvas, 0, 0);
 
-	ctxComposition2.globalCompositeOperation = settings.composition2;
+	ctxComposition2.globalCompositeOperation = 'xor';
 	ctxComposition2.drawImage(ctxComposition.canvas, 0, 0);
 
 	drawBackground(imageNormal, ctxComposition3);
@@ -235,7 +253,7 @@ const loop = () => {
 
 	brush.paint(ctxPaint, from, target, speed);
 
-	if (brush.isSprayCan && Math.random() > 0.8 && speed < 0.04) {
+	if (brush.isSprayCan && Math.random() > 0.95 && speed < 0.06) {
 		const dripping = createDripping(target, brush.getColor());
 
 		drippings.push(dripping);

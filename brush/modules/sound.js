@@ -9,11 +9,16 @@ class SpraySound {
 		this.volume = this.audioCtx.createGain();
 		this.volume.gain.value = 0.8;
 
-		this.volume.connect(this.destination);
-
 		this.bandpass = this.audioCtx.createBiquadFilter();
 		this.bandpass.type = 'bandpass';
+
 		this.bandpass.frequency.value = 2500;
+
+		this.panner = this.audioCtx.createStereoPanner();
+
+		this.volume
+			.connect(this.panner)
+			.connect(this.destination);
 	}
 
 	get time() {
@@ -67,6 +72,22 @@ class SpraySound {
 
 	stop() {
 		this.volume.gain.linearRampToValueAtTime(0, this.time + 0.25);
+	}
+
+	pan(amount) {
+		this.panner.pan.linearRampToValueAtTime(amount, this.time + 0.25)
+	}
+
+	setFrequency(ratio) {
+		// ratio 0: small spray, 1: large spray
+		// frequency 2500: small spray, 1500: large spray
+
+		const start = 2500;
+		const end = 1200;
+		const diff = end - start;
+		const freq = start + (diff * ratio);
+
+		this.bandpass.frequency.setValueAtTime(freq, this.time);
 	}
 
 	toggle(on) {

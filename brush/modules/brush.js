@@ -1,10 +1,7 @@
 
-import Ziggurat from '../utils/ziggurat.js';
-import randomGaussian from '../utils/random-gaussian.js';
 import hsvToHsl from '../utils/hsvToHsl.js';
 
 const simplex = new SimplexNoise();
-const ziggurat = new Ziggurat();
 
 const randomValue = () => Math.random(); // ziggurat.nextGaussian();
 
@@ -135,9 +132,10 @@ class Brush {
 		ctx.save();
 
 		if (this.type === 'marker') {
-			const color = this.getColor(lightness);
+			const color = this.getColor(lightness, 1);
 
-			ctx.strokeStye = color;
+			ctx.strokeStyle = color;
+			ctx.fillStyle = color;
 			ctx.lineWidth = radius * 2;
 			ctx.lineCap = 'round';
 

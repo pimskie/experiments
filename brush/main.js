@@ -121,7 +121,7 @@ const setup = async () => {
 	const compos = ["source-over", "source-in", "source-out", "source-atop", "destination-over", "destination-in", "destination-out", "destination-atop", "lighter", "copy", "xor", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"];
 
 	settings = {
-		size: 20,
+		size: 50,
 		detail: 120,
 		color: { h: 0, s: 1, v: 1 },
 		type: types[1],

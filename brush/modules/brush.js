@@ -81,7 +81,7 @@ class Brush {
 	}
 
 	createSprayTip(speed = 0) {
-		const maxGrow = 100;
+		const maxGrow = 150;
 
 		return new Array(1).fill().map((_, i) => {
 			const radiusIncrease = maxGrow * speed;
@@ -121,7 +121,7 @@ class Brush {
 		this.tip.forEach((drop, i) => this.paintDrop(ctx, drop, from, to));
 
 		if (this.type === 'spray') {
-			if (Math.random() > 0.5 && speed < 0.2) {
+			if (Math.random() > 0.25) {
 				this.paintDiffuse(ctx, to);
 			}
 
@@ -131,26 +131,35 @@ class Brush {
 
 	paintDrop(ctx, drop, from, to) {
 		const { position, radius, lightness, alpha = 1, blur = 0 } = drop;
-		const color = this.getColor(lightness);
-
-		ctx.strokeStyle = color;
-		ctx.fillStyle = color;
-		ctx.lineWidth = radius * 2;
-		ctx.lineCap = 'round';
 
 		ctx.save();
 
 		if (this.type === 'marker') {
+			const color = this.getColor(lightness);
+
+			ctx.strokeStye = color;
+			ctx.lineWidth = radius * 2;
+			ctx.lineCap = 'round';
+
 			ctx.beginPath();
 			ctx.moveTo(from.x + position.x, from.y + position.y);
 			ctx.lineTo(to.x + position.x, to.y + position.y);
 			ctx.stroke();
 			ctx.closePath();
 		} else {
-			ctx.globalAlpha = alpha;
+			const x = to.x + position.x;
+			const y = to.y + position.y;
+			const colorFrom = this.getColor(lightness, alpha);
+			const colorTo = this.getColor(lightness, 0);
+			const gradient = ctx.createRadialGradient(x, y, radius * 0.5, x, y, radius);
+
+			gradient.addColorStop(0, colorFrom);
+			gradient.addColorStop(1, colorTo);
+			ctx.fillStyle = gradient;
+
 			ctx.filter = `blur(${blur}px)`;
 			ctx.beginPath();
-			ctx.arc(to.x + position.x, to.y + position.y, radius, 0, Math.PI * 2);
+			ctx.arc(x, y, radius, 0, Math.PI * 2);
 			ctx.fill();
 			ctx.closePath();
 		}

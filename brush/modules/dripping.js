@@ -17,6 +17,7 @@ class Dripping {
 		const toY = this.from.y + this.velocity;
 
 		ctx.beginPath();
+		ctx.strokeStyle = this.color;
 		ctx.fillStyle = this.color;
 		ctx.lineWidth = this.size;
 		ctx.lineCap = 'round';

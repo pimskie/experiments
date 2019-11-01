@@ -205,8 +205,7 @@ const loop = () => {
 	}
 
 	const distance = Math.hypot(to.x - from.x, to.y - from.y);
-	const speed = clamp(map(distance, 0, width * 0.2, 0, 1), 0, 1);
-
+	const speed = clamp(map(distance, 0, width * 0.15, 0, 1), 0, 1);
 
 	if (brush.isSprayCan) {
 		const delay = 2;

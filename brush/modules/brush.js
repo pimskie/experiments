@@ -1,5 +1,4 @@
 import hsvToHsl from '../utils/hsvToHsl.js';
-const simplex = new SimplexNoise();
 
 class Brush {
 	constructor(canvas, { type = 'marker', markerDetail, size, color }) {

@@ -1,5 +1,7 @@
-// https://unsplash.com/photos/AupdmQ4w_M4
-// https://unsplash.com/photos/eWGE33JU5Ko
+/**
+ * Photo by Dave Webb on Unsplash
+ * https://unsplash.com/photos/eWGE33JU5Ko
+ */
 import Brush from './modules/brush.js';
 import { createDripping } from './modules/dripping.js';
 import spraySound from './modules/sound.js';

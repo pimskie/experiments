@@ -1,8 +1,5 @@
 import hsvToHsl from '../utils/hsvToHsl.js';
-
 const simplex = new SimplexNoise();
-
-const randomValue = () => Math.random(); // ziggurat.nextGaussian();
 
 class Brush {
 	constructor(canvas, { type = 'marker', markerDetail, size, color }) {
@@ -58,7 +55,7 @@ class Brush {
 		const heightHalf = height * 0.5;
 
 		const tip = new Array(this.detail).fill().map((_, i) => {
-			const lightness = this.getPointLightness(i, i, true);
+			const lightness = this.getPointLightness();
 			const radius = 1 + (1 * Math.random());
 
 			const point = {
@@ -87,7 +84,7 @@ class Brush {
 			const alpha = 1 - (speed * 0.95);
 			const blur = 40 * radiusIncreasePercent;
 
-			const angle = Math.PI * 2 * randomValue();
+			const angle = Math.PI * 2 * Math.random();
 
 			const position = {
 				x: Math.cos(angle),
@@ -185,10 +182,9 @@ class Brush {
 		return `hsla(${this.hue}, ${this.saturation}%, ${this.lightness + lightnessModifier}%, ${alpha})`;
 	}
 
-	getPointLightness(x, y, bevelMore = true) {
-		const noise = simplex.noise2D(x, y);
-		const noiseAmplitude = bevelMore ? 5 : 0;
-		const lightness = noise * noiseAmplitude;
+	getPointLightness() {
+		const noise = -1 + (Math.random() * 2);
+		const lightness = noise * 5;
 
 		return lightness;
 	}

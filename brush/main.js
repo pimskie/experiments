@@ -1,5 +1,5 @@
 // https://unsplash.com/photos/AupdmQ4w_M4
-// https://unsplash.com/photos/Ny7UDRl2LZY
+// https://unsplash.com/photos/eWGE33JU5Ko
 import Brush from './modules/brush.js';
 import { createDripping } from './modules/dripping.js';
 import spraySound from './modules/sound.js';
@@ -138,13 +138,12 @@ const toggleSound = (on) => {
 const getBrushSizeRatio = size => (size - sizeMin) / (sizeMax - sizeMin);;
 
 const setup = async () => {
-	imageNormal = await loadImage('./wall-small.jpg');
-	imageMapThreshold = await loadImage('./wall-threshold-180-levels.png');
+	imageNormal = await loadImage('//pimskie.dev/public/assets/wall-2.jpg');
+	imageMapThreshold = await loadImage('//pimskie.dev/public/assets/wall-2-threshold-215-levels.png');
 
 	resize();
 
 	const types = ['marker', 'spray'];
-
 
 	settings = {
 		size: sizeStart,

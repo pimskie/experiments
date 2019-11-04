@@ -1,4 +1,3 @@
-
 import hsvToHsl from '../utils/hsvToHsl.js';
 
 const simplex = new SimplexNoise();

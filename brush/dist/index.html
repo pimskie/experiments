@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <style>
+        :root {
+            --distance-s: 0.5rem;
+            --distance: 1rem;
+
+            --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .canvas--paint {
+            z-index: 100;
+            opacity: 0;
+        }
+
+        .canvas--composite,
+        .canvas--composite-2 {
+            display: none;
+        }
+
+        .canvas--composite-3 {
+            z-index: 10;
+        }
+
+
+        .canvas--cursor {
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas class="canvas canvas--paint js-canvas-paint"></canvas>
+    <canvas class="canvas canvas--composite js-canvas-composition"></canvas>
+    <canvas class="canvas canvas--composite-2 js-canvas-composition-2"></canvas>
+    <canvas class="canvas canvas--composite-3 js-canvas-composition-3"></canvas>
+    <canvas class="canvas canvas--cursor js-canvas-cursor"></canvas>
+
+    <div class="ui js-ui"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
+    <script src="https://unpkg.com/simplex-noise@2.4.0/simplex-noise.js"></script>
+    <script src="main.js" type="module"></script>
+</body>
+</html>

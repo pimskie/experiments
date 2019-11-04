@@ -36,7 +36,7 @@ let settings = {};
 
 const sizeMin = 10;
 const sizeMax = 75;
-const sizeStart = 50;
+const sizeStart = 30;
 
 const loadImage = (url) => {
 	const image = new Image();
@@ -148,7 +148,7 @@ const setup = async () => {
 
 	settings = {
 		size: sizeStart,
-		detail: 120,
+		markerDetail: 120,
 		color: { h: 0, s: 1, v: 1 },
 		type: types[1],
 		tipDelay: 0.5,
@@ -171,7 +171,7 @@ const setup = async () => {
 		spraySound.setFrequency(ratio);
 	});
 
-	gui.add(settings, 'detail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
+	gui.add(settings, 'markerDetail').min(20).max(300).step(1).onChange(detail => brush.setDetail(detail));
 	gui.add(settings, 'type', types).onChange(type => brush.setType(type));
 	gui.add(settings, 'pssssh').onChange(toggleSound);
 	gui.add(settings, 'clear')
@@ -253,7 +253,7 @@ const loop = () => {
 
 	brush.paint(ctxPaint, from, target, speed);
 
-	if (brush.isSprayCan && Math.random() > 0.95 && speed < 0.06) {
+	if (brush.isSprayCan && Math.random() > 0.9 && speed < 0.06) {
 		const dripping = createDripping(target, brush.getColor());
 
 		drippings.push(dripping);

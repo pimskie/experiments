@@ -6,11 +6,11 @@ const simplex = new SimplexNoise();
 const randomValue = () => Math.random(); // ziggurat.nextGaussian();
 
 class Brush {
-	constructor(canvas, { type = 'marker', detail, size, color }) {
+	constructor(canvas, { type = 'marker', markerDetail, size, color }) {
 		this.isPainting = false;
 
 		this.setType(type);
-		this.setDetail(detail);
+		this.setDetail(markerDetail);
 		this.setSize(size);
 		this.setColor(color);
 
@@ -78,7 +78,7 @@ class Brush {
 	}
 
 	createSprayTip(speed = 0) {
-		const maxGrow = 150;
+		const maxGrow = this.size * 4;
 
 		return new Array(1).fill().map((_, i) => {
 			const radiusIncrease = maxGrow * speed;

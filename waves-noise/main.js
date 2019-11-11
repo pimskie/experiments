@@ -70,7 +70,7 @@ const reset = () => {
 
 const loop = () => {
 	// clear();
-	ctx.globalCompositeOperation = 'lighten';
+	ctx.globalCompositeOperation = 'multiply';
 
 	drawWaveCircle(ctx, detail, radius, phase);
 

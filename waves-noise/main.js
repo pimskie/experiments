@@ -11,9 +11,9 @@ canvas.height = height;
 
 const getHue = () => Math.random() * 360;
 
-const radiusStart = 10;
+const radiusMin = 10;
 const radiusMax = width * 0.5;
-let radius = radiusStart;
+let radius = radiusMax;
 const radiusSpeed = 0.75;
 
 let phase = 0;
@@ -24,16 +24,17 @@ let hue = getHue();
 const detail = 100;
 
 const drawWaveCircle = (ctx, detail, radius, phase) => {
-	const radiusPercent = (radius - radiusStart) / (radiusMax - radiusStart);
-	const lightness = 50 + (50 * (1 - radiusPercent));
-
+	const radiusPercent = (radius - radiusMin) / (radiusMax - radiusMin);
+	const lightness = 100 - (100 * (1 - radiusPercent));
+	const color = `hsl(${hue}, 100%, ${lightness}%)`;
 	const amp = radius * 0.5;
 
 	ctx.save();
 	ctx.translate(width * 0.5, height * 0.5);
 
 	ctx.beginPath();
-	ctx.strokeStyle = `hsl(${hue}, 100%, ${lightness}%)`;
+	ctx.strokeStyle = color;
+	ctx.fillStyle = color;
 
 	new Array(detail).fill().forEach((_, i) => {
 		const angle = phase + (Math.PI * 2 / detail) * i;
@@ -52,7 +53,7 @@ const drawWaveCircle = (ctx, detail, radius, phase) => {
 
 	ctx.closePath();
 	ctx.stroke();
-
+	// ctx.fill();
 	ctx.restore();
 };
 
@@ -64,7 +65,7 @@ const clear = () => {
 };
 
 const reset = () => {
-	radius = radiusStart;
+	radius = radiusMax;
 	hue = getHue();
 };
 
@@ -74,9 +75,9 @@ const loop = () => {
 
 	drawWaveCircle(ctx, detail, radius, phase);
 
-	radius += radiusSpeed;
+	radius -= radiusSpeed;
 
-	if (radius > radiusMax) {
+	if (radius < radiusMin) {
 		reset();
 	}
 

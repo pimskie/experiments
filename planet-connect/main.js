@@ -6,100 +6,77 @@ const ctx = canvas.getContext('2d');
 const width = 500;
 const height = 500;
 
-const midX = width * 0.5;
-const midY = height * 0.5;
-
 canvas.width = width;
 canvas.height = height;
 
 let phase = 0;
-const phaseSpeed = 0.03;
+const phaseSpeed = 0.02;
 
-const numRings = 5;
-const dotsPerRing = 10;
-const numDots = numRings * dotsPerRing;
+const numRings = 3;
+const dotsPerRing = 9;
+const numCircles = numRings * dotsPerRing;
 
 const ease = t => t * (2 - t);
 const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec1.y);
 
-const drawDot = (ctx, { x, y, size, angle, speed }) => {
-	const rx = Math.max(size, size * (speed * 0.35));
-	const ry = size;
+const drawDot = (ctx, x, y, dotSize) => {
+	const { canvas } = ctx;
 
 	ctx.save();
-	ctx.translate(x, y);
+	ctx.translate(canvas.width * 0.5, canvas.height * 0.5);
+
 	ctx.beginPath();
-	ctx.ellipse(0, 0, rx, ry, angle, 0, Math.PI * 2);
+	ctx.arc(x, y, dotSize, 0, Math.PI * 2);
 	ctx.closePath();
 	ctx.fill();
 	ctx.restore();
 };
 
-const connect = (ctx, from, to, percent) => {
-	ctx.beginPath();
-	ctx.strokeStyle = `rgba(0, 0, 0, 0.01)`;
-	ctx.lineWidth = percent;
-	ctx.moveTo(from.x, from.y);
-	ctx.lineTo(to.x, to.y);
-	ctx.closePath();
-	ctx.stroke();
+const connect = (ctx, from, to = []) => {
+	to.forEach((t) => {
+		ctx.save();
+		ctx.translate(canvas.width * 0.5, canvas.height * 0.5);
+
+		ctx.beginPath();
+		ctx.strokeStyle = `rgba(255, 0, 0, ${t.percent})`;
+		ctx.moveTo(from.x, from.y);
+		ctx.lineTo(t.x, t.y);
+		ctx.closePath();
+		ctx.stroke();
+		ctx.restore();
+	});
 };
-
-const angleStep = Math.PI * 2 / numDots;
-const radiusMax = width * 0.45;
-
-const dots = new Array(numDots).fill().map((_, i) => {
-	const dot = {
-		offset: (i % numRings * 2) / (numRings - 2),
-		index: i,
-		angleStart: angleStep * i,
-		angle: angleStep * i,
-
-		update: function (phase = 0) {
-			const oldX = this.x;
-			const oldY = this.y;
-
-			const offsetPhase = this.offset + phase;
-			const cosNormal = map(Math.cos(offsetPhase), -1, 1, 0, 1);
-			const tick = ease(cosNormal);
-
-			const ringRadius = tick * radiusMax;
-
-			this.angle = this.angleStart + phase * 0.1;
-
-			this.size = 1 + (8 * Math.abs(ringRadius / radiusMax));
-			this.x = midX + (Math.cos(this.angle) * ringRadius);
-			this.y = midY + (Math.sin(this.angle) * ringRadius);
-
-			this.speed = distanceBetween({ x: oldX, y: oldY }, { x: this.x, y: this.y });
-		},
-	};
-
-	dot.update();
-
-	return dot;
-});
 
 const loop = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-	dots.forEach((dotA) => {
-		dotA.update(phase);
+	const angleStep = Math.PI * 2 / numCircles;
+	const radiusMin = 10;
+	const radiusMax = width * 0.45;
 
-		drawDot(ctx, dotA);
+	const dots = [];
 
-		dots.forEach((dotB) => {
-			if (dotB !== dotA) {
-				const distance = distanceBetween(dotA, dotB);
-				if (distance < 100) {
-					const percent = distance / 100;
+	for (let i = 0; i < numCircles; i++) {
+		const dotOffset = (i % numRings * 2) / (numRings / 2);
 
-					connect(ctx, dotA, dotB, percent);
-				}
-			}
-		});
-	});
+		const dotPhase = dotOffset + phase + (i * 0.09);
+		const cos = Math.cos(dotPhase);
+		const dotAngleNorm = map(cos, -1, 1, 0, 1);
+		const tick = ease(dotAngleNorm);
+
+		const dotCircleRadius = radiusMin + (tick * (radiusMax - radiusMin));
+
+		const dotSize = 1 + (8 * Math.abs(dotCircleRadius / radiusMax));
+
+		const angle = angleStep * i;
+		const x = Math.cos(angle + (phase * 0.25)) * dotCircleRadius;
+		const y = Math.sin(angle + (phase * 0.25)) * dotCircleRadius;
+
+		drawDot(ctx, x, y, dotSize);
+
+		dots.push({ x, y });
+	}
 
 	phase += phaseSpeed;
 

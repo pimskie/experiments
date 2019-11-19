@@ -65,22 +65,6 @@ const clicker = {
 		return last - secondLast;
 	},
 
-	elapsedTime() {
-		if (this.clicks.length < 2) {
-			return 0;
-		}
-
-		return this.clicks[this.clicks.length - 1] - this.clicks[this.clicks.length - 2];
-	},
-
-	sumTime() {
-		if (!this.clicks.length) {
-			return 0;
-		}
-
-		return this.clicks.reduce((total, time) => total + time, 0);
-	},
-
 	avgTime() {
 		return this.timeDifference() / this.clicks.length;
 	}
@@ -116,7 +100,7 @@ const addParticles = () => {
 			velocity: randomBetween(velocity * 1.1, velocity * 1.5),
 			rotation: Math.random() * Math.PI * 2,
 			angle: Math.random() * Math.PI * 2,
-			decay: randomBetween(95, 99) * 0.01,
+			decay: randomBetween(94, 96) * 0.01,
 			position: {},
 			numSides,
 			color,

@@ -3,7 +3,7 @@ const simplex = new SimplexNoise();
 const randomBetween = (min, max) => ~~(Math.random() * (max - min) + min);
 
 const randomHue = () => Math.random() * 360;
-const noiseColor = (hue, phase) => `hsl(${hue + (80 * phase)}, 100%, 60%)`;
+const noiseColor = (hue, phase) => `hsl(${hue + (80 * phase)}, 100%, 50%)`;
 
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');

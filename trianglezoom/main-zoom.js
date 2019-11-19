@@ -6,8 +6,8 @@ const noiseColor = (hue, phase) => `hsl(${hue + (100 * phase)}, 100%, 50%)`;
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
-const width = 500;
-const height = 500;
+const width = window.innerWidth;
+const height = window.innerHeight;
 
 const midX = width * 0.5;
 const midY = height * 0.5;
@@ -35,10 +35,6 @@ const clear = (ctx) => {
 
 const reset = () => {
 	clear(ctx);
-
-	otherHue = randomHue();
-	sizeModifier = grow;
-	size = 10;
 };
 
 const draw = (ctx, rotation, size, lineWidth, color) => {

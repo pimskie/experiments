@@ -109,23 +109,15 @@ const addParticles = () => {
 	const numParticles = randomBetween(3, 8);
 
 	for (let i = 0; i < numParticles; i++) {
-		const radius = destination;
-		const particleSize = randomBetween(size * 0.3, size * 0.5);
-		const rotation = Math.random() * Math.PI * 2;
-		const angle = Math.random() * Math.PI * 2;
-		const decay = randomBetween(95, 99) * 0.01;
-		const particleVelocity = randomBetween(velocity * 1.1, velocity * 1.5);
-
-		const position = {};
-
 		const particle = {
-			radius,
-			size: particleSize,
-			velocity: particleVelocity,
-			rotation,
-			position,
-			decay,
-			angle,
+			isEven: i % 2 === 0,
+			radius: destination,
+			size: randomBetween(size * 0.3, size * 0.5),
+			velocity: randomBetween(velocity * 1.1, velocity * 1.5),
+			rotation: Math.random() * Math.PI * 2,
+			angle: Math.random() * Math.PI * 2,
+			decay: randomBetween(95, 99) * 0.01,
+			position: {},
 			numSides,
 			color,
 
@@ -133,6 +125,8 @@ const addParticles = () => {
 				this.radius += this.velocity;
 				this.velocity *= this.decay;
 				this.size *= this.decay;
+
+				this.rotation += (this.isEven ? 0.01 : -0.01);
 
 				this.position.x = width * 0.5 + (Math.cos(this.angle) * this.radius);
 				this.position.y = height * 0.5 + (Math.sin(this.angle) * this.radius);

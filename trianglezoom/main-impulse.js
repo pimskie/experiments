@@ -1,8 +1,8 @@
 const simplex = new SimplexNoise();
-const synth = new Tone.Synth().toDestination();
+const synth = new Tone.PolySynth().toDestination();
 
-synth.envelope.attack = 0.05;
-synth.envelope.release = 1;
+// synth.envelope.attack = 0.05;
+// synth.envelope.release = 1;
 
 const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
 const randomBetween = (min, max) => ~~(Math.random() * (max - min) + min);
@@ -91,12 +91,9 @@ const timeline = {
 		this.beats = [];
 	},
 
-	addBeat() {
-		if (this.beats.length === 10) {
-			return;
-		}
-
-		this.beats.push(this.time);
+	// x, y: normals
+	addBeat(beat) {
+		this.beats.push(beat);
 	},
 
 	update() {
@@ -104,22 +101,30 @@ const timeline = {
 
 		if (this.time > 1) {
 			this.time = 0;
+			this.beats.forEach(b => b.played = false);
 		}
 
 		this.position = width * this.time;
 	},
 
 	beatOnTime() {
-		return this.beats.some(b => Math.abs(b - this.time) === 0);
+		const beat = this.beats.find(b => Math.abs(b.x - this.time) <= 0.005 && !b.played);
+
+		if (beat) {
+			beat.played = true;
+		}
+
+		return beat;
 	},
 
 	draw(ctx) {
-		this.beats.forEach((beat) => {
-			const position = beat * width;
+		this.beats.forEach(({ x, y }) => {
+			const positionX = x * width;
+			const positionY = y * height;
 
 			ctx.strokeStyle = '#fff';
 			ctx.beginPath();
-			ctx.arc(position - 2.5, height * 0.95, 5, 0, Math.PI * 2, false);
+			ctx.arc(positionX - 2.5, positionY, 5, 0, Math.PI * 2, false);
 			ctx.stroke();
 			ctx.closePath();
 		});
@@ -141,17 +146,18 @@ const getPath = (sides, size) => {
 	}));
 };
 
-const addForce = () => {
+const addForce = ({ x, y }) => {
 	velocity += force;
 
 	hue = randomHue();
 	rotation = randomRotation();
 	numSides = randomBetween(3, 6);
 
-	const scale = ['C4','D4','E4','F4','G4','A4','B4','C5'];
-	const note = randomArrayValue(scale);
+	const minF = 20;
+	const maxF = 500;
+	const f = minF + ((1 - y) * (maxF - minF));
 
-	synth.triggerAttackRelease(note, '10n');
+	synth.triggerAttackRelease(f, '10n');
 
 	addParticles();
 };
@@ -164,10 +170,10 @@ const addParticles = () => {
 			isEven: i % 2 === 0,
 			radius: destination,
 			size: randomBetween(size * 0.3, size * 0.5),
-			velocity: randomBetween(velocity * 1.1, velocity * 1.5),
+			velocity: randomBetween(velocity * 2, velocity * 3),
 			rotation: Math.random() * Math.PI * 2,
 			angle: Math.random() * Math.PI * 2,
-			decay: randomBetween(94, 96) * 0.01,
+			decay: randomBetween(93, 94) * 0.01,
 			position: {},
 			numSides,
 			color,
@@ -232,7 +238,7 @@ const loop = () => {
 	const noise = simplex.noise2D(phase, phase);
 
 	color = `hsl(${hue + (180 * noise)}, 100%, 50%)`;
-	velocity *= 0.98;
+	velocity *= 0.96;
 	destination = minSize + (amplitude * (velocity / maxVelocity));
 	size += (destination - size) / 1.2;
 
@@ -241,8 +247,10 @@ const loop = () => {
 	drawParticles();
 	drawTimeline();
 
-	if (timeline.beatOnTime()) {
-		addForce();
+	const beatOnTime = timeline.beatOnTime();
+
+	if (beatOnTime) {
+		addForce(beatOnTime);
 	}
 
 	phase += phaseSpeed;
@@ -250,25 +258,31 @@ const loop = () => {
 	requestAnimationFrame(loop);
 };
 
+const numBeats = 10;
+for (let i = 0; i < numBeats; i++) {
+	const x = (0.5 / numBeats) + (i / numBeats);
+	const y = 0.9;
+
+	timeline.addBeat({ x, y });
+}
+
 loop();
 
-canvas.addEventListener('click', () => {
+canvas.addEventListener('click', (e) => {
+	const { clientX: x, clientY: y } = e;
+	const { time } = timeline;
+
 	clearTimeout(clickTimeoutId);
 	clearInterval(impulseIntervalId);
 
-	timeline.addBeat();
+	const beat = { x: x / width, y: y / height };
 
-	addForce();
+	timeline.addBeat(beat);
+	addForce(beat);
 
 	if (clicker.clicks.length < 2) {
 		return;
 	}
-
-	// clickTimeoutId = setTimeout(() => {
-	// 	impulseIntervalId = setInterval(addForce, clicker.timeDifference());
-
-	// 	clicker.reset();
-	// }, 1000);
 });
 
 document.body.addEventListener('keydown', (e) => {

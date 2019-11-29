@@ -12,6 +12,7 @@ const height = 500;
 
 const midX = width >> 1;
 const midY = height >> 1;
+const hypo = distanceBetween({ x: 0, y: 0 }, { x: midX, y: midY });
 
 canvas.width = width;
 canvas.height = height;
@@ -24,12 +25,14 @@ class Trail {
 	constructor(position, angle, detail, spacing, velocity) {
 		this.position = position;
 		this.angle = angle;
+		this.heading = angle;
+
 		this.velocity = velocity;
-		this.spacing = spacing;
-		this.detail = detail;
 
 		this.spacingCurrent = 1;
+		this.spacing = spacing;
 
+		this.detail = detail;
 		this.trail = new Array(this.detail).fill();
 
 		this.initTrail();
@@ -44,14 +47,14 @@ class Trail {
 		});
 	}
 
-	update() {
+	update(phase, index) {
 		const tip = { ...this.trail[this.detail - 1] };
 
-		const scale = 0.01;
-		const noise = simplex.noise3D(tip.x * scale, tip.y * scale, this.angle * scale);
-		const angleModifier = 0.01 * noise;
+		const scale = 0.02;
+		const noise = simplex.noise3D(tip.x * scale, tip.y * scale, (this.angle + index) * scale);
+		const angleModifier = 0.75 * noise;
 
-		this.angle += angleModifier;
+		this.angle = this.heading + angleModifier;
 
 		const newTip = {
 			x: tip.x + (Math.cos(this.angle) * this.velocity),
@@ -70,10 +73,9 @@ class Trail {
 
 		this.trail[this.detail - 1] = newTip;
 
-		this.spacing *= 0.997;
-
 		const d2 = distanceBetween({ x: 0, y: 0 }, newTip);
-		this.spacingCurrent = this.spacing * (d2 / 100);
+
+		this.spacingCurrent = Math.max(2, this.spacing * (d2 / 100));
 	}
 
 	isOutside(width, height) {
@@ -100,6 +102,7 @@ class Trail {
 			ctx.lineWidth = width;
 			ctx.moveTo(this.trail[i].x, this.trail[i].y);
 			ctx.lineTo(this.trail[i + 1].x, this.trail[i + 1].y);
+
 			ctx.stroke();
 		}
 
@@ -108,23 +111,31 @@ class Trail {
 	}
 }
 
-const radius = 1;
 let angle = 0;
 let trails = [];
 
-const addTrail = (radius, angle) => {
+const addTrail = (angle) => {
 	const position = {
-		x: midX + (Math.cos(angle) * radius),
-		y: midY + (Math.sin(angle) * radius)
+		x: midX + Math.cos(angle),
+		y: midY + Math.sin(angle)
 	};
 
-	const velocity = 1 + (Math.random() * 0.25);
+	const velocity = 1.5 + (Math.random() * 0.25);
 	const detail = 6;
 	const spacing = 8;
 
 	const trail = new Trail(position, angle, detail, spacing, velocity);
 
 	trails.push(trail);
+};
+
+const drawOverlay = (ctx) => {
+	const fill = ctx.createRadialGradient(midX, midY, 0, midX, midY, hypo);
+	fill.addColorStop(0, 'rgba(0, 0, 0, 0)');
+	fill.addColorStop(0.75, 'rgba(0, 0, 0, 1)');
+
+	ctx.fillStyle = fill;
+	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
 const clear = () => {
@@ -135,11 +146,12 @@ const reset = () => {
 	clear();
 };
 
+
 const loop = () => {
 	clear();
 
 	if (frame % 1 === 0) {
-		addTrail(radius, angle);
+		addTrail(angle);
 
 		frame = 1;
 	}
@@ -151,14 +163,14 @@ const loop = () => {
 
 	trails = trails.filter(t => !t.isOutside(width, height));
 
-	angle += 0.5;
+	drawOverlay(ctx);
+
+	angle += 0.2; // 0.25;
 	frame += 1;
 	phase += phaseSpeed;
 
 	requestAnimationFrame(loop);
 };
-
-addTrail(radius, angle);
 
 loop();
 

@@ -28,6 +28,8 @@ class Trail {
 		this.spacing = spacing;
 		this.detail = detail;
 
+		this.spacingCurrent = 1;
+
 		this.trail = new Array(this.detail).fill();
 
 		this.initTrail();
@@ -36,19 +38,18 @@ class Trail {
 	initTrail() {
 		this.trail = this.trail.map((_, i) => {
 			return {
-				x: Math.cos(this.angle) * (this.spacing * i),
-				y: Math.sin(this.angle) * (this.spacing * i),
+				x: Math.cos(this.angle) * (this.spacingCurrent * i),
+				y: Math.sin(this.angle) * (this.spacingCurrent * i),
 			};
 		});
 	}
 
-	update(phase, index) {
+	update() {
 		const tip = { ...this.trail[this.detail - 1] };
 
-		const scale = 0.1;
-
-		const noise = simplex.noise3D(tip.x * scale, tip.y * scale, this.angle * 0.01);
-		const angleModifier = 0.03 * noise;
+		const scale = 0.01;
+		const noise = simplex.noise3D(tip.x * scale, tip.y * scale, this.angle * scale);
+		const angleModifier = 0.01 * noise;
 
 		this.angle += angleModifier;
 
@@ -57,7 +58,7 @@ class Trail {
 			y: tip.y + (Math.sin(this.angle) * this.velocity),
 		};
 
-		const percent = distanceBetween(newTip, tip) / this.spacing;
+		const percent = distanceBetween(newTip, tip) / this.spacingCurrent; // this.spacing;
 
 		for (let i = 0; i < this.detail - 1; i++) {
 			const p1 = this.trail[i];
@@ -68,6 +69,11 @@ class Trail {
 		}
 
 		this.trail[this.detail - 1] = newTip;
+
+		this.spacing *= 0.997;
+
+		const d2 = distanceBetween({ x: 0, y: 0 }, newTip);
+		this.spacingCurrent = this.spacing * (d2 / 100);
 	}
 
 	isOutside(width, height) {
@@ -102,7 +108,7 @@ class Trail {
 	}
 }
 
-const radius = 10;
+const radius = 1;
 let angle = 0;
 let trails = [];
 
@@ -112,9 +118,10 @@ const addTrail = (radius, angle) => {
 		y: midY + (Math.sin(angle) * radius)
 	};
 
-	const velocity = 0.75 + (Math.random() * 0.5);
+	const velocity = 1 + (Math.random() * 0.25);
 	const detail = 6;
 	const spacing = 8;
+
 	const trail = new Trail(position, angle, detail, spacing, velocity);
 
 	trails.push(trail);
@@ -131,7 +138,7 @@ const reset = () => {
 const loop = () => {
 	clear();
 
-	if (frame % 2 === 0) {
+	if (frame % 1 === 0) {
 		addTrail(radius, angle);
 
 		frame = 1;
@@ -144,7 +151,7 @@ const loop = () => {
 
 	trails = trails.filter(t => !t.isOutside(width, height));
 
-	angle += 0.1;
+	angle += 0.5;
 	frame += 1;
 	phase += phaseSpeed;
 

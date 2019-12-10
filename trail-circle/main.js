@@ -19,7 +19,7 @@ canvas.height = height;
 
 let frame = 0;
 let phase = 0;
-const phaseSpeed = 0.001;
+const phaseSpeed = 0.005;
 
 class Trail {
 	constructor(position, angle, detail, spacing, velocity) {
@@ -53,7 +53,6 @@ class Trail {
 		const scale = 0.02;
 		const noise = simplex.noise3D(tip.x * scale, tip.y * scale, (this.angle + index) * scale);
 		const angleModifier = 0.75 * noise;
-
 		this.angle = this.heading + angleModifier;
 
 		const newTip = {
@@ -61,21 +60,24 @@ class Trail {
 			y: tip.y + (Math.sin(this.angle) * this.velocity),
 		};
 
-		const percent = distanceBetween(newTip, tip) / this.spacingCurrent; // this.spacing;
+		const totalTravelledPercent = distanceBetween({ x: 0, y: 0 }, newTip) / hypo;
+		const tipTravelPercent = distanceBetween(newTip, tip) / this.spacingCurrent;
 
 		for (let i = 0; i < this.detail - 1; i++) {
 			const p1 = this.trail[i];
 			const p2 = this.trail[i + 1];
 
-			p1.x += (p2.x - p1.x) * percent;
-			p1.y += (p2.y - p1.y) * percent;
+			p1.x += (p2.x - p1.x) * tipTravelPercent;
+			p1.y += (p2.y - p1.y) * tipTravelPercent;
 		}
 
 		this.trail[this.detail - 1] = newTip;
+		this.spacingCurrent = Math.max(2, this.spacing * totalTravelledPercent);
 
-		const d2 = distanceBetween({ x: 0, y: 0 }, newTip);
+		const hue = 150 + (50 * phase);
+		const lightness = 100 - (50 * totalTravelledPercent);
 
-		this.spacingCurrent = Math.max(2, this.spacing * (d2 / 100));
+		this.color = `hsl(${hue}, 100%, ${lightness}%)`;
 	}
 
 	isOutside(width, height) {
@@ -88,8 +90,7 @@ class Trail {
 	}
 
 	draw(ctx) {
-		ctx.strokeStyle = '#fff';
-		ctx.fillStyle = '#fff';
+		ctx.strokeStyle = this.color;
 		ctx.lineCap = 'round';
 
 		ctx.save();
@@ -122,7 +123,7 @@ const addTrail = (angle) => {
 
 	const velocity = 1.5 + (Math.random() * 0.25);
 	const detail = 6;
-	const spacing = 8;
+	const spacing = 20;
 
 	const trail = new Trail(position, angle, detail, spacing, velocity);
 
@@ -130,22 +131,22 @@ const addTrail = (angle) => {
 };
 
 const drawOverlay = (ctx) => {
-	const fill = ctx.createRadialGradient(midX, midY, 0, midX, midY, hypo);
-	fill.addColorStop(0, 'rgba(0, 0, 0, 0)');
-	fill.addColorStop(0.75, 'rgba(0, 0, 0, 1)');
+	const fillOuter = ctx.createRadialGradient(midX, midY, 0, midX, midY, hypo);
+	fillOuter.addColorStop(0, 'rgba(37, 37, 37, 0)');
+	fillOuter.addColorStop(0.75, 'rgba(0, 0, 0, 1)');
+	ctx.fillStyle = fillOuter;
+	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-	ctx.fillStyle = fill;
+	const fillInner = ctx.createRadialGradient(midX, midY, 0, midX, midY, 100);
+	fillInner.addColorStop(0.05, 'rgba(0, 0, 0, 1)');
+	fillInner.addColorStop(0.5, 'rgba(0, 0, 0, 0)');
+	ctx.fillStyle = fillInner;
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
 const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
-
-const reset = () => {
-	clear();
-};
-
 
 const loop = () => {
 	clear();
@@ -165,7 +166,7 @@ const loop = () => {
 
 	drawOverlay(ctx);
 
-	angle += 0.2; // 0.25;
+	angle += 0.2;
 	frame += 1;
 	phase += phaseSpeed;
 
@@ -174,4 +175,3 @@ const loop = () => {
 
 loop();
 
-canvas.addEventListener('click', reset);

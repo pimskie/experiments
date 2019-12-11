@@ -15,27 +15,26 @@ canvas.width = width;
 canvas.height = height;
 
 let phase = 0;
-const phaseSpeed = 0.01;
+const phaseSpeed = 0.005;
 
-const numCircles = 10;
-const detail = 100;
-
+const numCircles = 20;
 let radius = 10;
-const radiusIncrease = 200;
+const radiusIncrease = 300;
 const radiusSpeed = 0.5;
 
-const drawPath = (ctx, detail, radius) => {
+const drawPath = (ctx, radius) => {
 
 	ctx.save();
 	ctx.translate(midX, midY);
 
-	const cicles = new Array(numCircles).fill().map((_, q) => {
+	new Array(numCircles).fill().map((_, q) => {
 		const circleRadius = radius + (radiusIncrease / numCircles * q);
-
-		ctx.beginPath();
+		const detail = 50 + (25 / numCircles * q);
+		const dotRadius = 1 + (5 / numCircles * q);
+		const alpha = 1 / numCircles * q;
 
 		for (let i = 0; i < detail; i++) {
-			const angle = phase + (Math.PI * 2 / detail) * i;
+			const angle = (Math.PI * 2 / detail) * i;
 
 			const cos = Math.cos(angle);
 			const sin = Math.sin(angle);
@@ -46,13 +45,13 @@ const drawPath = (ctx, detail, radius) => {
 			const x = cos * pointRadius;
 			const y = sin * pointRadius;
 
-			const m = i === 0 ? 'moveTo' : 'lineTo';
+			ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+			ctx.beginPath();
+			ctx.arc(x - dotRadius / 2, y - dotRadius / 2, dotRadius, 0, TAU, false);
 
-			ctx[m](x, y);
+			ctx.closePath();
+			ctx.fill();
 		}
-
-		ctx.closePath();
-		ctx.stroke();
 
 	});
 
@@ -60,14 +59,10 @@ const drawPath = (ctx, detail, radius) => {
 
 };
 
-const clear = () => {
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-};
-
 const loop = () => {
-	clear();
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-	drawPath(ctx, detail, radius);
+	drawPath(ctx, radius);
 
 	phase += phaseSpeed;
 

@@ -1,12 +1,15 @@
 const simplex = new SimplexNoise();
+
 const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec1.y);
 const angleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
+const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
 
 const canvas = document.querySelector('.js-canvas');
 const ctx = canvas.getContext('2d');
 
 const TAU = Math.PI * 2;
 
+const padding = 100;
 const width = window.innerWidth;
 const height = window.innerHeight;
 
@@ -17,8 +20,8 @@ canvas.width = width;
 canvas.height = height;
 
 let phase = 0;
-const phaseSpeedMin = 0.001;
-const phaseSpeedMax = 0.01;
+const phaseSpeedMin = 0.009;
+const phaseSpeedMax = 0.02;
 let phaseSpeed = phaseSpeedMin;
 
 const pointer = { x: 0, y: 0 };
@@ -35,8 +38,12 @@ const drawForm = (ctx) => {
 	velocity += ((force * 2)- velocity) / 2;
 
 	const anglePointer = angleBetween(pointer, position);
+
 	position.x += Math.cos(anglePointer) * velocity;
 	position.y += Math.sin(anglePointer) * velocity;
+
+	position.x = clamp(position.x, padding, width - padding);
+	position.y = clamp(position.y, padding, height - padding);
 
 	phaseSpeed = phaseSpeedMin + (phaseSpeedMax * force);
 

@@ -18,19 +18,19 @@ let phase = 0;
 const phaseSpeed = 0.005;
 
 const numCircles = 20;
-let radius = 10;
-const radiusIncrease = 300;
-const radiusSpeed = 0.5;
+const radius = 10;
+const radiusMax = 300;
+const radiusDecrease = (radiusMax - radius) / numCircles;
 
-const drawPath = (ctx, radius) => {
-
+const drawPath = (ctx) => {
 	ctx.save();
 	ctx.translate(midX, midY);
 
-	new Array(numCircles).fill().map((_, q) => {
-		const circleRadius = radius + (radiusIncrease / numCircles * q);
-		const detail = 50 + (25 / numCircles * q);
-		const dotRadius = 1 + (5 / numCircles * q);
+	for (let q = 0; q < numCircles; q++) {
+		const circleRadius = radiusMax - (radiusDecrease * q);
+
+		const detail = 10 + (50 * (circleRadius / radiusMax));
+		const dotRadius = 5 - (4 * (circleRadius / radiusMax));
 		const alpha = 1 / numCircles * q;
 
 		for (let i = 0; i < detail; i++) {
@@ -40,7 +40,7 @@ const drawPath = (ctx, radius) => {
 			const sin = Math.sin(angle);
 
 			const noise = simplex.noise3D(cos, sin, phase + (q * 0.05));
-			const pointRadius = circleRadius + (noise * circleRadius * 0.45);
+			const pointRadius = circleRadius + (noise * circleRadius * 0.5);
 
 			const x = cos * pointRadius;
 			const y = sin * pointRadius;
@@ -52,8 +52,7 @@ const drawPath = (ctx, radius) => {
 			ctx.closePath();
 			ctx.fill();
 		}
-
-	});
+	};
 
 	ctx.restore();
 
@@ -62,7 +61,7 @@ const drawPath = (ctx, radius) => {
 const loop = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-	drawPath(ctx, radius);
+	drawPath(ctx);
 
 	phase += phaseSpeed;
 

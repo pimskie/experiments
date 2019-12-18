@@ -1,6 +1,14 @@
 const simplex = new SimplexNoise();
 
 const getAngleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
+const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
+
+const palettes = [
+	['#f65c78', '#ffd271', '#fff3af', '#c3f584'],
+	['#111d5e', '#b21f66', '#fe346e', '#ffbd69'],
+	['#36b5b0', '#9dd8c8', '#f09595', '#fcf5b0'],
+	['#015668', '#263f44', '#ffd369', '#fff1cf'],
+];
 
 const canvas = document.querySelector('.js-canvas');
 const ctx = canvas.getContext('2d');
@@ -19,19 +27,23 @@ canvas.height = height;
 let phase = 0;
 let phaseSpeed = 0.001;
 
+let palette = [];
 let trails = [];
 const numTrails = 200;
 
 const generate = () => {
+	palette = randomArrayValue(palettes);
+
 	trails = [];
 
 	for (let i = 0; i < numTrails; i++) {
 		const spacing = 2;
-		const lineWidth = 1;
+		const lineWidth = 3 + (Math.random() * 3);
 		const velocity = 10 + (Math.random() * 10);
 		const angle = TAU / numTrails * i;
 		const numPoints = 20 + (Math.random() * 5);
 		const points = [];
+		const color = randomArrayValue(palette);
 
 		for (let q = 0; q < numPoints; q++) {
 			points.push({
@@ -40,7 +52,7 @@ const generate = () => {
 			});
 		}
 
-		trails.push({ spacing, points, angle, velocity, lineWidth });
+		trails.push({ spacing, points, angle, velocity, lineWidth, color });
 	}
 };
 
@@ -65,18 +77,20 @@ const updateTrail = (trail, index) => {
 
 
 	trail.velocity *= 0.99;
-	trail.lineWidth = (Math.abs(noise) * 12.5 * 3);
+	trail.lineWidth *= 0.98;
 	trail.isDead = head.x < -midX || head.x > midX || head.y < -midY || head.y > midY;
 };
 
 const drawTrail = (trail, index) => {
-	const { points, lineWidth } = trail;
+	const { points, lineWidth, color } = trail;
 
 	ctx.save();
 	ctx.translate(midX, midY);
 
 	ctx.beginPath();
 	ctx.lineWidth = lineWidth;
+	ctx.strokeStyle = color;
+
 	points.forEach((point, i) => {
 		const m = i === 0 ? 'moveTo' : 'lineTo';
 

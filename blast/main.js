@@ -26,33 +26,36 @@ canvas.height = height;
 
 let phase = 0;
 let phaseSpeed = 0.001;
+let noiseAmp = 0.08;
 
 let palette = [];
 let trails = [];
-const numTrails = 200;
+const numTrails = 400;
 
-const generate = () => {
+const generate = ({ x = midX, y = midY } = {}) => {
+	noiseAmp = 0.08;
 	palette = randomArrayValue(palettes);
 
 	trails = [];
 
 	for (let i = 0; i < numTrails; i++) {
-		const spacing = 2;
+		const spacing = 0.5;
 		const lineWidth = 3 + (Math.random() * 3);
 		const velocity = 10 + (Math.random() * 10);
 		const angle = TAU / numTrails * i;
 		const numPoints = 20 + (Math.random() * 5);
 		const points = [];
+		const life = 1;
 		const color = randomArrayValue(palette);
 
 		for (let q = 0; q < numPoints; q++) {
 			points.push({
-				x: Math.cos(angle) * ((numPoints) - (q * 10)),
-				y: Math.sin(angle) * ((numPoints) - (q * 10)),
+				x,
+				y,
 			});
 		}
 
-		trails.push({ spacing, points, angle, velocity, lineWidth, color });
+		trails.push({ spacing, points, angle, velocity, lineWidth, color, life });
 	}
 };
 
@@ -61,7 +64,7 @@ const updateTrail = (trail, index) => {
 	const [head] = points;
 
 	const scale = 0.002;
-	const noise = simplex.noise2D(head.x * scale, head.y * scale) * 0.08;
+	const noise = simplex.noise2D(head.x * scale, head.y * scale) * noiseAmp;
 
 	trail.angle += noise;
 
@@ -75,17 +78,19 @@ const updateTrail = (trail, index) => {
 		points[i].y = points[i - 1].y + (Math.sin(angleBetween) * spacing);
 	}
 
-
+	trail.life *= 0.98;
+	trail.spacing += 0.05;
 	trail.velocity *= 0.99;
-	trail.lineWidth *= 0.98;
-	trail.isDead = head.x < -midX || head.x > midX || head.y < -midY || head.y > midY;
+	trail.lineWidth = 1;
+	// trail.isDead = head.x < 0 || head.x > width || head.y < 0 || head.y > height || trail.life  < 0.05;
+	trail.isDead = trail.life  < 0.05;
 };
 
 const drawTrail = (trail, index) => {
-	const { points, lineWidth, color } = trail;
+	const { points, lineWidth, color, life } = trail;
 
 	ctx.save();
-	ctx.translate(midX, midY);
+	ctx.globalAlpha = life;
 
 	ctx.beginPath();
 	ctx.lineWidth = lineWidth;
@@ -112,12 +117,15 @@ const loop = () => {
 	trails = trails.filter(t => !t.isDead);
 
 	phase += phaseSpeed;
+	noiseAmp += 0.0005;
 
 	requestAnimationFrame(loop);
 };
 
 canvas.addEventListener('mousedown', (e) => {
-	generate();
+	const target = (e.touches && e.touches.length) ? e.touches[0] : e;
+
+	generate({ x: target.clientX, y: target.clientY });
 });
 
 generate();

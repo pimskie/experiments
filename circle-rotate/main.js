@@ -21,14 +21,17 @@ const radiusHalf = radius * 0.5;
 const loop = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+	const mod = 2 + Math.cos(phase);
+
 	for (let i = 0; i < numCircles; i++) {
 		const angle = (PI / numCircles) * i;
 
 		ctx.save();
 		ctx.translate(midX, midY);
 		ctx.rotate(angle);
+		ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
 
-		const circleCos = Math.abs(Math.cos((i / numCircles * 2) * PI + phase));
+		const circleCos = Math.abs(Math.cos((i / numCircles / mod) * PI + phase));
 		const radiusX = radius
 		const radiusY = radiusHalf * circleCos;
 
@@ -45,6 +48,5 @@ const loop = () => {
 
 	requestAnimationFrame(loop);
 };
-
 
 loop();

@@ -1,4 +1,4 @@
-let images = ['img-1.jpg', 'img-2.jpg'];
+let images = ['img-1.jpg', 'img-2.jpg', 'img-3.jpg'];
 
 const qs = sel => document.querySelector(sel);
 
@@ -18,20 +18,33 @@ const animationTime = transitionDurationMS + totalDelay;
 
 let timeoutId = null;
 
-container.addEventListener('click', (e) => {
+const switchImages = () => {
+	disable();
+
 	container.classList.add('is-switching');
 
 	clearTimeout(timeoutId);
 
-	setTimeout(() => {
-		slidesA.style.setProperty('--image-url', `url(/img/${images[1]})`);
-		slidesB.style.setProperty('--image-url', `url(/img/${images[0]})`);
+	timeoutId = setTimeout(() => {
+		images.push(images.shift());
+
+		slidesA.style.setProperty('--image-url', `url(/img/${images[0]})`);
+		slidesB.style.setProperty('--image-url', `url(/img/${images[1]})`);
 
 		container.classList.remove('is-switching');
 
-		images.reverse();
+		enable();
 
-		console.log(images)
 	}, animationTime);
-});
+};
 
+
+const enable = () => {
+	container.addEventListener('click', switchImages);
+};
+
+const disable = () => {
+	container.removeEventListener('click', switchImages);
+};
+
+enable();

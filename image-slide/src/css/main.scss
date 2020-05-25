@@ -1,4 +1,4 @@
-$num-panes: 5;
+$num-panes: 10;
 $background-offset: calc(100% / calc(#{$num-panes} - 1));
 $background-width: calc(#{$num-panes} * 100%);
 
@@ -8,6 +8,8 @@ $background-width: calc(#{$num-panes} * 100%);
 
 	--animation-duration: 700ms;
 	--animation-delay: 100ms;
+
+	--num-panes: #{$num-panes};
 }
 
 html,
@@ -108,10 +110,12 @@ body {
 @keyframes in {
 	0% {
 		transform: translate3d(0, 100%, 0);
+		filter: hue-rotate(90deg);
 	}
 
 	100% {
 		transform: translate3d(0, 0, 0);
+		filter: hue-rotate(0deg);
 	}
 }
 

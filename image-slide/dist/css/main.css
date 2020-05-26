@@ -1,8 +1,8 @@
 :root {
-  --image-1: url("/img/img-1.jpg");
-  --image-2: url("/img/img-2.jpg");
+  --image-1: "";
+  --image-2: "";
   --animation-duration: 700ms;
-  --animation-delay: 100ms;
+  --animation-delay: 50ms;
   --num-panes: 10;
 }
 
@@ -12,17 +12,20 @@ body {
   padding: 0;
 }
 
-.container {
-  position: relative;
+.wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.ratio {
+.container {
   position: relative;
   height: 0;
   display: block;
+  margin: 0 auto;
   padding-top: 30%;
+  cursor: pointer;
 }
-.ratio > * {
+.container > * {
   position: absolute;
   top: 0;
   left: 0;
@@ -74,70 +77,70 @@ body {
   animation-delay: calc(1 * var(--animation-delay));
 }
 .slide--1 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 0) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 0) 50%;
 }
 
 .slide--2 {
   animation-delay: calc(2 * var(--animation-delay));
 }
 .slide--2 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 1) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 1) 50%;
 }
 
 .slide--3 {
   animation-delay: calc(3 * var(--animation-delay));
 }
 .slide--3 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 2) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 2) 50%;
 }
 
 .slide--4 {
   animation-delay: calc(4 * var(--animation-delay));
 }
 .slide--4 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 3) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 3) 50%;
 }
 
 .slide--5 {
   animation-delay: calc(5 * var(--animation-delay));
 }
 .slide--5 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 4) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 4) 50%;
 }
 
 .slide--6 {
   animation-delay: calc(6 * var(--animation-delay));
 }
 .slide--6 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 5) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 5) 50%;
 }
 
 .slide--7 {
   animation-delay: calc(7 * var(--animation-delay));
 }
 .slide--7 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 6) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 6) 50%;
 }
 
 .slide--8 {
   animation-delay: calc(8 * var(--animation-delay));
 }
 .slide--8 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 7) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 7) 50%;
 }
 
 .slide--9 {
   animation-delay: calc(9 * var(--animation-delay));
 }
 .slide--9 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 8) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 8) 50%;
 }
 
 .slide--10 {
   animation-delay: calc(10 * var(--animation-delay));
 }
 .slide--10 .slide__image {
-  background-position: calc(calc(100% / calc(10 - 1)) * 9) 0;
+  background-position: calc(calc(100% / calc(10 - 1)) * 9) 50%;
 }
 
 @keyframes in {

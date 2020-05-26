@@ -3,11 +3,11 @@ $background-offset: calc(100% / calc(#{$num-panes} - 1));
 $background-width: calc(#{$num-panes} * 100%);
 
 :root {
-	--image-1: url('/img/img-1.jpg');
-	--image-2: url('/img/img-2.jpg');
+	--image-1: '';
+	--image-2: '';
 
 	--animation-duration: 700ms;
-	--animation-delay: 100ms;
+	--animation-delay: 50ms;
 
 	--num-panes: #{$num-panes};
 }
@@ -18,20 +18,22 @@ body {
 	padding: 0;
 }
 
-.container {
-	position: relative;
-	// width: 600px;
-	// height: 250px;
+.wrapper {
+	max-width: 1200px;
+	margin: 0 auto;
 }
 
-.ratio {
+.container {
 	position: relative;
-
 	height: 0;
 
 	display: block;
 
+	margin: 0 auto;
 	padding-top: 30%;
+
+
+	cursor: pointer;
 
 	& > * {
 		position: absolute;
@@ -101,7 +103,7 @@ body {
 		animation-delay: $anim-delay;
 
 		.slide__image {
-			background-position: calc(#{$background-offset} * #{$i - 1}) 0;
+			background-position: calc(#{$background-offset} * #{$i - 1}) 50%;
 		}
 	}
 }

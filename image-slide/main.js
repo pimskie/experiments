@@ -1,22 +1,54 @@
-let images = ['img-1.jpg', 'img-2.jpg', 'img-3.jpg'];
-
 const qs = sel => document.querySelector(sel);
 
+const IMG_ROOT = 'https://pimskie.dev/public/assets/imageslider';
+const images = ['img-1.jpg', 'img-2.jpg', 'img-3.jpg'];
+
 const container = qs('.js-container');
-const slidesA = qs('.js-slides-a');
-const slidesB = qs('.js-slides-b');
+let front;
+let back;
 
 const bodyStyles = window.getComputedStyle(document.body);
+const numPanes = parseInt(bodyStyles.getPropertyValue('--num-panes'), 10);
+
 const transitionDuration = bodyStyles.getPropertyValue('--animation-duration');
 const transitionDurationMS = parseFloat(transitionDuration.replace('ms', ''));
 
 const animationDelay = bodyStyles.getPropertyValue('--animation-delay');
 const animationDelayMS = parseFloat(animationDelay.replace('ms', ''));
 
-const totalDelay = animationDelayMS * slidesA.children.length;
+const totalDelay = animationDelayMS * numPanes;
 const animationTime = transitionDurationMS + totalDelay;
 
 let timeoutId = null;
+
+const build = () => {
+	front = document.createElement('div');
+
+	front.classList.add('slides');
+	front.innerHTML = new Array(numPanes).fill().map((_, i) => {
+		return `
+		<div class="slide slide--${i + 1}">
+			<div class="slide__image"></div>
+		</div>
+		`;
+	}).join('');
+
+	back = front.cloneNode(true);
+
+	front.classList.add('is-front');
+	back.classList.add('is-back');
+
+	updateImages(`${IMG_ROOT}/${images[0]}`, `${IMG_ROOT}/${images[1]}`);
+
+	container.appendChild(front);
+	container.appendChild(back);
+
+};
+
+const updateImages = (img1, img2) => {
+	front.style.setProperty('--image-url', `url(${img1})`);
+	back.style.setProperty('--image-url', `url(${img2})`);
+}
 
 const switchImages = () => {
 	disable();
@@ -28,8 +60,7 @@ const switchImages = () => {
 	timeoutId = setTimeout(() => {
 		images.push(images.shift());
 
-		slidesA.style.setProperty('--image-url', `url(/img/${images[0]})`);
-		slidesB.style.setProperty('--image-url', `url(/img/${images[1]})`);
+		updateImages(`${IMG_ROOT}/${images[0]}`, `${IMG_ROOT}/${images[1]}`);
 
 		container.classList.remove('is-switching');
 
@@ -47,4 +78,5 @@ const disable = () => {
 	container.removeEventListener('click', switchImages);
 };
 
+build();
 enable();

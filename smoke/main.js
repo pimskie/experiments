@@ -1,14 +1,22 @@
 const tl = gsap.timeline();
 
 const smokes = Array.from(document.querySelectorAll('.js-smoke'));
+const shoreline = document.querySelector('.js-shoreline');
+let delay = 0;
 
-smokes.forEach((smoke) => {
-	const duration = 3 + (Math.random() * 7);
-	const delay = 0;
-	console.log(duration);
+const shuffle = arr => arr.sort((a, b) => 0.5 - Math.random());
 
-	gsap.to(smoke, { duration, delay, ease: 'power1.inOut', attr:{y: '0%' } });
+const run = () => {
+	console.log('run')
+	shuffle(smokes);
+
+	tl.fromTo(smokes, { y: '65%' },  { duration: 3, ease: 'power1.inOut', stagger: 0.5, attr:{ y: '7%' } });
+	tl.fromTo(shoreline, { y: '0' }, { duration: 3, delay, ease: 'power1.inOut', attr:{ y: '100' } }, '-=2');
+
+};
+
+document.body.addEventListener('click', () => {
+	tl.restart(true, false);
 });
-
-// gsap.fromTo(smokes[0], 2, { y:0 }, {y:-1000});
+run();
 

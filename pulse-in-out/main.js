@@ -36,14 +36,14 @@ const draw = ({ x, y, s }) => {
 };
 
 const dots = new Array(cols * cols).fill().map((_, i) => {
-	const x = (spacing * 0.5) + (i % cols) * spacing;
-	const y = (spacing * 0.5) + Math.floor(i / cols) * spacing;
+	const p = {
+		x: (spacing * 0.5) + (i % cols) * spacing,
+		y: (spacing * 0.5) + Math.floor(i / cols) * spacing,
+	};
 
-	const p = { x, y };
 	const a = Math.atan2(mid.y - p.y, mid.x - p.x);
-	const r = 0;
 
-	const dot = { p, a, r };
+	const dot = { p, a, r: 0 };
 
 	return dot;
 });

@@ -6,7 +6,7 @@ const size = 500;
 const mid = { x: size * 0.5, y: size * 0.5 };
 const hypo = distanceBetween({ x: 0, y: 0 }, mid);
 
-const cols = 30;
+const cols = 20;
 const spacing = size / cols;
 
 ctx.canvas.width = size;
@@ -15,25 +15,61 @@ ctx.canvas.height = size;
 const update = (dots) => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-	dots.forEach((dot) => {
+	dots.forEach((dot, i) => {
 		const { p: { x, y }, a, r } = dot;
 
 		const x1 = x + (Math.cos(a) * r);
 		const y1 = y + (Math.sin(a) * r);
+
 		const d = Math.min(hypo, distanceBetween(mid, { x: x1, y: y1 }));
-		const s = 2 * (1 - (d / hypo));
+		const s = 2 + 2 * (1 - (d / hypo));
+
+		dot.p2 = { x: x1, y: y1 };
+		dot.d = d;
 
 		draw({x: x1, y: y1, s });
 	});
 };
 
+const connect = (dots) => {
+	dots.forEach((dot, i) => {
+		const row = Math.floor(i / cols);
+		const nextRow = Math.floor((i + 1) / cols);
+
+		const right = row === nextRow && dots[i + 1];
+		const below = dots[i + cols];
+
+		if (right) {
+			drawLine(dot, right);
+		}
+
+		if (below) {
+			drawLine(dot, below);
+		}
+	});
+};
+
 const draw = ({ x, y, s }) => {
 	ctx.beginPath();
+	ctx.strokeStyle = '#fff';
 	ctx.fillStyle = '#fff';
+	ctx.lineWidth = 1;
+
 	ctx.arc(x, y, s, 0, Math.PI * 2, false);
+	ctx.closePath();
 	ctx.fill();
+};
+
+const drawLine = (dotA, dotB) => {
+	ctx.beginPath();
+	ctx.lineWidth = 1 - (dotA.d / hypo);
+	ctx.strokeStyle = '#fff';
+	ctx.moveTo(dotA.p2.x, dotA.p2.y);
+	ctx.lineTo(dotB.p2.x, dotB.p2.y);
+	ctx.stroke();
 	ctx.closePath();
 };
+
 
 const dots = new Array(cols * cols).fill().map((_, i) => {
 	const p = {
@@ -49,7 +85,7 @@ const dots = new Array(cols * cols).fill().map((_, i) => {
 });
 
 const stagger = {
-	from: 'edges',
+	from: 'center',
 	amount: 0.4,
 	grid: [cols, cols],
 	onUpdate() {
@@ -72,6 +108,7 @@ gsap.fromTo(
 		stagger,
 		onUpdate() {
 			update(dots);
+			connect(dots);
 		}
 	}
 );

@@ -1,8 +1,6 @@
-const angleBetween = (vec1, vec2) => Math.atan2(vec2.y - vec1.y, vec2.x - vec1.x);
 const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec1.y);
 
-const c = document.querySelector('canvas');
-const ctx = c.getContext('2d');
+const ctx = document.querySelector('canvas').getContext('2d');
 
 const size = 500;
 const mid = { x: size * 0.5, y: size * 0.5 };
@@ -11,25 +9,21 @@ const hypo = distanceBetween({ x: 0, y: 0 }, mid);
 const cols = 30;
 const spacing = size / cols;
 
-c.width = size;
-c.height = size;
+ctx.canvas.width = size;
+ctx.canvas.height = size;
 
 const update = (dots) => {
-	ctx.clearRect(0, 0, size, size);
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	dots.forEach((dot) => {
-		const { p, a, r, s } = dot;
-
-		const { x, y } = p;
-		const d = distanceBetween(mid, p);
+		const { p: { x, y }, a, r } = dot;
 
 		const x1 = x + (Math.cos(a) * r);
 		const y1 = y + (Math.sin(a) * r);
-		const s1 = s + ((d / hypo) * 4);
+		const d = Math.min(hypo, distanceBetween(mid, { x: x1, y: y1 }));
+		const s = 2 * (1 - (d / hypo));
 
-		dot.a += 0.001;
-
-		draw({x: x1, y: y1, s: s1 });
+		draw({x: x1, y: y1, s });
 	});
 };
 
@@ -42,26 +36,28 @@ const draw = ({ x, y, s }) => {
 };
 
 const dots = new Array(cols * cols).fill().map((_, i) => {
-	const x = (spacing / 2) + (i % cols) * spacing;
-	const y = (spacing / 2) + Math.floor(i / cols) * spacing;
+	const x = (spacing * 0.5) + (i % cols) * spacing;
+	const y = (spacing * 0.5) + Math.floor(i / cols) * spacing;
 
 	const p = { x, y };
-	const a = angleBetween(p, mid);
+	const a = Math.atan2(mid.y - p.y, mid.x - p.x);
 	const r = 0;
-	const s = 1;
 
-	const dot = { p, a, r, s };
+	const dot = { p, a, r };
 
 	return dot;
 });
 
 const stagger = {
 	from: 'edges',
-	amount: 5,
+	amount: 0.4,
 	grid: [cols, cols],
+	onUpdate() {
+		const [target] = this.targets();
+
+	},
 };
 
-gsap.fromTo(dots, { r: 0 }, { r: size * 0.75, yoyo: true, repeat: -1, ease: 'circ.inOut', repeatDelay: 0, stagger, onUpdate() {
+gsap.fromTo(dots, { r: 0 }, { r: -100, yoyo: true, repeat: -1, repeatDelay: 0, ease: 'circ.inOut', stagger, onUpdate() {
 	update(dots);
 } });
-

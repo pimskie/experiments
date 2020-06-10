@@ -22,7 +22,7 @@ const update = (dots) => {
 		const y1 = y + (Math.sin(a) * r);
 
 		const d = Math.min(hypo, distanceBetween(mid, { x: x1, y: y1 }));
-		const s = 2 + 2 * (1 - (d / hypo));
+		const s = 4 * (1 - (d / hypo));
 
 		dot.p2 = { x: x1, y: y1 };
 		dot.d = d;
@@ -63,7 +63,7 @@ const draw = ({ x, y, s }) => {
 const drawLine = (dotA, dotB) => {
 	ctx.beginPath();
 	ctx.lineWidth = 1 - (dotA.d / hypo);
-	ctx.strokeStyle = '#fff';
+	ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
 	ctx.moveTo(dotA.p2.x, dotA.p2.y);
 	ctx.lineTo(dotB.p2.x, dotB.p2.y);
 	ctx.stroke();

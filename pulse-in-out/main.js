@@ -58,6 +58,20 @@ const stagger = {
 	},
 };
 
-gsap.fromTo(dots, { r: 0 }, { r: -100, yoyo: true, repeat: -1, repeatDelay: 0, ease: 'circ.inOut', stagger, onUpdate() {
-	update(dots);
-} });
+gsap.fromTo(
+	dots,
+	{
+		r: 0
+	},
+	{
+		r: -100,
+		yoyo: true,
+		repeat: -1,
+		repeatDelay: 0,
+		ease: 'circ.inOut',
+		stagger,
+		onUpdate() {
+			update(dots);
+		}
+	}
+);

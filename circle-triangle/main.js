@@ -1,21 +1,27 @@
 // https://www.pinterest.com/pin/528398968760662762/
 // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
-
-const ctx = document.querySelector('canvas').getContext('2d');
 const size = 500;
 const mid = { x: size * 0.5, y: size * 0.5 };
 const tau = Math.PI * 2;
 
-const operations = ['source-over', 'source-in', 'source-out', 'source-atop', 'destination-over', 'destination-in', 'destination-out', 'destination-atop', 'lighter', 'copy', 'xor', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
-const col = document.querySelector('input[type=color]');
-const sel = document.querySelector('select');
-sel.innerHTML = operations.map((op) => `<option value="${op}">${op}</option>`).join('');
+const ctxs = new Array(3).fill().map((_, i) => {
+	const c = document.createElement('canvas');
+
+	c.width = size;
+	c.height = size;
+
+	return c.getContext('2d');
+});
+
+const [ctx, ctx2, ctx3] = ctxs;
+
+document.body.append(ctx3.canvas);
 
 const settings = {
 	innerRadius: size * 0.2,
 	innerPoints: 5,
 	outerRadius: size * 0.45,
-	outerPoints: 4,
+	outerPoints: 12,
 	outerSpread: tau,
 };
 
@@ -23,7 +29,7 @@ ctx.canvas.width = size;
 ctx.canvas.height = size;
 
 const clear = () => {
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+	ctxs.forEach(c => c.clearRect(0, 0, c.canvas.width, c.canvas.height));
 };
 
 const background = () => {
@@ -53,34 +59,35 @@ const drawInner = (points, color = '#000') => {
 	ctx.restore();
 };
 
-const drawOuter = (innerPoints) => {
+const drawOuter = (dest, innerPoints, lineColor = '#000') => {
 	for (let i = 0; i < settings.outerPoints; i++) {
-		const a = (settings.outerSpread / settings.outerPoints) * i;
+		const a = ((settings.outerSpread / settings.outerPoints) * i);
 
-		const pos = {
+		const from = {
 			x: Math.cos(a) * settings.outerRadius,
 			y: Math.sin(a) * settings.outerRadius,
 		};
 
-		connectDots(pos, innerPoints);
+		connectDots(dest, from, innerPoints, lineColor);
 	}
 };
 
-const connectDots = (from, points) => {
-	ctx.save();
-	ctx.translate(mid.x, mid.y);
+const connectDots = (dest, from, points, lineColor) => {
+	dest.save();
+	dest.translate(mid.x, mid.y);
 
-	ctx.strokeStyle = col.value;
+	dest.strokeStyle = lineColor;
+	dest.lineWidth = 1;
 
 	points.forEach((point) => {
-		ctx.beginPath();
-		ctx.moveTo(from.x, from.y);
-		ctx.lineTo(point.x, point.y);
-		ctx.stroke();
-		ctx.closePath();
+		dest.beginPath();
+		dest.moveTo(from.x, from.y);
+		dest.lineTo(point.x, point.y);
+		dest.stroke();
+		dest.closePath();
 	});
 
-	ctx.restore();
+	dest.restore();
 };
 
 const draw = () => {
@@ -95,11 +102,17 @@ const draw = () => {
 
 	clear();
 
-	drawInner(points);
+	ctx.globalCompositeOperation = 'source-over';
 
-	ctx.globalCompositeOperation = 'xor'
+	drawInner(points, '#000');
 
-	drawOuter(points);
+	ctx.globalCompositeOperation = 'source-atop';
+
+	drawOuter(ctx, points, '#fff');
+	drawOuter(ctx2, points, '#000');
+
+	ctx3.drawImage(ctx2.canvas, 0, 0);
+	ctx3.drawImage(ctx.canvas, 0, 0);
 };
 
 gsap.defaults({
@@ -107,20 +120,17 @@ gsap.defaults({
 	onUpdate: draw,
 });
 
+// https://greensock.com/docs/v3/GSAP/Timeline
+// https://greensock.com/docs/v3/Eases
 const tl = gsap.timeline();
-tl.fromTo(settings, { innerRadius: 0 }, { innerRadius: size * 0.2, ease: 'back.out(1.4)' });
-tl.fromTo(settings, { innerPoints: 0 }, { innerPoints: 15, snap: 'innerPoints' });
-tl.fromTo(settings, { outerRadius: 0 }, { outerRadius: size * 0.4, duration: 2 });
 
-// tl.to(settings, { innerRadius: size * 0.3 });
+tl.fromTo(settings, { innerRadius: 0 }, { innerRadius: size * 0.2, ease: 'back.out(1.75)', duration: 1 });
+tl.fromTo(settings, { innerPoints: 0 }, { innerPoints: 12, snap: 'innerPoints', duration: 1, ease: 'power3.in' });
+tl.fromTo(settings, { outerRadius: 0 }, { outerRadius: size * 0.4, delay: 0.5, ease: 'power2.out' });
+tl.to(settings, { innerRadius: size * 0.5, ease: 'power2.out', delay: 1 });
+tl.to(settings, { outerRadius: size * 0.25, ease: 'power2.out' }, '<');
+tl.to(settings, { outerSpread: tau / 2 });
+tl.to(settings, { outerRadius: size * 0.5 });
 
-tl.to(settings, { outerPoints: 12, duration: 3, snap: 'outerPoints' });
-// tl.to(settings, { innerRadius: size * 0.5, duration: 3 });
-
-sel.addEventListener('change', (e) => {
-	draw();
-});
-
-col.addEventListener('input', (e) => {
-	draw();
-});
+tl.to(settings, { innerRadius: size * 0.2, delay: 1.5 });
+tl.to(settings, { outerSpread: tau, outerRadius: 0 });

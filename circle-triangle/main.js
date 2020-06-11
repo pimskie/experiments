@@ -4,6 +4,11 @@ const size = 500;
 const mid = { x: size * 0.5, y: size * 0.5 };
 const tau = Math.PI * 2;
 
+const operations = ['source-over', 'source-in', 'source-out', 'source-atop', 'destination-over', 'destination-in', 'destination-out', 'destination-atop', 'lighter', 'copy', 'xor', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
+const sel = document.querySelector('select');
+const col = document.querySelector('input');
+sel.innerHTML = operations.map((op) => `<option value="${op}">${op}</option>`).join('');
+
 const ctxs = new Array(3).fill().map((_, i) => {
 	const c = document.createElement('canvas');
 
@@ -18,11 +23,18 @@ const [ctx, ctx2, ctx3] = ctxs;
 document.body.append(ctx3.canvas);
 
 const settings = {
+	innerBackgroudColor: 'rgba(0, 0, 0, 1)',
 	innerRadius: size * 0.2,
-	innerPoints: 5,
+	innerPoints: 16,
+	innerLineColor: 'rgba(255, 255, 255, 1)',
+	outerBackgroundColor: 'rgba(255, 255, 255, 1)',
 	outerRadius: size * 0.45,
-	outerPoints: 12,
+	outerPoints: 8,
+	outerLineColor: 'rgba(0, 0, 0, 1)',
 	outerSpread: tau,
+	maskOuterRadius: 0,
+	maskInnerRadius: 0,
+	mask1Color: '#000',
 };
 
 ctx.canvas.width = size;
@@ -41,8 +53,8 @@ const background = () => {
 const drawInner = (points, color = '#000') => {
 	ctx.save();
 	ctx.translate(mid.x, mid.y);
-	ctx.strokeStyle = color;
-	ctx.fillStyle = color;
+	ctx.strokeStyle = settings.innerBackgroudColor;
+	ctx.fillStyle = settings.innerBackgroudColor;
 
 	ctx.beginPath();
 	ctx.arc(0, 0, settings.innerRadius, 0, tau, false);
@@ -108,29 +120,87 @@ const draw = () => {
 
 	ctx.globalCompositeOperation = 'source-atop';
 
-	drawOuter(ctx, points, '#fff');
-	drawOuter(ctx2, points, '#000');
+	drawOuter(ctx, points, settings.innerLineColor);
+	drawOuter(ctx2, points, settings.outerLineColor);
 
+	ctx3.fillStyle = settings.outerBackgroundColor;
+	ctx3.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+	ctx3.globalCompositeOperation='source-atop';
 	ctx3.drawImage(ctx2.canvas, 0, 0);
 	ctx3.drawImage(ctx.canvas, 0, 0);
+
+	ctx3.globalCompositeOperation='difference';
+	ctx3.fillStyle = 'white';
+	ctx3.globalAlpha = 1;
+	ctx3.beginPath();
+	ctx3.arc(mid.x, mid.y, settings.maskOuterRadius, 0, tau, false);
+	ctx3.arc(mid.x, mid.y, settings.maskInnerRadius, 0, tau, true);
+	ctx3.fill();
+	ctx3.closePath();
 };
 
 gsap.defaults({
-	duration: 2,
+	duration: 1,
 	onUpdate: draw,
 });
 
 // https://greensock.com/docs/v3/GSAP/Timeline
 // https://greensock.com/docs/v3/Eases
-const tl = gsap.timeline();
+const onComplete = () => {
+	tl.restart();
+};
+
+const tl = gsap.timeline({
+	// onComplete,
+});
 
 tl.fromTo(settings, { innerRadius: 0 }, { innerRadius: size * 0.2, ease: 'back.out(1.75)', duration: 1 });
-tl.fromTo(settings, { innerPoints: 0 }, { innerPoints: 12, snap: 'innerPoints', duration: 1, ease: 'power3.in' });
 tl.fromTo(settings, { outerRadius: 0 }, { outerRadius: size * 0.4, delay: 0.5, ease: 'power2.out' });
-tl.to(settings, { innerRadius: size * 0.5, ease: 'power2.out', delay: 1 });
-tl.to(settings, { outerRadius: size * 0.25, ease: 'power2.out' }, '<');
-tl.to(settings, { outerSpread: tau / 2 });
-tl.to(settings, { outerRadius: size * 0.5 });
 
-tl.to(settings, { innerRadius: size * 0.2, delay: 1.5 });
-tl.to(settings, { outerSpread: tau, outerRadius: 0 });
+tl.fromTo(settings,
+	{
+		maskOuterRadius: 0,
+	},
+	{
+		maskOuterRadius: size * 0.73,
+		ease: 'power2.inOut'
+	},
+);
+
+tl.to(settings, { innerRadius: size * 0.25 }, '<');
+
+tl.to(settings, {
+	outerRadius: size * 0.25,
+	outerSpread: tau / 2,
+	ease: 'power2.inOut', delay: 0.5
+});
+
+tl.to(settings, {
+	maskInnerRadius: size * 0.4,
+	innerRadius: size * 0.35,
+	outerRadius: size * 0.2,
+	ease: 'expo.out',
+	delay: 0.5
+});
+
+tl.to(settings, {
+	innerRadius: size * 0.25,
+	outerRadius: size * 0.4,
+	outerSpread: tau,
+	ease: 'power3.in'
+});
+
+tl.to(settings, {
+	maskInnerRadius: size * 0.5,
+	outerRadius: size * 0.5,
+});
+
+tl.to(settings, {
+	maskInnerRadius: size * 0.72,
+	innerRadius: size * 0.2,
+	outerRadius: size * 0.4,
+});
+
+sel.addEventListener('change', draw);
+col.addEventListener('input', draw);

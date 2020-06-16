@@ -142,7 +142,7 @@ const draw = () => {
 };
 
 gsap.defaults({
-	duration: 1,
+	duration: 2,
 	onUpdate: draw,
 });
 
@@ -153,27 +153,34 @@ const onComplete = () => {
 };
 
 const tl = gsap.timeline({
-	// onComplete,
+	onComplete,
 });
 
 tl.fromTo(settings, { innerRadius: 0 }, { innerRadius: size * 0.2, ease: 'back.out(1.75)', duration: 1 });
 tl.fromTo(settings, { outerRadius: 0 }, { outerRadius: size * 0.45, delay: 0.5, ease: 'power2.out' });
+
+tl.addLabel('started');
+
 tl.fromTo(settings, {
-	maskInnerRadius: 0,
-	maskOuterRadius: 0,
+	maskInnerRadius: hypo,
+	maskOuterRadius: hypo,
 }, {
 	maskInnerRadius: size * 0.45,
 	maskOuterRadius: hypo,
+	ease: 'power2.out',
 });
+
 
 
 tl.to(settings, { maskInnerRadius: size * 0.5, innerRadius: size * 0.25, outerRadius: size * 0.4 });
 
-tl.add('started');
 tl.to(settings, { outerPoints: 24, snap: 'outerPoints' });
-tl.to(settings, { innerRadius: size * 0.25, duration: 1.5 });
 tl.to(settings, { maskInnerRadius: size * 0.46 }, '<');
-tl.to(settings, { outerRadius: size * 0.25, innerRadius: size * 0.5, maskInnerRadius: size * 0.5 });
+tl.to(settings, { outerRadius: size * 0.2, innerRadius: size * 0.45, maskInnerRadius: size * 0.5 });
+tl.to(settings, { outerSpread: tau, innerRadius: size * 0.2, outerRadius: size * 0.45 });
+tl.to(settings, { outerPoints: 8, maskOuterRadius: size * 0.45 });
+tl.to(settings, { innerRadius: size * 0.15, outerRadius: size * 0.35, outerRadius: size * 0.5 }, '<');
+tl.to(settings, { innerRadius: size * 0.2, outerRadius: size * 0.45, maskInnerRadius: size * 0, maskOuterRadius: 0, ease: 'power2.out' });
 
 // tl.fromTo(settings,
 // 	{

@@ -18,9 +18,4 @@ body {
 
 canvas {
 	border-radius: 50%;
-	border: 1px solid;
-}
-
-canvas:nth-of-type(1) {
-	/* background: red; */
 }

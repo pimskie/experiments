@@ -5,11 +5,6 @@ const mid = { x: size * 0.5, y: size * 0.5 };
 const tau = Math.PI * 2;
 const hypo = size * 0.72;
 
-const operations = ['source-over', 'source-in', 'source-out', 'source-atop', 'destination-over', 'destination-in', 'destination-out', 'destination-atop', 'lighter', 'copy', 'xor', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
-const sel = document.querySelector('select');
-const col = document.querySelector('input');
-sel.innerHTML = operations.map((op) => `<option value="${op}">${op}</option>`).join('');
-
 const ctxs = new Array(3).fill().map((_, i) => {
 	const c = document.createElement('canvas');
 
@@ -182,33 +177,4 @@ tl.to(settings, { outerPoints: 8, maskOuterRadius: size * 0.45 });
 tl.to(settings, { innerRadius: size * 0.15, outerRadius: size * 0.35, outerRadius: size * 0.5 }, '<');
 tl.to(settings, { innerRadius: size * 0.2, outerRadius: size * 0.45, maskInnerRadius: size * 0, maskOuterRadius: 0, ease: 'power2.out' });
 
-// tl.fromTo(settings,
-// 	{
-// 		maskInnerRadius: 0,
-// 		maskOuterRadius: 0,
-// 	},
-// 	{
-// 		maskInnerRadius: 0.2,
-// 		maskOuterRadius: size * 0.5,
-// 	},
-// );
 
-// tl.to(settings, { outerRadius: size * 0.4 }, '<');
-
-// tl.to(settings, { outerPoints: 24, duration: 2 });
-// tl.to(settings, { maskInnerRadius: hypo, outerRadius: size * 0.25, innerRadius: size * 0.5 });
-// tl.to(settings, { innerPoints: 12, snap: 'innerPoints' });
-// tl.to(settings, { innerRadius: size * 0.25, outerRadius: size * 0.45 });
-
-// tl.to(settings, { outerRadius: size * 0.25, innerRadius: size * 0.5 });
-
-
-// tl.to(settings, {
-// 	innerRadius: size * 0.25,
-// 	outerRadius: size * 0.4,
-// 	outerSpread: tau,
-// 	ease: 'power3.in'
-// });
-
-// sel.addEventListener('change', draw);
-// col.addEventListener('input', draw);

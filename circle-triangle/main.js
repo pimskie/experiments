@@ -3,7 +3,6 @@
 const size = 500;
 const mid = { x: size * 0.5, y: size * 0.5 };
 const tau = Math.PI * 2;
-const hypo = size * 0.72;
 
 const ctxs = new Array(3).fill().map((_, i) => {
 	const c = document.createElement('canvas');
@@ -30,7 +29,6 @@ const settings = {
 	outerSpread: tau,
 	maskOuterRadius: 0,
 	maskInnerRadius: 0,
-	mask1Color: '#000',
 };
 
 ctx.canvas.width = size;
@@ -137,44 +135,33 @@ const draw = () => {
 };
 
 gsap.defaults({
-	duration: 2,
+	duration: 1,
+	ease: 'power2.out',
 	onUpdate: draw,
 });
 
-// https://greensock.com/docs/v3/GSAP/Timeline
-// https://greensock.com/docs/v3/Eases
-const onComplete = () => {
-	tl.seek('started');
-};
-
 const tl = gsap.timeline({
-	onComplete,
+	onComplete() {
+		tl.seek('started');
+	},
 });
 
-tl.fromTo(settings, { innerRadius: 0 }, { innerRadius: size * 0.2, ease: 'back.out(1.75)', duration: 1 });
-tl.fromTo(settings, { outerRadius: 0 }, { outerRadius: size * 0.45, delay: 0.5, ease: 'power2.out' });
+tl.fromTo(settings, { innerRadius: 0 }, { innerRadius: size * 0.2 });
+tl.fromTo(settings, { outerRadius: 50 }, { outerRadius: size * 0.45 });
+tl.to(settings, { maskInnerRadius:  size * 0.45, maskOuterRadius: size * 0.5 }, '<');
 
-tl.addLabel('started');
-
-tl.fromTo(settings, {
-	maskInnerRadius: hypo,
-	maskOuterRadius: hypo,
-}, {
-	maskInnerRadius: size * 0.45,
-	maskOuterRadius: hypo,
-	ease: 'power2.out',
-});
-
-
-
-tl.to(settings, { maskInnerRadius: size * 0.5, innerRadius: size * 0.25, outerRadius: size * 0.4 });
-
+tl.add('started');
 tl.to(settings, { outerPoints: 24, snap: 'outerPoints' });
-tl.to(settings, { maskInnerRadius: size * 0.46 }, '<');
-tl.to(settings, { outerRadius: size * 0.2, innerRadius: size * 0.45, maskInnerRadius: size * 0.5 });
-tl.to(settings, { outerSpread: tau, innerRadius: size * 0.2, outerRadius: size * 0.45 });
-tl.to(settings, { outerPoints: 8, maskOuterRadius: size * 0.45 });
-tl.to(settings, { innerRadius: size * 0.15, outerRadius: size * 0.35, outerRadius: size * 0.5 }, '<');
-tl.to(settings, { innerRadius: size * 0.2, outerRadius: size * 0.45, maskInnerRadius: size * 0, maskOuterRadius: 0, ease: 'power2.out' });
 
+tl.to(settings, { outerRadius: size * 0.2, innerRadius: size * 0.5, maskInnerRadius: size * 0.5 });
+tl.to(settings, { maskOuterRadius: 0, maskInnerRadius: 0 });
+tl.to(settings, { innerRadius: size * 0.25, outerRadius: size * 0.5 });
 
+tl.set(settings,  { maskInnerRadius: size * 0.5, maskOuterRadius: size * 0.5 });
+tl.to(settings, { outerRadius: size * 0.45, maskInnerRadius: size * 0.45 });
+tl.to(settings, { outerPoints: 8, snap: 'outerPoints'});
+tl.to(settings, { outerRadius: size * 0.4, maskInnerRadius: size * 0.5 });
+tl.to(settings, { innerRadius: size * 0.2, outerRadius: size * 0.45 });
+
+tl.set(settings,  { maskInnerRadius: 0, maskOuterRadius: 0 }, '<');
+tl.to(settings,  { maskInnerRadius: size * 0.45, maskOuterRadius: size * 0.5}, '<');

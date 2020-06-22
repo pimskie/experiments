@@ -1,77 +1,88 @@
-// https://fyprocessing.tumblr.com/post/98066742289/bigblueboo-turn-urge
-
+const ctxShape = document.createElement('canvas').getContext('2d');
 const ctx = document.querySelector('canvas').getContext('2d');
+
 const size = 500;
-const mid = { x: size * 0.5, y: size * 0.5 };
-const tau = Math.PI * 2;
-const speed = 0.01;
-const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+const speed = 2;
+
+
+const cols = 5;
+const rows = cols * 2;
+
+const tileWidth = size / cols;
+const tileHeight = tileWidth * 0.5;
 
 ctx.canvas.width = size;
 ctx.canvas.height = size;
 
-class Group {
-	constructor({ pos, radius, numRings, baseAngle = 0, phase = 0 }) {
-		this.pos = pos;
-		this.radius = radius;
-		this.numRings = numRings;
-		this.baseAngle = baseAngle;
-		this.phase = phase;
-	}
+ctxShape.canvas.width = tileWidth;
+ctxShape.canvas.height = tileHeight;
 
-	update(speed) {
-		this.phase += speed;
-	}
+const clear = () => {
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+	ctxShape.clearRect(0, 0, ctxShape.canvas.width, ctxShape.canvas.height);
+};
 
-	draw(ctx, hue) {
-		ctx.save();
-		ctx.translate(this.pos.x, this.pos.y);
-		ctx.strokeStyle = `hsla(${hue}, 50%, 50%, 0.25)`;
+let position = 0;
+const lineWidth = tileWidth * 0.2;
 
-		for (let i = 0; i < this.numRings; i++) {
-			const percent = tau * (i / this.numRings);
-			const phaseLocal = this.phase + percent;
-			const radius = 10 + Math.abs(Math.sin((phaseLocal / 2) - this.baseAngle - (Math.PI / 2))) * 70;
-			const radiusInc = radius;
+const drawShape = () => {
+	drawArrow(position);
+	drawArrow(position + tileHeight * 1.5);
+};
 
-			ctx.beginPath();
-			ctx.arc(Math.cos(phaseLocal) * this.radius, Math.sin(phaseLocal) * this.radius, radiusInc, 0, tau);
-			ctx.stroke();
-			ctx.closePath();
-		}
+const drawArrow = (position) => {
+	const spacing = lineWidth * 0.75;
 
-		ctx.restore();
-	}
+	ctxShape.lineWidth = lineWidth;
 
-}
+	ctxShape.save();
+	ctxShape.translate(0, position + spacing);
 
-const clear = () => ctx.clearRect(0, 0, size, size);
+	ctxShape.beginPath();
 
-const numGroups = 4;
-const groups = new Array(numGroups).fill().map((_, i) => {
-	const angle = (tau / numGroups) * i;
-	const baseAngle = Math.PI + (Math.PI / numGroups) * i;
-	const radius = 80;
+	// bottom left
+	ctxShape.moveTo(-spacing, tileHeight + spacing);
 
-	return new Group({
-		pos: { x: mid.x + (Math.cos(angle) * radius), y: mid.y + (Math.sin(angle) * radius) },
-		radius,
-		numRings: 20,
-		baseAngle,
-		phase: (i / numGroups) * tau,
-	});
-});
+	// tip
+	ctxShape.lineTo(tileHeight, 0);
+
+	// bottom right
+	ctxShape.lineTo(tileWidth + spacing, tileHeight + spacing);
+	ctxShape.stroke();
+	ctxShape.closePath();
+
+	ctxShape.restore();
+};
 
 const loop = () => {
 	clear();
 
-	groups.forEach((group, i) => {
-		const inc = i % 2 === 0 ? speed : -speed;
-		const c = (group.phase + group.baseAngle) * (180 / Math.PI);
+	drawShape();
 
-		group.update(inc);
-		group.draw(ctx, c);
-	});
+	for (let i = 0; i < rows; i += 1) {
+
+		const y = i * tileHeight;
+		const isFlipped = i % 2 !== 0;
+		const translateY = isFlipped ? y + tileHeight : y;
+		const scaleY = isFlipped ? -1 : 1;
+
+		for (let q = 0; q < cols; q += 1) {
+			const x = q * tileWidth;
+
+			ctx.save();
+			ctx.translate(x, translateY);
+			ctx.scale(1, scaleY);
+
+			ctx.drawImage(ctxShape.canvas, 0, 0);
+			ctx.restore();
+		}
+	}
+
+	position -= speed;
+
+	if (position < -tileHeight * 1.5) {
+		position = 0;
+	}
 
 	requestAnimationFrame(loop);
 };

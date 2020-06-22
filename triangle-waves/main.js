@@ -31,7 +31,7 @@ const drawShape = () => {
 };
 
 const drawArrow = (position) => {
-	const spacing = lineWidth * 0.75;
+	const spacing = lineWidth * 0.7;
 
 	ctxShape.lineWidth = lineWidth;
 

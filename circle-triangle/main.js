@@ -1,5 +1,3 @@
-// https://www.pinterest.com/pin/528398968760662762/
-// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
 const size = 500;
 const mid = { x: size * 0.5, y: size * 0.5 };
 const tau = Math.PI * 2;

@@ -1,0 +1,39 @@
+body {
+	min-height: 100vw;
+	min-height: 100vh;
+}
+
+.container {
+	position: relative;
+}
+
+.node {
+	position: absolute;
+	left: var(--x);
+	top: var(--y);
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	width: 50px;
+	height: 50px;
+
+	box-shadow: inset 0px 0px 0px 2px black;
+}
+
+.is-adjacent {
+	box-shadow: inset 0px 0px 0px 2px #a8eca8;
+}
+
+.is-diagonal {
+	box-shadow: inset 0px 0px 0px 2px #5bea5b;
+}
+
+.is-closed {
+	background: #000;
+}
+
+.is-current {
+	background: #22a2ce;
+}

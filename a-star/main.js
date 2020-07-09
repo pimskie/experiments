@@ -1,3 +1,5 @@
+// http://csis.pace.edu/~benjamin/teaching/cs627/webfiles/Astar.pdf
+
 const size = 50;
 const cols = 7;
 const rows = 5;

@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
 body {
 	min-height: 100vw;
 	min-height: 100vh;
@@ -62,7 +68,6 @@ body {
 	display: none;
 }
 
-.is-adjacent,
 .is-neighbour {
 	background: #a8eca8;
 }
@@ -82,6 +87,10 @@ body {
 
 .is-current {
 	background: #22a2ce;
+}
+
+.is-path {
+	background: #f74b73;
 }
 
 .ui {

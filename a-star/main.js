@@ -9,8 +9,7 @@ const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 
 let simplex = new SimplexNoise(Math.random());
 const cols = 40;
 const rows = 40;
-const size = Math.ceil(Math.min(window.innerWidth, window.innerHeight) / cols);
-
+const size = Math.floor(Math.min(window.innerWidth, window.innerHeight) / cols);
 
 const fragment = new DocumentFragment();
 
@@ -147,11 +146,15 @@ const resetWalls = () => {
 	});
 };
 
+const createNoiseMap = () => {
+	simplex = new SimplexNoise(Math.random());
+
+	reset();
+
+};
 
 const reset = () => {
 	cancelAnimationFrame(rafId);
-
-	simplex = new SimplexNoise(Math.random());
 
 	generateGrid();
 	resetPath();
@@ -273,6 +276,33 @@ const generateGrid = () => {
 	openList.push(startTile);
 };
 
+const isNode = (el) => el.classList && el.classList.contains('node');
+
+const removeWall = (node) => {
+	walls.delete(node);
+};
+
+const paint = (node, isFlattening) => {
+	const { dataset: { col, row } } = node;
+	const tile = grid[row][col];
+	let { noise } = tile;
+
+	noise = Math.max(0, noise);
+	noise += isFlattening ? -0.1 : 0.1;
+	noise = Math.max(0, Math.min(noise, 1));
+
+	tile.noise = noise;
+	tile.level = noise * 3;
+
+	tile.node.style.setProperty('--alpha', noise);
+
+	if (noise > 0) {
+		walls.add(node);
+	} else {
+		walls.delete(node);
+	}
+};
+
 qs('.js-walk').addEventListener('click', () => {
 	cancelAnimationFrame(rafId);
 
@@ -284,31 +314,10 @@ qs('.js-reset').addEventListener('click', () => {
 	reset();
 });
 
-const isNode = (el) => el.classList && el.classList.contains('node');
+qs('.js-noise').addEventListener('click', () => {
+	createNoiseMap();
+});
 
-const removeWall = (node) => {
-	walls.delete(node);
-};
-
-const paint = (node, isFlattening) => {
-	const { dataset: { col, row } } = node;
-	const tile = grid[row][col];
-	let { level } = tile;
-
-	level += isFlattening ? -1 : 1;
-	level = Math.max(0, Math.min(level, 4));
-
-	tile.level = level;
-
-	node.classList.remove('is-level-1', 'is-level-2', 'is-level-3', 'is-level-4');
-	node.classList.add(`is-level-${level}`);
-
-	if (level > 0) {
-		walls.add(node);
-	} else {
-		walls.delete(node);
-	}
-};
 
 document.body.addEventListener('mousedown', ({ target }) => {
 	if (!isNode(target)) {
@@ -332,8 +341,6 @@ document.body.addEventListener('mouseover', (e) => {
 	if (!isNode(target)) {
 		return;
 	}
-
-	console.log('paintinigngn');
 
 	paint(target, ctrlKey);
 });

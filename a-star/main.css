@@ -29,8 +29,11 @@ body {
 	width: var(--size);
 	height: var(--size);
 
+	background: rgba(0, 0, 0, var(--alpha));
 	box-shadow: inset 0px 0px 0px 0.5px #d2d2d2;
 	font-size: 0.75rem;
+
+	user-select: none;
 }
 
 .node:before {
@@ -80,9 +83,12 @@ body {
 	background: red;
 }
 
+.is-water {
+	background: #66b1dc
+}
 
 .is-closed {
-	background: #000;
+	background: #3c3c3c;
 }
 
 .is-current {
@@ -99,4 +105,20 @@ body {
 
 	bottom: 0;
 	right: 0;
+}
+
+.is-level-1 {
+	background: #dedede;
+}
+
+.is-level-2 {
+	background: #b1afaf;
+}
+
+.is-level-3 {
+	background: #757575;
+}
+
+.is-level-4 {
+	background: #292929;
 }

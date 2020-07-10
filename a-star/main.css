@@ -29,11 +29,13 @@ body {
 	width: var(--size);
 	height: var(--size);
 
-	background: rgba(0, 0, 0, var(--alpha));
+	background: rgba(177, 40, 50, var(--alpha));
 	box-shadow: inset 0px 0px 0px 0.5px #d2d2d2;
 	font-size: 0.75rem;
 
 	user-select: none;
+
+	transition: background-color 0.1s ease-out;
 }
 
 .node:before {

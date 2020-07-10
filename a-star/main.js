@@ -84,7 +84,8 @@ const setParentTile = (parentTile, tile) => {
 };
 
 const getTerrainCostG = (tile) => {
-	const cost = tile.level * 10;
+	const { level = 0 } = tile;
+	const cost = level * 50;
 
 	return cost;
 };
@@ -151,6 +152,20 @@ const createNoiseMap = () => {
 
 	reset();
 
+	const noiseScale = 0.07;
+
+	for (let row = 0; row < rows; row++) {
+		for (let col = 0; col < cols; col++) {
+			const noise = simplex.noise2D(col * noiseScale, row * noiseScale);
+
+			const tile = grid[row][col];
+			const { node } = tile;
+
+			tile.level = noise;
+
+			node.style.setProperty('--alpha', `${noise}`);
+		}
+	}
 };
 
 const reset = () => {
@@ -164,54 +179,54 @@ const reset = () => {
 const walk = (destinationTile) => {
 	const then = performance.now();
 
-	const currentTile = getCurrentTile();
+	while (!isDestinationReached) {
 
-	closedList.push(currentTile);
-	openList = openList.filter(t => t !== currentTile);
 
-	const neighbourTiles = getNeighbourTiles(grid, currentTile, closedList);
+		const currentTile = getCurrentTile();
 
-	markCurrent(currentTile);
+		closedList.push(currentTile);
+		openList = openList.filter(t => t !== currentTile);
 
-	neighbourTiles.forEach((neighbourTile) => {
-		if (!openList.includes(neighbourTile)) {
-			openList.push(neighbourTile);
+		const neighbourTiles = getNeighbourTiles(grid, currentTile, closedList);
 
-			markOpenTile(neighbourTile);
-			setParentTile(currentTile, neighbourTile);
-			updatePathProperties(currentTile, neighbourTile, destinationTile);
-		} else {
-			const { g: currentG } = currentTile;
-			const { g: neighbourG } = neighbourTile;
-			const incrementG = getCostG(currentTile, neighbourTile);
+		markCurrent(currentTile);
 
-			const newG = neighbourG + incrementG;
+		neighbourTiles.forEach((neighbourTile) => {
+			if (!openList.includes(neighbourTile)) {
+				openList.push(neighbourTile);
 
-			if (newG < currentG) {
+				markOpenTile(neighbourTile);
 				setParentTile(currentTile, neighbourTile);
 				updatePathProperties(currentTile, neighbourTile, destinationTile);
+			} else {
+				const { g: currentG } = currentTile;
+				const { g: neighbourG } = neighbourTile;
+				const incrementG = getCostG(currentTile, neighbourTile);
+
+				const newG = neighbourG + incrementG;
+
+				if (newG < currentG) {
+					setParentTile(currentTile, neighbourTile);
+					updatePathProperties(currentTile, neighbourTile, destinationTile);
+				}
 			}
+		});
+
+		turns++;
+
+		if (currentTile.node === destinationTile.node) {
+			drawPath(openList[0]);
+
+			isDestinationReached = true;
+
+			console.log('REACHED')
 		}
-	});
 
-	turns++;
+		if (openList.length === 0) {
+			isDestinationReached = true;
 
-	if (currentTile.node === destinationTile.node) {
-		drawPath(openList[0]);
-
-		isDestinationReached = true;
-
-		console.log('REACHED')
-
-		return;
-	}
-
-	if (openList.length === 0) {
-		isDestinationReached = true;
-
-		console.log('😥 DNF');
-
-		return;
+			console.log('😥 DNF');
+		}
 	}
 
 	const now = performance.now();
@@ -219,7 +234,7 @@ const walk = (destinationTile) => {
 
 	console.log(`That took ${time.toPrecision(2)}MS, and ${turns} turns`);
 
-	rafId = requestAnimationFrame(() => walk(destinationTile));
+	// rafId = requestAnimationFrame(() => walk(destinationTile));
 
 };
 
@@ -237,26 +252,20 @@ const generateGrid = () => {
 
 		for (col = 0; col < cols; col++) {
 			const x = col * size;
-			const isWater = waterIndices.includes(i);
-			const noise = simplex.noise2D(col * 0.08, row * 0.08);
-			const level = noise * 3;
-
 			const node = document.createElement('div');
 
 			node.classList.add('node');
-			node.classList.toggle('is-water', isWater);
 
 			node.style.setProperty('--size', `${size}px`);
 			node.style.setProperty('--x', `${x}px`);
 			node.style.setProperty('--y', `${y}px`);
-			node.style.setProperty('--alpha', noise);
 
 			node.dataset.col = col;
 			node.dataset.row = row;
 
 			fragment.appendChild(node);
 
-			grid[row][col] = { node, col, row, isWater, index: i, noise, level };
+			grid[row][col] = { node, col, row, index: i };
 			i++;
 		}
 	}
@@ -278,29 +287,29 @@ const generateGrid = () => {
 
 const isNode = (el) => el.classList && el.classList.contains('node');
 
-const removeWall = (node) => {
-	walls.delete(node);
-};
-
 const paint = (node, isFlattening) => {
 	const { dataset: { col, row } } = node;
 	const tile = grid[row][col];
-	let { noise } = tile;
 
-	noise = Math.max(0, noise);
-	noise += isFlattening ? -0.1 : 0.1;
-	noise = Math.max(0, Math.min(noise, 1));
-
-	tile.noise = noise;
-	tile.level = noise * 3;
-
-	tile.node.style.setProperty('--alpha', noise);
-
-	if (noise > 0) {
-		walls.add(node);
-	} else {
+	if (isFlattening) {
 		walls.delete(node);
+	} else {
+		walls.add(node);
 	}
+
+	node.classList.toggle('is-closed', !isFlattening);
+
+	// const { dataset: { col, row } } = node;
+	// const tile = grid[row][col];
+	// let { level = 0 } = tile;
+
+	// level = Math.max(0, level);
+	// level += isFlattening ? -0.2 : 0.2;
+	// level = Math.max(0, Math.min(level, 1));
+
+	// tile.level = level;
+
+	// tile.node.style.setProperty('--alpha', level);
 };
 
 qs('.js-walk').addEventListener('click', () => {
@@ -308,6 +317,12 @@ qs('.js-walk').addEventListener('click', () => {
 
 	resetPath();
 	walk(destinationTile);
+});
+
+qs('.js-reset-path').addEventListener('click', () => {
+	cancelAnimationFrame(rafId);
+
+	resetPath();
 });
 
 qs('.js-reset').addEventListener('click', () => {

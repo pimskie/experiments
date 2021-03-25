@@ -36,7 +36,7 @@ class Line {
 
 		this.directionFrom += (this.directionTo - this.directionFrom) / this.smoothness;
 
-		this.intensity *= 0.98;
+		this.intensity *= 0.9;
 
 		if (Math.abs(this.directionFrom - this.directionTo) <= 0.05) {
 			this.getNewDirection(this.directionFrom);
@@ -124,14 +124,20 @@ const go = async () => {
 
 	const run = () => {
 		lines.forEach((line) => {
-			const intensity = getPixelIntensity(imageData, line.position);
+			const intensityDark = getPixelIntensity(imageData, line.position);
+			const intensityWhite = 1 - intensityDark;
+
+			const lineWidth = 1; // (2 * (1 - intensityWhite));
 			const smoothness = 30;
+			const amplitude = 1 - (1 - intensityDark);
 
 			line.smoothness = smoothness;
+			line.intensity += intensityDark * 0.1;
 			line.length = 3;
 
 			ctxOutput.beginPath();
-			ctxOutput.strokeStyle = `rgba(0, 0, 0, ${0.01 + Math.pow(intensity, 3)})`;
+			ctxOutput.lineWidth = lineWidth;
+			ctxOutput.strokeStyle = `rgba(0, 0, 0, ${0.01 + Math.pow(line.intensity, 3)})`;
 			ctxOutput.moveTo(line.position.x, line.position.y);
 			ctxOutput.lineTo(line.positionPrevious.x, line.positionPrevious.y);
 			ctxOutput.closePath();

@@ -20,18 +20,23 @@
             justify-content: center;
             align-items: center;
         }
-        canvas {
+
+        .canvas {
             border: 1px solid;
+        }
+
+        .canvas--source {
+            /* display: none; */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <canvas class="canvas js-source"></canvas>
+        <canvas class="canvas canvas--source js-source"></canvas>
         <canvas class="canvas js-output"></canvas>
     </div>
 
     <script src="https://unpkg.com/simplex-noise@2.4.0/simplex-noise.js"></script>
-    <script src="main.js"></script>
+    <script src="circle.js"></script>
 </body>
 </html>

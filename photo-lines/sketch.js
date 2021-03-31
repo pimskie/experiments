@@ -4,7 +4,7 @@ const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec
 const randomBetween = (min, max) => Math.random() * (max - min) + min;
 const getPixelIndex = ({ x, y }, imageData) => (~~x + ~~y * imageData.width) * 4;
 
-const sourceURL = './image.jpg';
+const sourceURL = './image1.jpg';
 
 const ctxInput = qs('.js-source').getContext('2d');
 const ctxOutput = qs('.js-output').getContext('2d');
@@ -36,7 +36,7 @@ class Line {
 
 		this.directionFrom += (this.directionTo - this.directionFrom) / this.smoothness;
 
-		this.intensity *= 0.98;
+		this.intensity *= 0.6;
 
 		if (Math.abs(this.directionFrom - this.directionTo) <= 0.05) {
 			this.getNewDirection(this.directionFrom);
@@ -92,6 +92,7 @@ const getPixelIntensity = (imageData, position) => {
 
 const go = async () => {
 	const image = await loadImage();
+
 	const { width, height } = image;
 
 	const lines = new Array(200).fill().map((i) => {
@@ -124,14 +125,20 @@ const go = async () => {
 
 	const run = () => {
 		lines.forEach((line) => {
-			const intensity = getPixelIntensity(imageData, line.position);
+			const intensityDark = getPixelIntensity(imageData, line.position);
+			const intensityWhite = 1 - intensityDark;
+
+			const lineWidth = 1 + (2 * intensityWhite);
 			const smoothness = 30;
+			const amplitude = 1 - (1 - intensityDark);
 
 			line.smoothness = smoothness;
+			line.intensity += intensityDark * 0.5;
 			line.length = 3;
 
 			ctxOutput.beginPath();
-			ctxOutput.strokeStyle = `rgba(0, 0, 0, ${0.01 + Math.pow(intensity, 3)})`;
+			ctxOutput.lineWidth = lineWidth;
+			ctxOutput.strokeStyle = `rgba(0, 0, 0, ${0.01 + Math.pow(line.intensity, 3)})`;
 			ctxOutput.moveTo(line.position.x, line.position.y);
 			ctxOutput.lineTo(line.positionPrevious.x, line.positionPrevious.y);
 			ctxOutput.closePath();

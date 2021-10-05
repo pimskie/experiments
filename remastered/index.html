@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        html,
+        body {
+        margin: 0;
+        padding: 0;
+        }
+
+        .container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+        .canvas {
+        box-shadow:
+            8px 4px 10px -42px rgba(0, 0, 0, 0.031),
+            64px 32px 80px -42px rgba(0, 0, 0, 0.07)
+        ;
+        }
+
+        .ghost {
+        display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <canvas class="ghost"></canvas>
+    <canvas class="canvas"></canvas>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.3.0/gsap.min.js"></script>
+    <script src="https://unpkg.com/simplex-noise@2.4.0/simplex-noise.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

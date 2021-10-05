@@ -4,11 +4,56 @@ const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec
 const randomBetween = (min, max) => Math.random() * (max - min) + min;
 const getPixelIndex = ({ x, y }, imageData) => (~~x + ~~y * imageData.width) * 4;
 
-const sourceURL = './image11.jpg';
+const sourceURL = './image1.jpg';
 
 const ctxInput = qs('.js-source').getContext('2d');
 const ctxOutput = qs('.js-output').getContext('2d');
 const simplex = new SimplexNoise();
+
+class Line {
+	constructor(center, radius) {
+		this.center = center;
+		this.radius = radius;
+
+		this.angle = 0;
+		this.angleSpeed = 0.1;
+		this.decay = 0.07;
+		this.width = 0.5;
+
+		this.posFrom = {
+			x: this.center.x + (Math.cos(this.angle) * this.radius),
+			y:this.center.y + (Math.sin(this.angle) * this.radius),
+		};
+
+		this.posTo = {
+			x: this.posFrom.x,
+			y: this.posFrom.y,
+		};
+	}
+
+	update(intensity) {
+		this.radius -= this.decay;
+		this.radius = Math.max(0, this.radius);
+
+		this.angle += this.angleSpeed;
+		this.width += intensity;
+		this.width *= 0.85;
+
+		this.updatePosition();
+	}
+
+	updatePosition() {
+		this.posFrom = {
+			x: this.posTo.x,
+			y: this.posTo.y,
+		};
+
+		this.posTo = {
+			x: this.center.x + (Math.cos(this.angle) * this.radius),
+			y: this.center.y + (Math.sin(this.angle) * this.radius),
+		};
+	}
+}
 
 const loadImage = () => {
 	const image = new Image();
@@ -55,32 +100,25 @@ const setupCanvases = (ctxInput, ctxOutput, image, maxWidth = 500) => {
 	ctxInput.drawImage(image, 0, 0, width, height);
 }
 
-const drawCircle = (center, radius, segments, imageData, ctx) => {
-	const TAU = Math.PI * 2;
-	const angleStep = TAU / segments;
+const drawSegment = (imageData, line, ctxOutput, iteration) => {
+	const { posFrom, posTo } = line;
 
-	// 1 + (1 - (1 - (1 * 0.1)))
+	const intesityDark = getPixelIntensity(imageData, line.posTo);
+	const intensityWhite = 1 - intesityDark;
 
-	for (let i = 1; i < segments + 1; i++) {
-		const angleFrom = angleStep * (i - 1);
-		const angleTo = angleStep * i;
+	const noiseScale = 0.005;
+	const noiseValue = simplex.noise2D(posFrom.x * noiseScale, posFrom.y * noiseScale);
 
-		const from = {
-			x: center.x + (Math.cos(angleFrom) * radius),
-			y: center.y + (Math.sin(angleFrom) * radius),
-		};
+	const lineIntensity = noiseValue;
 
-		const to = {
-			x: center.x + (Math.cos(angleTo) * radius),
-			y: center.y + (Math.sin(angleTo) * radius),
-		};
+	line.update(intesityDark);
 
-		ctx.beginPath();
-		ctx.moveTo(from.x, from.y);
-		ctx.lineTo(to.x, to.y);
-		ctx.stroke();
-		ctx.closePath();
-	}
+	ctxOutput.beginPath();
+	ctxOutput.lineWidth = line.width;
+	ctxOutput.moveTo(posFrom.x, posFrom.y);
+	ctxOutput.lineTo(posTo.x, posTo.y);
+	ctxOutput.closePath();
+	ctxOutput.stroke();
 };
 
 const go = async () => {
@@ -91,20 +129,29 @@ const go = async () => {
 	const { canvas: { width, height } } = ctxOutput;
 	const imageData = ctxInput.getImageData(0, 0, width, height);
 
-	let radius = Math.max(width, height) * 0.48;
-	const decay = 10;
-
+	const radius = Math.max(width, height) * 0.51;
 	const center = {
 		x: width * 0.5,
 		y: height * 0.5,
 	};
 
-	const run = () => {
-		while (radius >= decay) {
-			drawCircle(center, radius, 100, imageData, ctxOutput);
+	const line = new Line(center, radius);
 
-			radius -= decay;
+	const run = () => {
+		// const iterations = 20000;
+
+		// for (let i = 0; i < iterations; i++) {
+		// 	drawSegment(imageData, line, ctxOutput, i);
+		// }
+
+		while (line.radius > 1) {
+			drawSegment(imageData, line, ctxOutput);
 		}
+
+		// drawSegment(imageData, line, ctxOutput);
+		// drawSegment(imageData, line, ctxOutput);
+
+		// requestAnimationFrame(run);
 	};
 
 	run();

@@ -11,17 +11,43 @@
 <body>
 	<div class="container">
 		<div class="clock">
-			<div class="left">
-				<div class="flip">
-					<div class="number">
-						<div class="front">01</div>
-						<div class="back">02</div>
+			<div class="hour js-hours">
+				<div class="flipper">
+					<div class="front">
+						<div class="number">03</div>
 					</div>
-				  </div>
 
+					<div class="back">
+						<div class="number">04</div>
+					</div>
+				</div>
+
+				<div class="flipper">
+					<div class="front">
+						<div class="number">02</div>
+					</div>
+
+					<div class="back">
+						<div class="number">03</div>
+					</div>
+				</div>
+
+				<div class="flipper">
+					<div class="front">
+						<div class="number">01</div>
+					</div>
+
+					<div class="back">
+						<div class="number">02</div>
+					</div>
+				</div>
 			</div>
-			<div class="right"></div>
+
+			<div class="minute js-minutes"></div>
 		</div>
+
+        <button class="js-hour-button">hour</button>
+        <button class="js-minute-button">minute</button>
 	</div>
 
 	<script src="main.js"></script>

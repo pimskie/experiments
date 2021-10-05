@@ -17,65 +17,66 @@ body {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	flex-direction: column;
 }
 
 .clock {
-	width: 100%;
-	max-width: 62.5rem;
+	width: 500px;
 	aspect-ratio: 8 / 3;
 	perspective: 1000px;
 
-	border: 1px solid;
-
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 2rem;
-}
-
-.left,
-.right {
-	border: 1px solid;
-	position: relative;
-}
-
-.flip {
-	width: 100%;
-	height: 50%;
+	gap: 1rem;
 
 	perspective: 1000px;
 }
 
-.number {
+.hour,
+.minute {
 	position: relative;
-	width: 100%;
-	height: 100%;
+	transform-style: preserve-3d;
+}
 
-	transition: transform 0.3s ease-in;
+.flipper {
+	position: absolute;
+	width: 100%;
+	height: 50%;
+
+	transition: transform 0.3s cubic-bezier(.64,.24,.84,.47);
 	transform-style: preserve-3d;
 	transform-origin: left bottom;
-	transform: rotateX(180deg);
 
 	color: #fff;
-	background: #000;
-	border-radius: 5px;
+
+}
+
+.flipper.is-flipped {
+	transform: rotateX(-180deg) translateZ(-1px);
 }
 
 .front,
 .back {
 	position: absolute;
+	top: 0;
+	left: 0;
 	width: 100%;
-	height: 100%;
-	backface-visibility: hidden;
+	height: 99%;
 
+	font-size: 10rem;
 	text-align: center;
-	font-size: 30rem;
-	line-height: 0;
-}
+	backface-visibility: hidden;
+	background: linear-gradient(60deg, rgba(43,43,43,1) 3%, rgba(0,0,0,1) 79%);
+	border-radius: 5px;
 
-.front {
-	padding-top: 50%;
+	overflow: hidden;
 }
 
 .back {
 	transform: rotateX(180deg);
+}
+
+.back .number {
+	position: relative;
+	bottom: 100%;
 }

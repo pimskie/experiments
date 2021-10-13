@@ -2,11 +2,9 @@ const qs = s => document.querySelector(s);
 const qsa = s => document.querySelectorAll(s);
 
 const now = new Date();
-const hourNow = now.getHours() > 12
-	? now.getHours() - 12
-	: now.getHours();
-
+const hourNow = now.getHours();
 const minutesNow = now.getMinutes();
+const secondsNow = now.getSeconds();
 
 const getFlipperTemplate = (numFront, numBack) => `
 	<div class="flipper" data-number="${numFront}">
@@ -20,10 +18,10 @@ const getFlipperTemplate = (numFront, numBack) => `
 	</div>
 `;
 
-const getFlippers = (numCurrent, numMax, canBeZero = false) => {
+const getFlippers = (numCurrent, numMax) => {
 	const numComplete = `${numCurrent}`.padStart(2, '0');
 	const numCompleteNext = numCurrent === numMax
-		? canBeZero ? '00' : '01'
+		? '00'
 		: `${numCurrent + 1}`.padStart(2, '0');
 
 	return getFlipperTemplate(numComplete, numCompleteNext);
@@ -31,21 +29,26 @@ const getFlippers = (numCurrent, numMax, canBeZero = false) => {
 
 const hoursContainer = qs('.js-hours');
 const minutesContainer = qs('.js-minutes');
+const secondsContainer = qs('.js-seconds');
 
-const hourButton = qs('.js-hour-button');
-const minuteButton = qs('.js-minute-button');
-
-hoursContainer.innerHTML = new Array(12)
+hoursContainer.innerHTML = new Array(24)
 	.fill()
-	.map((_, index) => getFlippers(index + 1, 12))
+	.map((_, index) => getFlippers(index, 23))
 	.reverse()
 	.join('');
 
 minutesContainer.innerHTML = new Array(60)
 	.fill()
-	.map((_, index) => getFlippers(index, 59, true))
+	.map((_, index) => getFlippers(index, 59))
 	.reverse()
 	.join('');
+
+secondsContainer.innerHTML = new Array(60)
+	.fill()
+	.map((_, index) => getFlippers(index, 59))
+	.reverse()
+	.join('');
+
 
 const onTransitionEnd = (e) => {
 	const { target: currentFlipped } = e;
@@ -81,26 +84,34 @@ const flipClockPart = (part) => {
 
 const hourFlippers = [...hoursContainer.querySelectorAll('.flipper')].reverse();
 const minuteFlippers = [...minutesContainer.querySelectorAll('.flipper')].reverse();
+const secondFlippers = [...secondsContainer.querySelectorAll('.flipper')].reverse();
 
-for (let i = 0; i < hourNow - 2; i++) {
+for (let i = 0; i < hourNow - 1; i++) {
 	hourFlippers[i].parentNode.prepend(hourFlippers[i]);
 }
 
-for (let i = 0; i < minutesNow - 2; i++) {
+for (let i = 0; i < minutesNow - 1; i++) {
 	minuteFlippers[i].parentNode.prepend(minuteFlippers[i]);
 }
 
-hourButton.addEventListener('click', () => flipClockPart(hoursContainer));
-minuteButton.addEventListener('click', () => flipClockPart(minutesContainer));
+for (let i = 0; i < secondsNow - 1; i++) {
+	secondFlippers[i].parentNode.prepend(secondFlippers[i]);
+}
 
 flipClockPart(hoursContainer);
 flipClockPart(minutesContainer);
+flipClockPart(secondsContainer);
 
 setInterval(() => {
-	const currentMinuteFLipper = flipClockPart(minutesContainer);
-	const currentMinute = currentMinuteFLipper.dataset.number;
+	const currentSecondFlipper = flipClockPart(secondsContainer);
+	const currentSecond = currentSecondFlipper.dataset.number;
 
-	if (currentMinute === '59') {
-		flipClockPart(hoursContainer);
+	if (currentSecond === '59') {
+		const currentMinuteFlipper = flipClockPart(minutesContainer);
+		const currentMinute = currentMinuteFlipper.dataset.number;
+
+		if (currentMinute === '59') {
+			flipClockPart(hoursContainer);
+		}
 	}
-}, 500);
+}, 1000);

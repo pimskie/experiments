@@ -4,7 +4,7 @@ const qsa = s => document.querySelectorAll(s);
 const now = new Date();
 const hourNow = now.getHours() > 12
 	? now.getHours() - 12
-	: hours24;
+	: now.getHours();
 
 const minutesNow = now.getMinutes();
 

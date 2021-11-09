@@ -1,136 +1,87 @@
 const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 
-const wrappBBox = (vec, w, h) => {
+const wrappBBox = (vec, w, h, i) => {
 	if (vec.x < 0) {
 		vec.x = w;
+		vec.i += 1;
 	} else if (vec.x > w) {
 		vec.x = 0;
+		vec.i += 1;
+	}
+
+
+	if (vec.y < 0) {
+		vec.y = h;
+		vec.i += 1;
+	} else if (vec.y > h) {
+		vec.y = 0;
+		vec.i += 1;
 	}
 }
 
 const W = 350;
 const H = W;
 
-const COLS = 30;
+const COLS = 20;
 const ROWS = COLS;
+const COLW = W / COLS;
+const ROWH = H / ROWS;
 
-const NUM_LINES = 10;
+const NUM_LINES = 50;
 
 const simplex = new SimplexNoise(performance.now());
 const ctx = document.querySelector('.js-lines').getContext('2d');
 
+const trailer = {
+	x: 0,
+	y: H * 0.5,
+	v: 1,
+	i: 0,
+};
+
 ctx.canvas.width = W;
 ctx.canvas.height = H;
 
-const lines = new Array(NUM_LINES).fill().map((_, i) => ({
-	index: i,
-	x: 0,
-	y: (H / NUM_LINES) * (1 + i),
-	angle: 0,
-	velocity: 0.5 + (Math.random() * 0.5),
-}));
+const getNoiseValue = (x, y, i = 1) => {
+	const scale = 0.07;
+
+	return simplex.noise3D(x * scale, y * scale, i * 0.1);
+};
+
 
 const clear = () => {
 	ctx.clearRect(0, 0, W, H);
 };
 
-const drawGrid = () => {
-	ctx.strokeStyle = '#aaa';
-	ctx.lineWidth = 1;
-
-	for (let i = 1; i < COLS; i++) {
-		const x = (W / COLS) * i;
-
-		ctx.beginPath();
-		ctx.moveTo(x, 0);
-		ctx.lineTo(x, H);
-		ctx.stroke();
-		ctx.closePath();
-	}
-
-	for (let i = 1; i < ROWS; i++) {
-		const y = (H / ROWS) * i;
-
-		ctx.beginPath();
-		ctx.moveTo(0, y);
-		ctx.lineTo(W, y);
-		ctx.stroke();
-		ctx.closePath();
-	}
-};
-
-const drawNoiseVector = (x, y, angle) => {
-	const length = (W / COLS) / 2;
-
-	const endX = x + (Math.cos(angle) * length);
-	const endY = y + (Math.sin(angle) * length);
-
-	ctx.lineWidth = 1;
-	ctx.beginPath();
-	ctx.moveTo(x, y);
-	ctx.lineTo(endX, endY);
-	ctx.stroke();
-	ctx.closePath();
-};
-
-const drawNoise = () => {
-	const colWidth = W / COLS;
-	const rowHeight = H / ROWS;
-
-
-	for (let i = 0; i < COLS * ROWS; i++) {
-		const col = i % COLS;
-		const row = Math.floor(i / COLS);
-
-		const x = col * colWidth + (colWidth / 2);
-		const y = row * rowHeight + (rowHeight / 2);
-
-		const noise = getNoiseValue(x, y);
-		const angle = noise * (Math.PI / 2);
-
-		drawNoiseVector(x, y, angle);
-	}
-};
-
-const getNoiseValue = (x, y, i = 1) => {
-	const noiseScaleX = 0.009;
-	const noiseScaleY = 0.001;
-
-	const noise = simplex.noise3D(x * noiseScaleX, y * noiseScaleY, i);
-
-	return noise;
-};
 
 const drawLines = () => {
-	lines.forEach((line) => {
-		const lineCurrent = { ...line };
-		const noise = getNoiseValue(lineCurrent.x, lineCurrent.y);
-		const angle = (Math.PI / 2) * noise;
-		const lightness = map(noise, -1, 1, 30, 200);
-		const lineWidth = map(noise, -1, 1, 1, 4);
+	const DETAIL = 50;
+	const spaceX = W / DETAIL;
+	const spaceY = H / NUM_LINES;
 
-		line.angle = angle;
-		line.x += line.velocity;
-		line.y += Math.sin(line.angle) * line.velocity;
-
-		ctx.strokeStyle = `rgb(${lightness}, ${lightness}, ${lightness})`;
-		ctx.lineWidth = lineWidth;
+	for (let y = 0; y < NUM_LINES; y++) {
+		const posY = (y * spaceY) + spaceY;
 
 		ctx.beginPath();
-		ctx.moveTo(lineCurrent.x, lineCurrent.y);
-		ctx.lineTo(line.x, line.y);
+
+		for (x = 0; x < DETAIL; x++) {
+			const posX = (x * spaceX) + spaceX;
+			const ampY = getNoiseValue(x, y) * 50;
+
+			if (x === 0) {
+				ctx.moveTo(posX, posY + ampY);
+			} else {
+				ctx.lineTo(posX, posY + ampY);
+			}
+		}
 
 		ctx.stroke();
 		ctx.closePath();
-
-		wrappBBox(line, W, H);
-	});
+	}
 };
 
 const draw = () => {
-	// clear();
-	// drawGrid();
-	// drawNoise();
+	clear();
 	drawLines();
 
 	requestAnimationFrame(draw);

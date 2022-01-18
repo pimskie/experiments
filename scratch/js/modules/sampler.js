@@ -2,13 +2,12 @@ class Sampler {
 	constructor() {
 		this.audioContext = new AudioContext();
 		this.audioBuffer = null;
+		this.audioBufferReversed = null;
 		this.audioSource = null;
 
 		this.timeStarted = 0;
-		this.timePaused = 0;
 		this.timePausedAt = 0;
-
-		this.isPaused = false;
+		this.duration = 0;
 	}
 
 	async getArrayBufferFromUrl(audioUrl) {
@@ -27,8 +26,22 @@ class Sampler {
 
 	async loadTrack(audioUrl) {
 		this.audioBuffer = await this.getAudioBuffer(audioUrl);
+		this.audioBufferReversed = this.getReversedAudioBuffer(this.audioBuffer);
 
-		console.log(this.audioBuffer)
+		this.duration = this.audioBuffer.duration;
+	}
+
+	getReversedAudioBuffer(audioBuffer) {
+		const bufferArray = audioBuffer
+			.getChannelData(0)
+			.slice()
+			.reverse();
+
+		const audioBufferReversed = this.audioContext.createBuffer(1, audioBuffer.length, audioBuffer.sampleRate);
+
+		audioBufferReversed.getChannelData(0).set(bufferArray);
+
+		return audioBufferReversed;
 	}
 
 	play() {
@@ -50,7 +63,6 @@ class Sampler {
 
 	pause() {
 		this.timePausedAt = Date.now() - this.timeStarted;
-		this.isPaused = true;
 
 		this.audioSource.stop();
 	}

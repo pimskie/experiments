@@ -1,0 +1,52 @@
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+.layout {
+	display: flex;
+	flex-direction: column;
+}
+
+.scratch-container {
+	width: 100%;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 0 0 2rem;
+}
+
+
+.ui-container {
+	display: flex;
+	justify-content: center;
+}
+
+.disc {
+	--dim: 300px;
+
+	position: relative;
+
+	width: var(--dim);
+	height: var(--dim);
+
+	border: 4px solid black;
+	border-radius: 50%;
+}
+
+.que {
+	--dim: 10px;
+
+	position: absolute;
+
+	top: 50%;
+	right: 30px;
+
+	width: var(--dim);
+	height: var(--dim);
+
+	background: #000;
+	border-radius: 50%;
+}

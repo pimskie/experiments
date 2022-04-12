@@ -1,6 +1,5 @@
 const getPixelIndex = (x, y, imageData) => (~~x + ~~y * imageData.width) * 4;
 
-const simplex = new SimplexNoise();
 const ctx = document.querySelector('.js-canvas').getContext('2d');
 const ctxGhost = document.createElement('canvas').getContext('2d');
 
@@ -74,8 +73,7 @@ const drawSegment = (painter, ctxDest) => {
 
 const draw = () => {
 	const { width, height } = ctx.canvas;
-	const smoothness = 3;
-	const minRadius = 3;
+	const smoothness = 5;
 
 	painters.forEach((painter) => {
 		painter.position.x += Math.cos(painter.angle) * painter.speed;
@@ -88,8 +86,9 @@ const draw = () => {
 		painter.color.b += (color.b - painter.color.b) / smoothness;
 
 		const total = color.r + color.g + color.b;
-		const percent = total / (255 * 3);
-		const radius = minRadius
+		const percent = 1- (total / (255 * 3));
+
+		painter.radius = 1 + (3 * percent);
 
 		drawSegment(painter, ctx);
 
@@ -120,7 +119,7 @@ const start = async () => {
 	const image = await loadImage();
 
 	const { width, height } = image;
-	const numPainters = 290;
+	const numPainters = 300;
 
 	setupCanvas(width, height);
 
@@ -129,6 +128,10 @@ const start = async () => {
 	painters = new Array(numPainters).fill().map((_, i) => ({
 		...getDefaultPainter(width, height),
 	}));
+
+	ctx.canvas.addEventListener('click', () => {
+		ctx.clearRect(0, 0, width, height);
+	});
 
 	draw();
 };

@@ -8,8 +8,13 @@ const ROWS = COLS;
 const SPACEX = W / COLS;
 const SPACEY = H / ROWS;
 
-const NUM_LINES = 30;
-const COLORS = ['#F1DDBF', '#525E75', '#78938A', '#92BA92'];
+const NUM_LINES = 10;
+const COLORS = [
+	['#F1DDBF', '#525E75', '#78938A', '#92BA92'],
+	['#e63946', '#f1faee', '#a8dadc', '#457b9d', '#1d3557'],
+	['#ccd5ae', '#e9edc9', '#fefae0', '#faedcd', '#d4a373'],
+	['#3A3845', '#F7CCAC', '#C69B7B', '#826F66'],
+];
 
 const simplex =  new SimplexNoise(Math.random() * 10000);
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -22,95 +27,92 @@ ctx.canvas.width = W;
 ctx.canvas.height = H;
 
 const generateLines = () => {
+	const palette = pick(COLORS);
+
 	return new Array(NUM_LINES).fill().map((_, i) => ({
-		i,
 		v: 2,
-		color: pick(COLORS),
-		points: [{
-			x: 0,
-			y:  (H / NUM_LINES) * (i + 1),
-		}],
+		color: pick(palette),
+		x: 0,
+		y:  (H / NUM_LINES) * (i + 1),
 	}));
 };
-const getNoiseValue = (x, y, phase = 1) => {
-	const scale = 0.05;
-	const noisePhase = phase * 0.0005;
+
+const getNoiseValue = (x, y) => {
+	const scale = 0.02;
+	const noisePhase = performance.now() * 0.0005;
 
 	return simplex.noise3D(x * scale, y * scale, noisePhase);
 };
 
 const clear = () => ctx.clearRect(0, 0, W, H);
 
-const drawForceField = () => {
-	for (let i = 0; i < COLS * ROWS; i++) {
-		const col = (i % COLS);
-		const row = Math.floor(i / ROWS);
-
-		const noise = getNoiseValue(col, row, phase);
-		const angle = noise * (Math.PI / 2);
-
-		const x = col * SPACEX;
-		const y = row * SPACEY;
-
-		ctx.beginPath();
-		ctx.moveTo(x, y);
-		ctx.lineTo(x + (Math.cos(angle) * 6), y + (Math.sin(angle) * 6));
-		ctx.stroke();
-		ctx.closePath();
-	}
-};
-
-const drawLine = (line, index) => {
-	const { points } = line;
-
-	const pointFirst = points[0];
-	let pointLast = points[points.length - 1];
-
-	const col = Math.ceil(pointLast.x / SPACEX);
-	const row = Math.ceil(pointLast.y / SPACEY);
-	const noise = getNoiseValue(col, row, phase);
-
-	const angle = noise * (Math.PI / 2);
-
-	points.push({
-		x: pointLast.x + line.v,
-		y: pointLast.y + (Math.sin(angle) * line.v),
-	});
+const drawFill = (from, to, color) => {
+	ctx.fillStyle = color;
+	ctx.strokeStyle = color;
+	ctx.lineWidth = 2;
 
 	ctx.beginPath();
-	ctx.fillStyle = line.color;
-	ctx.moveTo(pointFirst.x, pointFirst.y);
-
-	let i;
-	for (i = 1; i < points.length; i++) {
-		ctx.lineTo(points[i].x, points[i].y);
-	}
-
-	ctx.lineTo(points[i - 1].x, H);
-	ctx.lineTo(0, H);
-	ctx.lineTo(pointFirst.x, pointFirst.y);
-
-	ctx.fill();
+	ctx.moveTo(from.x, from.y);
+	ctx.lineTo(to.x, to.y);
+	ctx.lineTo(to.x, H);
+	ctx.lineTo(from.x, H);
+	ctx.lineTo(from.x, from.y);
 	ctx.closePath();
+	ctx.fill();
+	ctx.stroke();
 };
 
-const draw = () => {
-	clear();
+const drawShape = (line, index) => {
+	const { x, y } = line;
 
-	lines.forEach(drawLine);
+	const col = Math.ceil(x / SPACEX);
+	const row = Math.ceil(y / SPACEY);
+	const noise = getNoiseValue(col, row);
+
+	const angle = noise * (Math.PI * 0.5);
+	const nextX = x + line.v;
+	const nextY = y + (Math.sin(angle) * line.v);
+
+	const outlineWidth = 5;
+
+	drawFill(
+		{ x, y: y - outlineWidth },
+		{ x: nextX, y: nextY - outlineWidth },
+		'#000',
+	);
+
+	drawFill(
+		{ x, y },
+		{ x: nextX, y: nextY },
+		line.color,
+	);
+
+	line.x = nextX;
+	line.y = nextY;
+
+	if (line.x > W) {
+		ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+		ctx.fillRect(0, 0, W, H);
+
+		line.x = 0;
+		line.y = (H / NUM_LINES) * (index + 1);
+	}
+};
+
+const loop = () => {
+	lines.forEach(drawShape);
 
 	phase += 1;
 
-	requestAnimationFrame(draw);
+	requestAnimationFrame(loop);
 };
 
 ctx.canvas.addEventListener('click', () => {
-	phase = Math.random() * 10000;
-
+	clear();
 	lines = generateLines();
 
 });
 
 lines = generateLines();
 
-draw();
+loop();

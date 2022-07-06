@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+
+            overflow: hidden;
+        }
+
+        @property --rotation {
+            syntax: "<number>";
+            initial-value: 0;
+            inherits: true;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+
+            perspective: 700px;
+        }
+
+        .flake {
+            --_width: 300px;
+            --_height: calc(var(--_width) * 0.5);
+
+            --_positionX: var(--positionX, 50%);
+            --_positionY: var(--positionY, 50%);
+
+            --_hue: calc(var(--hue, 200) * 1deg);
+            --_rotation: calc(var(--rotation, 180) * 1deg);
+
+            transform-style: preserve-3d;
+
+            position: absolute;
+            left: var(--_positionX);
+            top: var(--_positionY);
+
+            width: var(--_width);
+            height: var(--_height);
+
+            margin-left: calc(var(--_width) * -0.5);
+            margin-top: calc(var(--_height) * -0.5);
+
+            background: hsl(var(--_hue), 100%, 50%);
+
+            transform: rotate3d(1, 1, 1, var(--_rotation));
+        }
+    </style>
+</head>
+<body>
+    <div class="container js-container">
+        <div class="flock"></div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

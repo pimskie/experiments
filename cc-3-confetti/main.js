@@ -11,7 +11,7 @@ const createFlake = () => {
 	container.appendChild(flake);
 
 	const maxDepth = 50;
-	const depth = -50 + (100 * Math.random());
+	const depth = -100 + (200 * Math.random());
 	const lightness = (depth / maxDepth) * 50;
 
 	const animationFrames = () => [
@@ -26,8 +26,9 @@ const createFlake = () => {
 			 '--positionX': -50 + (100 * Math.random()),
 			 '--positionY': -50 + (100 * Math.random()),
 			 '--positionZ': depth,
-			 '--lightness': 50 - lightness, //lightness,
-	},
+			 '--lightness': 50 - lightness,
+			 '--opacity': 0,
+		},
 	  ];
 
 	  const animationTiming = {
@@ -42,9 +43,7 @@ const createFlake = () => {
 };
 
  const party = (e) => {
-	// const { pageX: mouseX, pageY: mouseY } = e;
-
-	for (let i = 0; i < 30; i++) {
+	for (let i = 0; i < 40; i++) {
 		createFlake();
 	}
 };

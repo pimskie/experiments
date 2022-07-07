@@ -50,6 +50,12 @@
             initial-value: 0;
         }
 
+        @property --opacity {
+            syntax: '<number>';
+            inherits: false;
+            initial-value: 1;
+        }
+
 
         .container {
             width: 100vw;
@@ -85,6 +91,8 @@
             margin-top: calc(var(--_height) * -0.5);
 
             background: hsl(var(--_hue), 100%, var(--_lightness));
+
+            opacity: var(--opacity);
 
             transform: translate3d(var(--_positionX), var(--_positionY), var(--_positionZ)) rotate3d(1, 1, 1, var(--_rotation));
 

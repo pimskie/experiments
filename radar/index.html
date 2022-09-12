@@ -7,31 +7,23 @@
         <title>Document</title>
 
         <style>
-            @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@200&display=swap");
-
-            html,
-            body {
+            body,
+            html {
                 margin: 0;
                 padding: 0;
             }
 
             body {
-                font-family: "Montserrat", sans-serif;
-                font-size: 0.9rem;
-                color: #3c3c3c;
-            }
-
-            a:hover {
-                text-decoration: none;
+                min-height: 100vh;
             }
 
             .container {
                 width: 100vw;
                 height: 100vh;
+
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                flex-direction: column;
             }
 
             .canvas {
@@ -43,10 +35,9 @@
     </head>
     <body>
         <div class="container">
-            <canvas class="canvas js-lines"></canvas>
+            <canvas class="canvas js-canvas"></canvas>
         </div>
 
-        <script src="https://unpkg.com/simplex-noise@2.4.0/simplex-noise.js"></script>
         <script src="main.js"></script>
     </body>
 </html>

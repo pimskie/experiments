@@ -23,7 +23,7 @@ const setupCanvas = (width, height) => {
 };
 
 
-const drawCircle = (scale = 1) => {
+const drawCircle = (scale = 1, frame = 1) => {
 	const detail = 100;
 	const step = TAU / detail;
 	const scaleInverse = 1 - scale;
@@ -32,7 +32,7 @@ const drawCircle = (scale = 1) => {
 	ctx.translate((W * 0.5) + (mousePosition.x * scaleInverse) * 0.5, H * 0.5 + (mousePosition.y * scaleInverse) * 0.5);
 	ctx.beginPath();
 	ctx.strokeStyle = `rgba(0, 0, 0, ${scaleInverse})`;
-	ctx.fillStyle = `hsla(210, 100%, 35%, 0.02)`;
+	ctx.fillStyle = `hsla(100, 100%, 35%, 0.02)`;
 
 	for (let i = 0; i < detail; i++) {
 		const angle = i * step;
@@ -44,8 +44,8 @@ const drawCircle = (scale = 1) => {
 		const mainRadiusIncrease = noiseValue * 100;
 		const circleRadius = (R + mainRadiusIncrease) * scale;
 
-		const xAltered = Math.cos(angle) * circleRadius;
-		const yAltered = Math.sin(angle) * circleRadius;
+		const xAltered = Math.sin(angle) * circleRadius;
+		const yAltered = Math.cos(angle) * circleRadius;
 
 		ctx.lineTo(xAltered, yAltered);
 	}
@@ -64,7 +64,7 @@ const loop = () => {
 	for (let i = 0; i < count; i++) {
 		const scale = 1 - (i / count);
 
-		drawCircle(scale);
+		drawCircle(scale, frame);
 	}
 
 	frame += 1;

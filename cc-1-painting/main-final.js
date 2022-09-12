@@ -11,7 +11,7 @@ let imageData;
 
 const ctx = document.querySelector('.js-lines').getContext('2d');
 const ctxGhost = document.createElement('canvas').getContext('2d');
-const imageUrl = 'https://pimskie.dev/public/assets/portrait1.jpg';
+const imageUrl = './portrait1.jpg';
 
 const getColor = ({ x, y },) => {
 	const pixelIndex = getPixelIndex(x, y, imageData );
@@ -55,18 +55,18 @@ const getImageData = (ctxDest, image) => {
 	return ctxDest.getImageData(0, 0, W, H);
 };
 
-const drawStroke = () => {
+const draw = () => {
 	const { x, y } = getPosition();
 	const color = getColor({ x, y });
 	const colorDarken = Math.random() * 30;
 
-	const noiseValue = getNoiseValue({ x, y }, 0.008);
+	const noiseValue = getNoiseValue({ x, y }, 0.003);
 	const angle = TAU * noiseValue;
 
 	const lightness = getLightness(color);
 
 	const lengthMin = 10;
-	const lengthVariation = 10;
+	const lengthVariation = 20;
 	const length = lengthMin + (lengthVariation * lightness);
 
 	ctx.save();
@@ -87,7 +87,7 @@ const clear = () => ctx.clearRect(0, 0, W, H);
 
 const loop = () => {
 	for (let i = 0; i < 40; i++) {
-		drawStroke();
+		draw();
 	}
 
 	requestAnimationFrame(loop);
@@ -100,11 +100,8 @@ const start = async () => {
 
 	imageData = getImageData(ctxGhost, image);
 
-	ctx.canvas.addEventListener('click', () => {
-		reset();
-	});
+	ctx.canvas.addEventListener('click', reset);
 
-	reset();
 	loop();
 };
 

@@ -26,10 +26,14 @@ const clear = () => {
 
 const draw = () => {
 	ctx.save();
-	ctx.translate(MX, MY);
+
+	const fill = ctx.createRadialGradient(MX, MY, 10, MX, MY, radius);
+
+	fill.addColorStop(0, "rgba(200, 50, 50, 0.2)");
+	fill.addColorStop(1, "rgba(160, 0, 0, 0.2)");
 
 	ctx.beginPath();
-	ctx.fillStyle = "rgba(200, 50, 50, 0.2)";
+	ctx.fillStyle = fill;
 
 	for (let i = 0; i < detail; i++) {
 		const angle = angleStep * i;
@@ -44,7 +48,7 @@ const draw = () => {
 		const newX = Math.cos(angle) * newRadius;
 		const newY = Math.sin(angle) * newRadius;
 
-		ctx.lineTo(newX, newY);
+		ctx.lineTo(MX + newX, MY + newY);
 	}
 
 	ctx.closePath();

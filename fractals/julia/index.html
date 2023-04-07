@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Julia Set in JavaScript</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const map = (value, start1, stop1, start2, stop2) => ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+        const randomBetween = (min, max) => Math.random() * (max - min) + min;
+
+
+        // Bepaal de afmetingen van het canvas
+        const canvas = document.getElementById('canvas');
+        const width = canvas.width = 250;
+        const height = canvas.height = 250;
+
+        // Bepaal de afmetingen van het complexe vlak dat we willen plotten
+        const xmin = -1;
+        const xmax = 1;
+        const ymin = -1;
+        const ymax = 1;
+
+        const colors = [
+            '#fff',
+            '#8adf7a',
+            '#cf7adf',
+            '#e34242',
+        ];
+
+        // Maak een 2D tekencontext voor het canvas
+        const ctx = canvas.getContext('2d');
+
+        const draw = () => {
+            const colorAngle =  180 + (360 * Math.cos(performance.now() * 0.0001));
+
+            const then = performance.now();
+            const a = Math.cos(then * 0.001) * 0.01;
+            const b = Math.sin(then * 0.001) * 0.1;
+
+            // Kies een complex getal C
+            const C = { re: 0.33 + b, im: 0.5 + a };
+
+            // Loop door elk pixel op het canvas en bepaal het bijbehorende complexe getal
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    const Z = {
+                        re: xmin + (x / width) * (xmax - xmin),
+                        im: ymin + (y / height) * (ymax - ymin)
+                    };
+
+                    // Voer het iteratieve proces uit
+                    let i;
+                    for (i = 0; i < 100; i++) {
+                        const Znew = {
+                            re: Z.re * Z.re - Z.im * Z.im + C.re,
+                            im: 2 * Z.re * Z.im + C.im
+                        };
+
+                        if (Znew.re * Znew.re + Znew.im * Znew.im > 10) {
+                            break;
+                        }
+
+                        Z.re = Znew.re;
+                        Z.im = Znew.im;
+                    }
+
+                    // Kleur het pixel op basis van het aantal iteraties dat nodig was om de limiet te bereiken
+                    const color = `hsl(${i * colorAngle / 100}, 100%, 50%)`;
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+
+            const now = performance.now();
+
+            requestAnimationFrame(draw);
+        };
+
+        draw();
+    </script>
+</body>
+</html>

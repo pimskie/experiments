@@ -1,0 +1,31 @@
+:root {
+	--position-x: 50;
+	--position-y: 50;
+	--rotation: 50;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	min-width: 100vw;
+	min-height: 100vh;
+}
+
+.hand {
+	--_position-x: calc(var(--position-x) * 1px);
+	--_position-y: calc(var(--position-y) * 1px);
+	--_rotation: calc(var(--rotation) * 1rad);
+
+	position: absolute;
+	font-size: 3rem;
+
+	left: var(--_position-x);
+	top: var(--_position-y);
+
+	transform-origin: center bottom;
+	transform: translate(-50%, -100%) rotate(var(--_rotation));
+}

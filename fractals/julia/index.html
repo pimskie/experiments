@@ -13,8 +13,8 @@
 
         // Bepaal de afmetingen van het canvas
         const canvas = document.getElementById('canvas');
-        const width = canvas.width = 250;
-        const height = canvas.height = 250;
+        const width = canvas.width = 20;
+        const height = canvas.height = 20;
 
         // Bepaal de afmetingen van het complexe vlak dat we willen plotten
         const xmin = -1;
@@ -50,6 +50,8 @@
                         im: ymin + (y / height) * (ymax - ymin)
                     };
 
+                    console.log(Z)
+
                     // Voer het iteratieve proces uit
                     let i;
                     for (i = 0; i < 100; i++) {
@@ -75,7 +77,7 @@
 
             const now = performance.now();
 
-            requestAnimationFrame(draw);
+            // requestAnimationFrame(draw);
         };
 
         draw();

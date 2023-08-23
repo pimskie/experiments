@@ -1,11 +1,8 @@
 // https://medium.com/@hemalatha.psna/implementation-of-poisson-disc-sampling-in-javascript-17665e406ce1
 //  Robert Bridson, called Fast Poisson Disk Sampling in Arbitrary Dimensions
 // https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
-// Photo by <a href="https://unsplash.com/@pradologue?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Prado</a> on <a href="https://unsplash.com/photos/S89gVhM67lU?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
 // https://unsplash.com/photos/S89gVhM67lU
-// https://unsplash.com/photos/a-colorful-parrot-sitting-on-top-of-a-tree-branch-ArQXu1jXdpE
 
-// https://pimskie.dev/public/assets/turban1-resized.jpg
 const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
 const randomBetween = (min, max) => Math.random() * (max - min) + min;
 const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec1.y);
@@ -85,19 +82,18 @@ class Poisson {
 	addPointToGrid(point) {
 		const { col, row } = this.getGridPosition(point);
 
-		try {
-			this.grid[col][row] = point;
-		} catch(e) {
-				// console.log('error', col, this.cols)
-		}
+		this.grid[col][row] = point;
 
 		this.activeList.push(point);
 	};
 
 	tryAdd() {
 		const point = randomArrayValue(this.activeList);
-
 		const validPoints = [];
+
+		if (!point) {
+			return false;
+		}
 
 		for (let i = 0; i < this.k; i++) {
 			const angle = Math.random() * PI2;
@@ -159,15 +155,21 @@ class Visual {
 		const pixelIndex = this.getPixelIndex(position);
 
 		const rgb = [
-				this.imageData[pixelIndex],
-				this.imageData[pixelIndex + 1],
-				this.imageData[pixelIndex + 2],
-			];
+			this.imageData[pixelIndex],
+			this.imageData[pixelIndex + 1],
+			this.imageData[pixelIndex + 2],
+		];
+
+		const lightness = rgb[0] + rgb[1] + rgb[2];
+		const lightnessMax = 255 * 3;
+		const lightnessFraction = 1 - (lightness / lightnessMax);
+
+		const radiusLightness = 0.5 + (3 * lightnessFraction);
 
 		this.ctx.save();
 		this.ctx.beginPath();
-		this.ctx.fillStyle = `rgb(${rgb.join(', ')})`;
-		this.ctx.arc((position.x), (position.y), radius, 0, PI2);
+		this.ctx.fillStyle = `rgba(${rgb.join(', ')})`;
+		this.ctx.arc((position.x), (position.y), radiusLightness, 0, PI2);
 
 		this.ctx.closePath();
 		this.ctx.fill();
@@ -195,7 +197,7 @@ const start = async () => {
 	cancelAnimationFrame(rafId);
 
 	const visual = new Visual(ctx);
-	await visual.init('https://pimskie.dev/public/assets/turban1-resized-2.jpg');
+	await visual.init('https://pimskie.dev/public/assets/turban1-resized.jpg');
 
 	const { width, height } = visual;
 
@@ -216,7 +218,7 @@ const start = async () => {
 	})
 
 	const loop = () => {
-		for (let i = 0; i < 10; i++) {
+		for (let i = 0; i < 100; i++) {
 			const points = poisson.tryAdd();
 
 			if (points) {

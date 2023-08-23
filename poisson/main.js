@@ -15,9 +15,9 @@ const PI2 = Math.PI * 2;
 
 const ctx = document.querySelector('#canvas').getContext('2d');
 class Poisson {
-	constructor() {
-		this.r = 5;
-		this.k  = 30;
+	constructor(r, k = 30) {
+		this.r = r;
+		this.k  = k;
 		this.cellSize = Math.floor(this.r / Math.sqrt(2));
 
 		this.grid = [];
@@ -97,7 +97,7 @@ class Poisson {
 	tryAdd() {
 		const point = randomArrayValue(this.activeList);
 
-		let hasPoint = false;
+		const validPoints = [];
 
 		for (let i = 0; i < this.k; i++) {
 			const angle = Math.random() * PI2;
@@ -111,15 +111,17 @@ class Poisson {
 			if (this.isPointValid(point2)) {
 				this.addPointToGrid(point2);
 
-				return point2;
+				validPoints.push(point2);
 			}
 		}
 
-		if (!hasPoint) {
+		if (!validPoints.length) {
 			this.activeList = this.activeList.filter(p => p !== point);
 
 			return false;
 		}
+
+		return validPoints;
 	}
 }
 
@@ -153,8 +155,7 @@ class Visual {
 		return  (~~x + ~~y * this.width) * 4;
 	};
 
-	drawPoint(position) {
-		const radius = 2;
+	drawPoint(position, radius = 2) {
 		const pixelIndex = this.getPixelIndex(position);
 
 		const rgb = [
@@ -188,34 +189,49 @@ class Visual {
 	}
 }
 
+let rafId = null;
+
 const start = async () => {
-	let rafId = null;
+	cancelAnimationFrame(rafId);
 
 	const visual = new Visual(ctx);
-	await visual.init('https://pimskie.dev/public/assets/turban1-resized.jpg');
+	await visual.init('https://pimskie.dev/public/assets/turban1-resized-2.jpg');
 
-	const poisson = new Poisson();
-	poisson.init(visual.width, visual.height)
+	const { width, height } = visual;
 
-	const pointInit = {
-		x: visual.width >> 1,
-		y: visual.height >> 1,
-	};
+	const poisson = new Poisson(4);
+	poisson.init(width, height);
 
-	poisson.addPointToGrid(pointInit);
-	visual.drawPoint(pointInit);
+	const pointsStart = [
+		{ x: 50, y: 50 },
+		{ x: width - 50, y: 50 },
+		{ x: width - 50, y: height - 50 },
+		{ x: 50, y: height - 50 },
+		{ x: width * 0.5, y: height * 0.5 },
+	];
+
+	pointsStart.forEach((p) =>  {
+		poisson.addPointToGrid(p);
+		visual.drawPoint(p);
+	})
 
 	const loop = () => {
-		const pointB = poisson.tryAdd();
+		for (let i = 0; i < 10; i++) {
+			const points = poisson.tryAdd();
 
-		if (pointB) {
-			visual.drawPoint(pointB);
+			if (points) {
+				points.forEach(p => visual.drawPoint(p, 2));
+			}
 		}
 
-		rafId = requestAnimationFrame(loop);
+		if (poisson.activeList.length) {
+			rafId = requestAnimationFrame(loop);
+		}
 	};
 
 	loop();
 };
 
 start();
+
+ctx.canvas.addEventListener('click', start);

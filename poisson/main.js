@@ -6,168 +6,216 @@
 // https://unsplash.com/photos/a-colorful-parrot-sitting-on-top-of-a-tree-branch-ArQXu1jXdpE
 
 // https://pimskie.dev/public/assets/turban1-resized.jpg
-const DIMENSION = 500;
-const PI2 = Math.PI * 2;
-
 const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
 const randomBetween = (min, max) => Math.random() * (max - min) + min;
 const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec1.y);
+const getPixelIndex = ({ x, y }, imageWidth) => (~~x + ~~y * imageWidth) * 4;
 
-const getCellRowByPosition = ({ x, y }) => ({
-	x: Math.floor(x / cellSize),
-	y: Math.floor(y / cellSize),
-});
+const PI2 = Math.PI * 2;
 
+const ctx = document.querySelector('#canvas').getContext('2d');
+class Poisson {
+	constructor() {
+		this.r = 5;
+		this.k  = 30;
+		this.cellSize = Math.floor(this.r / Math.sqrt(2));
 
-const drawPoint = (position) => {
-	const radius = 2;
+		this.grid = [];
+		this.activeList = [];
 
-	ctx.save();
-	ctx.beginPath();
-	ctx.fillStyle = `hsl(${hue}, 50%, 50%)`;
-	ctx.arc((position.x), (position.y), radius, 0, PI2);
+		this.width = 0;
+		this.height = 0;
 
-	ctx.closePath();
-	ctx.fill();
-	ctx.restore();
-};
+		this.cols = 0;
+		this.rows = 0;
+	}
 
-const drawLine = (from, to) => {
-	ctx.save();
-	ctx.strokeStyle = '#999';
-	ctx.beginPath();
-	ctx.moveTo(from.x, from.y)
-	ctx.lineTo(to.x, to.y);
-	ctx.stroke();
-	ctx.closePath();
-	ctx.restore();
-};
+	init(width, height) {
+		this.width = width;
+		this.height = height;
 
-const ctx = document
-	.querySelector('#canvas')
-	.getContext('2d');
+		this.cols = Math.ceil(width / this.cellSize) + 1;
+		this.rows = Math.ceil(height / this.cellSize) + 1;
 
-ctx.canvas.width = ctx.canvas.height = DIMENSION;
+		this.grid = new Array(this.cols).fill(-1).map(() => new Array(this.rows).fill(-1));
+	}
 
-const r = 10;
-const k = 30;
-const cellSize = Math.floor(r / Math.sqrt(2));
+	isPointFarEnough = (point) => {
+		const { col, row } = this.getGridPosition(point);
 
-const cols = Math.ceil(DIMENSION / cellSize) + 1;
-const rows = Math.ceil(DIMENSION / cellSize) + 1;
+		const xmin = Math.max(col - 1, 0);
+		const xmax = Math.min(col + 1, this.cols - 1);
+		const ymin = Math.max(row - 1, 0);
+		const ymax = Math.min(row + 1, this.rows - 1);
 
-const grid = new Array(cols).fill(-1).map(() => new Array(rows).fill(-1));
+		for (let x = xmin; x <= xmax; x++ ) {
+			for (let y = ymin; y <= ymax; y++ ) {
+				const cell = this.grid[x][y];
 
-let activeList = new Array();
+				if (cell !== -1) {
+					const distance = distanceBetween(cell, point);
 
-let hue = 0;
-
-const getGridPosition = (point) => ({
-	col: Math.floor(point.x / cellSize),
-	row: Math.floor(point.y / cellSize),
-});
-
-const addPointToGrid = (point) => {
-	const { col, row } = getGridPosition(point);
-
-  grid[col][row] = point;
-};
-
-const p1 = {
-	x: Math.random() * DIMENSION,
-	y: Math.random() * DIMENSION,
-};
-
-drawPoint(p1);
-addPointToGrid(p1);
-activeList.push(p1);
-
-const isFarEnough = (point) => {
-	const { col, row } = getGridPosition(point);
-
-	const xmin = Math.max(col - 1, 0);
-	const xmax = Math.min(col + 1, cols - 1);
-	const ymin = Math.max(row - 1, 0);
-	const ymax = Math.min(row + 1, rows - 1);
-
-	for (let x = xmin; x <= xmax; x++ ) {
-		for (let y = ymin; y <= ymax; y++ ) {
-			const cell = grid[x][y];
-
-			if (cell !== -1) {
-				const distance = distanceBetween(cell, point);
-
-				if (distance < r) {
-					return false;
+					if (distance < this.r) {
+						return false;
+					}
 				}
 			}
 		}
+
+		return true;
+	};
+
+	isPointValid(point) {
+		if (point.x < 0 || point.x > this.width || point.y < 0 || point.y > this.height) {
+			return false;
+		}
+
+		if (!this.isPointFarEnough(point)) {
+			return false;
+		}
+
+		return true;
 	}
 
-	return true;
-};
+	getGridPosition = (point) => ({
+		col: Math.floor(point.x / this.cellSize),
+		row: Math.floor(point.y / this.cellSize),
+	});
 
-const isValidPoint = (point) => {
-	if (point.x < 0 || point.x > DIMENSION || point.y < 0 || point.y > DIMENSION) {
-		return false;
-	}
+	addPointToGrid(point) {
+		const { col, row } = this.getGridPosition(point);
 
-	if (!isFarEnough(point)) {
-		return false;
-	}
+		try {
+			this.grid[col][row] = point;
+		} catch(e) {
+				// console.log('error', col, this.cols)
+		}
 
-	return true;
-};
+		this.activeList.push(point);
+	};
 
-const poisson = (point) => {
-	let hasPoint = false;
+	tryAdd() {
+		const point = randomArrayValue(this.activeList);
 
-	for (let i = 0; i < k; i++) {
-		const angle = Math.random() * PI2;
-		const length = randomBetween(r, r * 2);
+		let hasPoint = false;
 
-		const point2 = {
-			x: point.x + (Math.cos(angle) * length),
-			y: point.y + (Math.sin(angle) * length),
-		};
+		for (let i = 0; i < this.k; i++) {
+			const angle = Math.random() * PI2;
+			const length = randomBetween(this.r, this.r * 2);
 
-		if (isValidPoint(point2)) {
-			hue += 0.1;
+			const point2 = {
+				x: point.x + (Math.cos(angle) * length),
+				y: point.y + (Math.sin(angle) * length),
+			};
 
-			drawLine(point, point2)
-			drawPoint(point2);
+			if (this.isPointValid(point2)) {
+				this.addPointToGrid(point2);
 
-			addPointToGrid(point2);
-			activeList.push(point2)
+				return point2;
+			}
+		}
 
-			hasPoint = true;
+		if (!hasPoint) {
+			this.activeList = this.activeList.filter(p => p !== point);
 
-			break;
+			return false;
 		}
 	}
+}
 
-	if (!hasPoint) {
-		activeList = activeList.filter(p => p !== point);
+class Visual {
+	constructor(ctx) {
+		this.ctx = ctx;
+
+		this.width = 0
+		this.height = 0;
+		this.imageData = [];
 	}
+
+	async init(imageUrl) {
+		const image = await Visual.loadImage(imageUrl);
+
+		this.width = image.width;
+		this.height = image.height;
+
+		// resize
+		this.ctx.canvas.width = this.width;
+		this.ctx.canvas.height= this.height;
+
+		// paint image, get image data and clear canvas again
+		this.ctx.drawImage(image, 0, 0);
+		this.imageData = this.ctx.getImageData(0, 0, this.width, this.height).data;
+
+		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+	}
+
+	getPixelIndex({ x, y }) {
+		return  (~~x + ~~y * this.width) * 4;
+	};
+
+	drawPoint(position) {
+		const radius = 2;
+		const pixelIndex = this.getPixelIndex(position);
+
+		const rgb = [
+				this.imageData[pixelIndex],
+				this.imageData[pixelIndex + 1],
+				this.imageData[pixelIndex + 2],
+			];
+
+		this.ctx.save();
+		this.ctx.beginPath();
+		this.ctx.fillStyle = `rgb(${rgb.join(', ')})`;
+		this.ctx.arc((position.x), (position.y), radius, 0, PI2);
+
+		this.ctx.closePath();
+		this.ctx.fill();
+		this.ctx.restore();
+	}
+
+	static loadImage(imageUrl) {
+		const img = new Image();
+
+		img.crossOrigin = '';
+
+		return new Promise(function(resolve, reject) {
+			img.addEventListener('load', () => {
+				resolve(img);
+			});
+
+			img.src = imageUrl;
+		});
+	}
+}
+
+const start = async () => {
+	let rafId = null;
+
+	const visual = new Visual(ctx);
+	await visual.init('https://pimskie.dev/public/assets/turban1-resized.jpg');
+
+	const poisson = new Poisson();
+	poisson.init(visual.width, visual.height)
+
+	const pointInit = {
+		x: visual.width >> 1,
+		y: visual.height >> 1,
+	};
+
+	poisson.addPointToGrid(pointInit);
+	visual.drawPoint(pointInit);
+
+	const loop = () => {
+		const pointB = poisson.tryAdd();
+
+		if (pointB) {
+			visual.drawPoint(pointB);
+		}
+
+		rafId = requestAnimationFrame(loop);
+	};
+
+	loop();
 };
 
-const loop = () => {
-	if (!activeList.length) {
-		return;
-	}
-
-	const p1 = randomArrayValue(activeList);
-
-	poisson(p1);
-
-	requestAnimationFrame(loop);
-};
-
-loop();
-
-
-// while (activeList.length) {
-// 	const p1 = randomArrayValue(activeList);
-
-// 	poisson(p1);
-// }
+start();

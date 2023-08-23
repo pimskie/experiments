@@ -1,36 +1,45 @@
-const DIMENSION = 300;
-const MID = DIMENSION * 0.5;
-const NOISE_SCALE = 0.001;
-const TAU = Math.PI * 2;
+// https://medium.com/@hemalatha.psna/implementation-of-poisson-disc-sampling-in-javascript-17665e406ce1
+//  Robert Bridson, called Fast Poisson Disk Sampling in Arbitrary Dimensions
+// https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
+// Photo by <a href="https://unsplash.com/@pradologue?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Prado</a> on <a href="https://unsplash.com/photos/S89gVhM67lU?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+// https://unsplash.com/photos/S89gVhM67lU
+// https://unsplash.com/photos/a-colorful-parrot-sitting-on-top-of-a-tree-branch-ArQXu1jXdpE
+
+// https://pimskie.dev/public/assets/turban1-resized.jpg
+const DIMENSION = 500;
+const PI2 = Math.PI * 2;
 
 const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
+const randomBetween = (min, max) => Math.random() * (max - min) + min;
+const distanceBetween = (vec1, vec2) => Math.hypot(vec2.x - vec1.x, vec2.y - vec1.y);
 
-const getPositionByIndex = (index, cols) => ({
-	x: index % cols,
-	y: Math.floor(index / cols),
+const getCellRowByPosition = ({ x, y }) => ({
+	x: Math.floor(x / cellSize),
+	y: Math.floor(y / cellSize),
 });
 
-const getIndexByPosition = (totalCols, col, row) => (row * totalCols) + col;
 
-const drawRegion = (ctx, position, radius, cellSize) => {
+const drawPoint = (position) => {
+	const radius = 2;
+
 	ctx.save();
 	ctx.beginPath();
-	ctx.strokeStyle = '#aaa';
-	ctx.arc((position.x * cellSize) + (cellSize * 0.5), (position.y * cellSize) + (cellSize * 0.5), radius, 0, Math.PI * 2);
-
-	ctx.closePath();
-	ctx.stroke();
-	ctx.restore();
-};
-
-const drawPoint = (ctx, position, radius, cellSize) => {
-	ctx.save();
-	ctx.beginPath();
-	ctx.fillStyle = '#000';
-	ctx.arc((position.x * cellSize) + (cellSize * 0.5), (position.y * cellSize) + (cellSize * 0.5), radius, 0, Math.PI * 2);
+	ctx.fillStyle = `hsl(${hue}, 50%, 50%)`;
+	ctx.arc((position.x), (position.y), radius, 0, PI2);
 
 	ctx.closePath();
 	ctx.fill();
+	ctx.restore();
+};
+
+const drawLine = (from, to) => {
+	ctx.save();
+	ctx.strokeStyle = '#999';
+	ctx.beginPath();
+	ctx.moveTo(from.x, from.y)
+	ctx.lineTo(to.x, to.y);
+	ctx.stroke();
+	ctx.closePath();
 	ctx.restore();
 };
 
@@ -40,31 +49,125 @@ const ctx = document
 
 ctx.canvas.width = ctx.canvas.height = DIMENSION;
 
-const minDistance = 100;
+const r = 10;
+const k = 30;
+const cellSize = Math.floor(r / Math.sqrt(2));
 
-const radius = minDistance / Math.sqrt(2);
-const cellSize = radius / Math.sqrt(2);
+const cols = Math.ceil(DIMENSION / cellSize) + 1;
+const rows = Math.ceil(DIMENSION / cellSize) + 1;
 
-const cols = Math.floor(DIMENSION / cellSize);
-const rows = Math.floor(DIMENSION / cellSize);
-const numPoints = cols * rows;
+const grid = new Array(cols).fill(-1).map(() => new Array(rows).fill(-1));
 
-const grid = new Array(numPoints);
-const points = new Array(numPoints);
-const activeList = new Array();
+let activeList = new Array();
 
-for (let i = 0; i < numPoints; i++) {
-	const position = getPositionByIndex(i, cols);
+let hue = 0;
 
-	drawRegion(ctx, position, radius, cellSize);
-}
+const getGridPosition = (point) => ({
+	col: Math.floor(point.x / cellSize),
+	row: Math.floor(point.y / cellSize),
+});
 
-const x0 = { x: 2, y: 3 };
-const index = getIndexByPosition(cols, x0.x, x0.y);
+const addPointToGrid = (point) => {
+	const { col, row } = getGridPosition(point);
 
-drawPoint(ctx, x0, 3, cellSize);
+  grid[col][row] = point;
+};
 
-activeList.push(index);
+const p1 = {
+	x: Math.random() * DIMENSION,
+	y: Math.random() * DIMENSION,
+};
 
-const i = randomArrayValue(activeList);
-const k = 5;
+drawPoint(p1);
+addPointToGrid(p1);
+activeList.push(p1);
+
+const isFarEnough = (point) => {
+	const { col, row } = getGridPosition(point);
+
+	const xmin = Math.max(col - 1, 0);
+	const xmax = Math.min(col + 1, cols - 1);
+	const ymin = Math.max(row - 1, 0);
+	const ymax = Math.min(row + 1, rows - 1);
+
+	for (let x = xmin; x <= xmax; x++ ) {
+		for (let y = ymin; y <= ymax; y++ ) {
+			const cell = grid[x][y];
+
+			if (cell !== -1) {
+				const distance = distanceBetween(cell, point);
+
+				if (distance < r) {
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+};
+
+const isValidPoint = (point) => {
+	if (point.x < 0 || point.x > DIMENSION || point.y < 0 || point.y > DIMENSION) {
+		return false;
+	}
+
+	if (!isFarEnough(point)) {
+		return false;
+	}
+
+	return true;
+};
+
+const poisson = (point) => {
+	let hasPoint = false;
+
+	for (let i = 0; i < k; i++) {
+		const angle = Math.random() * PI2;
+		const length = randomBetween(r, r * 2);
+
+		const point2 = {
+			x: point.x + (Math.cos(angle) * length),
+			y: point.y + (Math.sin(angle) * length),
+		};
+
+		if (isValidPoint(point2)) {
+			hue += 0.1;
+
+			drawLine(point, point2)
+			drawPoint(point2);
+
+			addPointToGrid(point2);
+			activeList.push(point2)
+
+			hasPoint = true;
+
+			break;
+		}
+	}
+
+	if (!hasPoint) {
+		activeList = activeList.filter(p => p !== point);
+	}
+};
+
+const loop = () => {
+	if (!activeList.length) {
+		return;
+	}
+
+	const p1 = randomArrayValue(activeList);
+
+	poisson(p1);
+
+	requestAnimationFrame(loop);
+};
+
+loop();
+
+
+// while (activeList.length) {
+// 	const p1 = randomArrayValue(activeList);
+
+// 	poisson(p1);
+// }

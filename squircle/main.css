@@ -1,0 +1,110 @@
+@import "https://unpkg.com/open-props";
+@import "https://unpkg.com/open-props/normalize.min.css";
+@import url('https://fonts.googleapis.com/css2?family=Koulen&family=Lato:wght@300&display=swap');
+
+:root {
+	--color-official-brand-1: #4590aa;
+	--color-official-brand-5: #58b7cf;
+
+	--color-gray-1: #818181;
+}
+
+h1 {
+	font-family: 'Koulen', sans-serif;
+	background-image: linear-gradient(45deg, var(--color-official-brand-1), var(--color-official-brand-5));
+	-webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-background-clip: text;
+  -moz-text-fill-color: transparent;
+}
+
+h2 {
+	font-family: 'Lato', sans-serif;
+	font-size: var(--font-size-4);
+	color: var(--color-gray-1);
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+	display: grid;
+	grid-template-columns: auto auto;
+	align-items: center;
+}
+
+.logo.hidden {
+	opacity: 0;
+}
+
+.text {
+	overflow: hidden;
+}
+.title {
+	overflow: hidden;
+}
+
+
+.circle {
+  width: var(--size-13);
+  height: var(--size-13);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 10px solid var(--color-official-brand-1);
+  border-radius: 50%;
+}
+
+.square {
+  width: 60%;
+  aspect-ratio: 1/1;
+
+	background: var(--color-official-brand-5);
+	/* background: url(./squircle.svg) 50% 50% / 130% 130%; */
+
+	-webkit-mask-image: url('./squircle.svg');
+	-webkit-mask-size: 140%;
+	-webkit-mask-position: 20% 41%;
+
+}
+
+@keyframes circle-in {
+	0% {
+		transform: scale(0);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+
+/*
+.square {
+  width: 71%;
+  aspect-ratio: 1/1;
+
+	background: red;
+
+	-webkit-mask-image: url('./squircle.svg');
+	-webkit-mask-size: 140%;
+	-webkit-mask-position: 20% 41%;
+
+	animation: 0.25s forwards ease-out mask;
+}
+
+@keyframes mask {
+	0% {
+		-webkit-mask-size: 140%;
+	}
+	100% {
+		-webkit-mask-size: 100%;
+	}
+} */

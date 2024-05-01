@@ -1,0 +1,17 @@
+@import url("https://unpkg.com/open-props@1.7.4/open-props.min.css");
+@import url("https://unpkg.com/open-props@1.7.4/normalize.min.css");
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	width: 100vw;
+	height: 100vh;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

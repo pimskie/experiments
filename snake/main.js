@@ -1,6 +1,6 @@
 const ctx = document.getElementById('canvas').getContext('2d');
 const canvasWidth = 500;
-const cellWidth = 25;
+const cellWidth = 10;
 
 const columnCount = canvasWidth / cellWidth;
 const rowCount = canvasWidth / cellWidth;
@@ -27,6 +27,7 @@ const getCell = (index) => {
     return {
         index,
         life: 0,
+        isActive: false,
         position: getCellCoordinates(index),
     };
 };
@@ -55,13 +56,26 @@ const drawGrid = () => {
     }
 };
 
+const highlightOtherCells = (cellIndex, num, life = 1) => {
+    if (num <= 0) {
+        return;
+    }
+
+    cells[cellIndex].life = life;
+
+    const adjacentCells = getAdjacentCells(cellIndex).slice(0, num + 1); 
+
+    adjacentCells.filter(c => c.life < 0.3).forEach((cell) => {
+        highlightOtherCells(cell.index, num - 1, life * 0.6);
+    });
+}
+
 ctx.canvas.addEventListener('pointermove', (e) => {
     const cellIndex = getCellIndex(e.offsetX, e.offsetY);
     
 
     if (activeCell !== cellIndex) {
-        console.log(getAdjacentCells(cellIndex))
-        cells[cellIndex].life = 1;
+        highlightOtherCells(cellIndex, 3);
     }
 
     activeCell = cellIndex;
@@ -96,7 +110,7 @@ const drawSingleCell = (cell) => {
 
 const drawCells = () => {
     cells.filter(c => c.life > 0.05).forEach((cell) => {
-        cell.life *= 0.98; 
+        cell.life *= 0.97; 
 
         drawSingleCell(cell);
     });

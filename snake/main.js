@@ -56,26 +56,12 @@ const drawGrid = () => {
     }
 };
 
-const highlightOtherCells = (cellIndex, num, life = 1) => {
-    if (num <= 0) {
-        return;
-    }
-
-    cells[cellIndex].life = life;
-
-    const adjacentCells = getAdjacentCells(cellIndex).slice(0, num + 1); 
-
-    adjacentCells.filter(c => c.life < 0.3).forEach((cell) => {
-        highlightOtherCells(cell.index, num - 1, life * 0.6);
-    });
-}
-
 ctx.canvas.addEventListener('pointermove', (e) => {
     const cellIndex = getCellIndex(e.offsetX, e.offsetY);
     
 
     if (activeCell !== cellIndex) {
-        highlightOtherCells(cellIndex, 3);
+        cells[cellIndex].life = 1;
     }
 
     activeCell = cellIndex;
@@ -83,13 +69,29 @@ ctx.canvas.addEventListener('pointermove', (e) => {
 
 const getAdjacentCells = (cellIndex) => {
     const adjacentCells = [
-        cellIndex - columnCount - 1,
+        // top left
+        // cellIndex - columnCount - 1,
+        
+        // top
         cellIndex - columnCount,
-        cellIndex - columnCount + 1,
+        
+        // top right
+        // cellIndex - columnCount + 1,
+
+        // left
         cellIndex - 1,
-        cellIndex + 1,
-        cellIndex + columnCount - 1,
+
+        // right
+        // cellIndex + 1,
+
+        // bottom left
+        // cellIndex + columnCount - 1,
+
+        // bottom
         cellIndex + columnCount,
+
+        // bottom right
+        // cellIndex + columnCount + 1,
     ]
     .filter((index) => index >= 0 && index < cellCount)
     .map((index) => cells[index]);
@@ -108,11 +110,31 @@ const drawSingleCell = (cell) => {
     ctx.fillRect(cell.position.x, cell.position.y, cellWidth, cellWidth);
 };
 
+
+const highlightOtherCells = (cellIndex, num, life = 1) => {
+    if (num <= 0 || Math.random() > 0.5) {
+        return;
+    };
+
+    cells[cellIndex].life = life;
+
+    const adjacentCells = getAdjacentCells(cellIndex); //.slice(0, num + 1); 
+
+    adjacentCells.filter(c => c.life < 0.3).forEach((cell) => {
+        cell.life = life;
+        highlightOtherCells(cell.index, num - 1, life * 0.6);
+    });
+}
+
 const drawCells = () => {
-    cells.filter(c => c.life > 0.05).forEach((cell) => {
-        cell.life *= 0.97; 
+    cells.forEach((cell) => {
+        cell.life *= 0.99; 
 
         drawSingleCell(cell);
+
+        if (cell.life > 0.85) {
+            highlightOtherCells(cell.index, 3, cell.life);
+        }
     });
 };
 

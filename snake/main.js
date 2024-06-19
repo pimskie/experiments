@@ -11,6 +11,24 @@ let activeCell = undefined;
 ctx.canvas.width = canvasWidth;
 ctx.canvas.height = canvasWidth;
 
+class Dot {
+    constructor(index, position) {
+        this.index = index;
+        this.position = position;
+        this.life = 0;
+
+        this.decay = 0.99;
+    }
+
+    goLive() {
+        this.life = 1;
+    }
+
+    update() {
+        this.life *= this.decay;
+    }
+}
+
 const getCellIndex = (x, y) => {
     const xPos = Math.floor(x / cellWidth);
     const yPos = Math.floor(y / cellWidth);
@@ -82,7 +100,7 @@ const getAdjacentCells = (cellIndex) => {
         cellIndex - 1,
 
         // right
-        // cellIndex + 1,
+        cellIndex + 1,
 
         // bottom left
         // cellIndex + columnCount - 1,
@@ -128,12 +146,12 @@ const highlightOtherCells = (cellIndex, num, life = 1) => {
 
 const drawCells = () => {
     cells.forEach((cell) => {
-        cell.life *= 0.99; 
+        cell.life *= 0.98; 
 
         drawSingleCell(cell);
 
         if (cell.life > 0.85) {
-            highlightOtherCells(cell.index, 3, cell.life);
+            // highlightOtherCells(cell.index, 3, cell.life);
         }
     });
 };

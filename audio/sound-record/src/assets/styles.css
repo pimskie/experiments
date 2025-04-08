@@ -1,0 +1,187 @@
+:root {
+	--color-primary: #4a6fd4;
+	--color-primary-dark: #3a5cb3;
+	--color-record: #f44336;
+	--color-record-active: #b71c1c;
+	--color-play: #4caf50;
+	--color-background: #f9f9fb;
+	--color-visualizer: #e0e5f2;
+	--color-card: #ffffff;
+	--color-text: #2a2f45;
+	--color-text-secondary: #5a6488;
+	--color-slider-track: #d0d9f0;
+	--color-slider-thumb: #4a6fd4;
+	--color-slider-thumb-hover: #3a5cb3;
+	--shadow-default: 0 4px 15px rgba(74, 111, 212, 0.15);
+	--border-radius-default: 8px;
+	--border-radius-round: 50%;
+	--transition-default: 0.3s ease;
+
+	/* Base instrument colors */
+	--color-instrument-kick: #4a6fd4;
+	--color-instrument-snare: #f44336;
+	--color-instrument-hihat: #ffb300;
+	--color-instrument-tom: #8e44ad;
+	--color-instrument-cymbal: #2ecc71;
+	--color-instrument-clap: #e67e22;
+	--color-instrument-bass: #3498db;
+	--color-instrument-synth: #9c27b0;
+
+	/* Darker variants for hover/active states */
+	--color-instrument-kick-dark: #3a5cb3;
+	--color-instrument-snare-dark: #d32f2f;
+	--color-instrument-hihat-dark: #ff9800;
+	--color-instrument-tom-dark: #7d3c98;
+	--color-instrument-cymbal-dark: #27ae60;
+	--color-instrument-clap-dark: #d35400;
+	--color-instrument-bass-dark: #2980b9;
+	--color-instrument-synth-dark: #7b1fa2;
+
+	/* Lighter variants for backgrounds/accents */
+	--color-instrument-kick-light: #d0d9f0;
+	--color-instrument-snare-light: #ffcdd2;
+	--color-instrument-hihat-light: #ffe082;
+	--color-instrument-tom-light: #d6b0e4;
+	--color-instrument-cymbal-light: #a7e9c3;
+	--color-instrument-clap-light: #f8c4a0;
+	--color-instrument-bass-light: #bbdefb;
+	--color-instrument-synth-light: #e1bee7;
+}
+
+body {
+	font-family: "Arial", sans-serif;
+	margin: 0;
+	padding: 20px;
+	background-color: #f5f5f5;
+}
+
+.container {
+	max-width: 600px;
+	margin: 20px auto;
+	padding: 20px;
+	background-color: var(--color-background);
+	border-radius: var(--border-radius-default);
+	box-shadow: var(--shadow-default);
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.title {
+	text-align: center;
+	margin-top: 0;
+}
+
+.drum-pad-section {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+}
+
+.drum-pad {
+	width: 120px;
+	height: 120px;
+	padding: 20px;
+	border-radius: var(--border-radius-round);
+	font-size: 16px;
+	font-weight: bold;
+	color: white;
+	border: none;
+	box-shadow: var(--shadow-default);
+	cursor: pointer;
+	transition: transform 0.1s, background-color var(--transition-default);
+}
+
+.drum-pad.snare {
+	background-color: var(--color-instrument-snare);
+}
+
+.drum-pad.kick {
+	background-color: var(--color-instrument-kick);
+}
+
+.drum-pad:active,
+.drum-pad.active {
+	transform: scale(0.95);
+}
+
+.drum-pad.snare:active,
+.drum-pad.snare.active {
+	background-color: var(--color-primary-dark);
+}
+
+.transport-controls {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.transport-button {
+	padding: 10px 20px;
+	border-radius: var(--border-radius-default);
+	font-size: 16px;
+	color: white;
+	border: none;
+	cursor: pointer;
+}
+
+.record-button {
+	background-color: var(--color-record);
+}
+
+.record-button.recording {
+	background-color: var(--color-record-active);
+	animation: pulse 1.5s infinite;
+}
+
+.play-button {
+	background-color: var(--color-play);
+}
+
+.play-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.recording-visualizer {
+	width: 100%;
+	min-height: 70px;
+	margin-top: 20px;
+	display: none;
+}
+
+.timeline {
+	width: 100%;
+	height: 50px;
+	position: relative;
+	background-color: var(--color-visualizer);
+	border-radius: var(--border-radius-default);
+	margin-top: 10px;
+}
+
+.beat-marker {
+	position: absolute;
+	top: 5px;
+	width: 10px;
+	height: 40px;
+	border-radius: 2px;
+	transition: transform 0.1s, opacity 0.1s;
+}
+
+.beat-marker.snare {
+	background-color: var(--color-primary);
+}
+
+@keyframes pulse {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.7;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+

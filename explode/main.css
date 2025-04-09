@@ -1,0 +1,41 @@
+body {
+	min-width: 100vw;
+	min-height: 100vh;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	overflow: hidden;
+}
+
+.container {
+	width: 100%;
+	max-width: 40vmax;
+
+	display: flex;
+	flex-wrap: wrap;
+
+	perspective: 900px;
+}
+
+.tile {
+	pointer-events: none;
+	transform-style: preserve-3d;
+
+	width: calc(var(--w) * 1%);
+	aspect-ratio: 1/1;
+	background: red;
+
+	background: url(./bird.jpg) no-repeat;
+	background-position: calc(var(--x) * 1%) calc(var(--y) * 1%);
+	background-size: calc(var(--bg-size) * 1%);
+
+	transition: transform 1s ease-out;
+}
+
+.exploded .tile {
+	transform: translateZ(calc(var(--dest-y) * 1px));
+	/* transform: translateZ(calc(var(--distance) * 70px)); */
+}
+

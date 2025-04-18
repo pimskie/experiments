@@ -1,0 +1,56 @@
+body {
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.visual {
+	--_parent-angle: var(--parent-angle, 137.5deg);
+	--_count: var(--count, 100);
+
+	width: 50vmin;
+	aspect-ratio: 1/1;
+
+	position: relative;
+	border: 1px solid red;
+}
+
+.dot {
+	--width: 7%;
+	/* --radius: calc(50 * var(--percent)); */
+	--radius: calc(3.5 * sqrt(calc(var(--index))));
+	--radius-max: calc(75);
+	--angle: calc(var(--index) * var(--_parent-angle));
+
+	--x-pos: calc(var(--radius) * cos(var(--angle)));
+	--y-pos: calc(var(--radius) * sin(var(--angle)));
+
+	--distance: hypot(var(--x-pos), var(--y-pos));
+	--hypo: hypot(var(--radius-max), var(--radius-max));
+	--scale: var(--percent);
+
+	width: var(--width);
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+
+	/* translate: calc(var(--x-pos) * 1%) calc(var(--y-pos) * 1%); */
+	translate: -50% -50%;
+	scale: calc(1 - var(--scale));
+	left: calc(50% + var(--x-pos) * 1%);
+	top: calc(50% + var(--y-pos) * 1%);
+	background-color: oklch(40% 0.5 calc(360 * var(--percent)));
+
+	opacity: calc(1 - var(--scale));
+}
+
+.slider {
+	position: relative;
+	z-index: 100;
+}
+

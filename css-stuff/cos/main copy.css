@@ -1,0 +1,31 @@
+body {
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.visual {
+	width: 50vmin;
+	aspect-ratio: 1/1;
+	border: 1px solid #000;
+
+	position: relative;
+}
+
+.dot {
+	--radius: calc(50% * var(--percent));
+
+	width: 5%;
+	aspect-ratio: 1/1;
+	background-color: #000;
+	position: absolute;
+	border-radius: 50%;
+
+	left: calc(50% + calc(sin(calc(var(--percent) * 620deg)) * var(--radius)));
+	top: calc(50% + calc(cos(calc(var(--percent) * 620deg)) * var(--radius)));
+}
+

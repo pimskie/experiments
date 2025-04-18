@@ -1,0 +1,83 @@
+/* https://codepen.io/pimskie/pen/rLRYBb?editors=0010 */
+
+body {
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+@property --o {
+	syntax: "<angle>";
+	inherits: true;
+	initial-value: 137.5deg;
+}
+
+@property --radius-base {
+	syntax: "<number>";
+	inherits: true;
+	initial-value: 3.5;
+}
+
+.visual {
+	--_parent-angle: var(--parent-angle, 137.5deg);
+	--_count: var(--count, 100);
+
+	width: 50vmin;
+	aspect-ratio: 1/1;
+
+	position: relative;
+
+	animation: angle 10s ease-out infinite alternate;
+}
+
+.dot {
+	--width: 7%;
+	--radius: calc(var(--radius-base) * sqrt(calc(var(--index))));
+	--angle: calc(var(--index) * var(--o));
+
+	--x-pos: calc(var(--radius) * cos(var(--angle)));
+	--y-pos: calc(var(--radius) * sin(var(--angle)));
+
+	--distance: hypot(var(--x-pos), var(--y-pos));
+	--hypo: hypot(var(--radius-max), var(--radius-max));
+	--scale: var(--percent);
+
+	width: var(--width);
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+
+	translate: -50% -50%;
+	scale: calc(1 - var(--scale));
+	left: calc(50% + var(--x-pos) * 1%);
+	top: calc(50% + var(--y-pos) * 1%);
+	background-color: oklch(60% 0.5 calc(360 * var(--percent)));
+	border: 1px solid oklch(40% 0.3 calc(360 * var(--percent)));
+	box-shadow: 0 0 0.5vmin oklch(40% 0.5 calc(360 * var(--percent)));
+
+	z-index: calc(var(--_count) - var(--index));
+
+	opacity: calc(1 - var(--scale));
+}
+
+.slider {
+	position: relative;
+	z-index: 100;
+}
+
+@keyframes angle {
+	0% {
+		--o: 137.5deg;
+		--radius-base: 3.5;
+	}
+	100% {
+		--o: 140deg;
+		--radius-base: 1;
+	}
+}
+

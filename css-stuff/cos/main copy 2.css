@@ -1,0 +1,49 @@
+body {
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.visual {
+	--_parent-angle: var(--parent-angle, 137.5deg);
+	--_count: var(--count, 100);
+
+	width: 50vmin;
+	aspect-ratio: 1/1;
+
+	position: relative;
+}
+
+.dot {
+	--width: 7%;
+	--radius: calc(75 * sqrt(calc(var(--index) * 0.6)));
+	--angle: calc(var(--index) * var(--_parent-angle));
+	--x: calc(var(--radius) * cos(var(--angle)));
+	--y: calc(var(--radius) * sin(var(--angle)));
+
+	--hypo: 5;
+	--distance: calc(sqrt(calc(var(--x) * var(--x) + var(--y) * var(--y))));
+	--scale: calc(var(--distance) / var(--hypo) * 1%);
+
+	width: var(--width);
+	aspect-ratio: 1/1;
+	background-color: #000;
+	position: absolute;
+	border-radius: 50%;
+
+	translate: calc(var(--x) * 1%) calc(var(--y) * 1%);
+	scale: var(--scale);
+
+	inset: 50%;
+}
+
+.slider {
+	position: relative;
+	z-index: 100;
+}
+

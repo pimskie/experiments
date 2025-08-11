@@ -4,7 +4,7 @@ const w = window.innerWidth;
 const h = window.innerHeight;
 
 const numLayers = 4;
-
+const title = document.querySelector(".title");
 const ctxs = new Array(numLayers).fill(0).map((_, i) => {
 	const canvas = document.createElement("canvas");
 
@@ -12,29 +12,44 @@ const ctxs = new Array(numLayers).fill(0).map((_, i) => {
 	canvas.height = h;
 	canvas.style.setProperty("--layer", i * 10);
 
-	return canvas.getContext("2d");
-});
+	document.body.appendChild(canvas);
 
-ctxs.forEach((ctx) => {
-	document.body.appendChild(ctx.canvas);
+	return canvas.getContext("2d");
 });
 
 const noiseLayers = new Array(ctxs.length)
 	.fill(0)
 	.map((_, i) => new SimplexNoise());
 
-let phase = 0;
+let phase;
+let sparks;
 
-const sparks = new Array(100).fill(0).map((_, i) => ({
-	x: -300 * Math.random(),
-	y: Math.random() * h,
-	size: 3,
-	life: 1,
-	speed: 7 + 5 * Math.random(),
-	decay: 0.989 + 0.01 * Math.random(),
-	noiseLayer: randomArrayValue(noiseLayers),
-	ctx: randomArrayValue(ctxs),
-}));
+const reset = () => {
+	title.classList.remove("go");
+
+	// he is dirty, Paaatriiccck
+	setTimeout(() => {
+		title.classList.add("go");
+	}, 100);
+
+	phase = 0;
+
+	sparks = new Array(100).fill(0).map((_, i) => {
+		const ctx = randomArrayValue(ctxs);
+		const depth = ctxs.indexOf(ctx) * 0.5;
+
+		return {
+			x: -300 * Math.random(),
+			y: Math.random() * h,
+			size: 2 + Math.random() + depth,
+			life: 1,
+			speed: 5 + 5 * Math.random() + depth,
+			decay: 0.989 + 0.01 * Math.random(),
+			noiseLayer: randomArrayValue(noiseLayers),
+			ctx,
+		};
+	});
+};
 
 const clean = () => {
 	ctxs.forEach((ctx) => {
@@ -94,5 +109,8 @@ const loop = () => {
 	requestAnimationFrame(loop);
 };
 
+reset();
 loop();
+
+document.body.addEventListener("click", reset);
 

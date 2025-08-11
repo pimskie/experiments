@@ -21,5 +21,25 @@ body {
 	color: white;
 
 	pointer-events: none;
+	z-index: 15;
+
+	.go {
+		animation: fadeIn 2s ease-in-out;
+	}
+}
+
+canvas {
+	position: fixed;
+	inset: 0;
+	z-index: var(--layer);
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 

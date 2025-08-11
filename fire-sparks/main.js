@@ -17,17 +17,18 @@ const noiseLayers = new Array(50).fill(0).map((_, i) => {
 let phase = 0;
 
 const sparks = new Array(50).fill(0).map((_, i) => ({
-	x: -100 * Math.random(),
+	x: -300 * Math.random(),
 	y: Math.random() * h,
 	size: 3,
 	life: 1,
-	speed: 5 + 5 * Math.random(),
+	speed: 7 + 5 * Math.random(),
 	decay: 0.99 + 0.01 * Math.random(),
 	noiseLayer: randomArrayValue(noiseLayers),
 }));
 
 const clean = () => {
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+	ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
 const update = (spark, phase) => {
@@ -39,7 +40,7 @@ const update = (spark, phase) => {
 	spark.life *= spark.decay;
 
 	spark.x += spark.speed * spark.life;
-	spark.y += Math.sin(angleY) * (spark.speed * spark.life);
+	spark.y += Math.sin(angleY) * (spark.speed * spark.life * spark.life * 0.5);
 	spark.speed *= spark.decay;
 
 	if (spark.y > h) {
@@ -55,7 +56,13 @@ const draw = ({ x, y, size, life }) => {
 	ctx.save();
 
 	ctx.translate(x, y);
-	ctx.fillStyle = "white";
+
+	// Fire spark color gradient: yellow -> orange/red
+	const r = 255;
+	const g = 255 * life;
+	const b = 0;
+
+	ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${life})`;
 	ctx.beginPath();
 	ctx.arc(0, 0, size * life, 0, Math.PI * 2);
 	ctx.fill();

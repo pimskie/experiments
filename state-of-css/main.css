@@ -1,0 +1,82 @@
+@import url("https://unpkg.com/open-props@1.7.15/open-props.min.css");
+@import url("https://unpkg.com/open-props@1.7.15/normalize.min.css");
+
+/* https://assets.devographics.com/surveys/css2025.png */
+
+body {
+	width: 100vw;
+	height: 100vh;
+	display: grid;
+	place-items: center;
+	background: #212424;
+}
+
+.container {
+	position: relative;
+	width: 500px;
+	aspect-ratio: 1;
+}
+
+.stripes {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding-block: var(--size-3);
+}
+
+.stripe {
+	--count: sibling-count();
+	--index: sibling-index();
+	--half-pi: calc(pi / 2);
+
+	--percent: calc((var(--index) - 1) / (var(--count) - 1));
+	--scale-angle: calc(pi * var(--percent));
+
+	--scale: calc(0.4 + 0.6 * sin(var(--scale-angle)));
+
+	width: 100%;
+	height: 5%;
+	background: #48aac8; /* purple: #59268a */
+	transform: scale(var(--scale));
+}
+
+.squares {
+	position: absolute;
+	inset: 50%;
+	width: 70%;
+	aspect-ratio: 1;
+	background: white;
+	transform-origin: 50% 50%;
+	translate: -50% -50%;
+	rotate: 45deg;
+}
+
+.squares__perspective {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
+.square {
+	--count: sibling-count();
+	--index: sibling-index();
+
+	/* Calculate percent (0 for first, 1 for last) */
+	--percent: calc((var(--index) - 1) / (var(--count) - 1));
+
+	/* Size: largest for first, smallest for last */
+	width: calc(80% - 40% * var(--percent));
+	aspect-ratio: 1;
+	position: absolute;
+
+	background: red;
+
+	/* Rotate and skew based on index */
+	/* transform: rotate(45deg) skewY(calc(-10deg + 20deg * var(--percent)));
+
+	z-index: calc(var(--count) - var(--index));
+	opacity: calc(0.7 + 0.3 * (1 - var(--percent)));
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); */
+}
+

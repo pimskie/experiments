@@ -1,6 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { createNoise3D, createNoise2D } from "simplex-noise";
 
+const randomArrayValue = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const palette = ["#780000", "#c1121f", "#fdf0d5", "#003049", "#669bbc"];
+const noise2D = createNoise2D();
+
+const clock = new THREE.Clock();
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -8,31 +14,48 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
+camera.position.y = 30;
+camera.position.z = 30;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 
+const controls = new OrbitControls(camera, renderer.domElement);
+
+const spread = 20;
+const noiseScale = 0.1;
 document.body.appendChild(renderer.domElement);
 
-const boxGeom = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(boxGeom, material);
+for (let count = 0; count < 300; count++) {
+  const x = -spread / 2 + Math.random() * spread;
+  const z = Math.random() * spread;
 
-const planeGeom = new THREE.PlaneGeometry(1, 1.3);
-const planeMaterial = new THREE.MeshBasicMaterial({ color: "tomato" });
-const plane = new THREE.Mesh(planeGeom, planeMaterial);
-plane.position.set(0, 0, 1);
+  const noiseValue = noise2D(x * noiseScale, z * noiseScale);
+  const noiseValue2 = noise2D(z * noiseScale, x * noiseScale);
 
-console.log(plane.geometry.getAttribute("position"));
-scene.add(cube);
-scene.add(plane);
+  const height = 7 + 7 * noiseValue;
+  const w = 1 + noiseValue2 * 1;
 
-camera.position.z = 5;
+  const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(w, height, w),
+    new THREE.MeshBasicMaterial({
+      color: randomArrayValue(palette),
+    })
+  );
+
+  cube.position.set(x, height * 0.5, z);
+  cube.rotation.set(0, noise2D(count * 0.001, 1), 0);
+
+  scene.add(cube);
+}
+
+const transformCard = (tick) => {};
 
 function animate() {
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+  const elapsedTime = clock.getElapsedTime();
+  transformCard(elapsedTime);
 
+  controls.update();
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);

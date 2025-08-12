@@ -65,7 +65,7 @@ const transformCard = (tick) => {
 
   plane.rotation.x = noiseRotationX;
   plane.rotation.y = noiseRotationY;
-  plane.position.x += 0.1;
+  plane.position.x += 0.03;
 
   position.needsUpdate = true;
 };
@@ -80,4 +80,3 @@ function animate() {
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
-

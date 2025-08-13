@@ -39,6 +39,7 @@ scene.add(plane);
 
 const transformCard = (tick) => {
   const position = plane.geometry.getAttribute("position");
+
   const noiseScale = 0.05;
   const noiseRotationX = noise3D(
     plane.position.x * noiseScale,
@@ -49,11 +50,6 @@ const transformCard = (tick) => {
     plane.position.x * noiseScale,
     tick * noiseScale,
     plane.position.y * noiseScale
-  );
-  const noisePositionX = noise3D(
-    plane.position.x * noiseScale,
-    plane.position.y * noiseScale,
-    tick * noiseScale
   );
 
   for (let i = 0; i < position.count; i++) {

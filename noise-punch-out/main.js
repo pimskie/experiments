@@ -103,13 +103,14 @@ const addParticle = () => {
 	const particle = {
 		x: posX,
 		y: posY,
-		velocity: 1 + Math.random(),
+		velocity: 1 + Math.random() * 0.5,
 		noise: randomArrayItem(noiseLayers),
 		decay: 0.998,
 		opacityChange: 0.005,
 		life: 1,
 		opacity: 0.5,
 		angle: 0,
+		strokeWidth: 1,
 	};
 
 	particles.push(particle);
@@ -122,7 +123,7 @@ const generate = () => {
 };
 
 const update = (particle, phase, bounds) => {
-	const scale = 0.005;
+	const scale = 0.004;
 
 	const noiseValue = particle.noise.noise3D(
 		particle.x * scale,
@@ -130,12 +131,10 @@ const update = (particle, phase, bounds) => {
 		phase
 	);
 
-	const noiseValueMapped = map(noiseValue, -0.4, 0.4, 0, 1);
+	particle.angle = noiseValue * PI2;
 
-	particle.angle = noiseValueMapped * PI2;
-
-	particle.x += Math.cos(particle.angle);
-	particle.y += Math.sin(particle.angle);
+	particle.x += Math.cos(particle.angle) * particle.velocity;
+	particle.y += Math.sin(particle.angle) * particle.velocity;
 
 	const pixelIndex = getPixelIndex(particle.x, particle.y, imageData);
 	const pixelData = getPixelData(pixelIndex, imageData);
@@ -143,12 +142,28 @@ const update = (particle, phase, bounds) => {
 
 	if (isDark) {
 		particle.opacity *= 1.1;
+		particle.opacity = Math.min(particle.opacity, 1);
 	} else {
-		particle.opacity *= 0.996;
+		// Calculate distance from center of canvas
+		const centerX = canvasWidth / 2;
+		const centerY = canvasHeight / 2;
+
+		const distanceX = Math.abs(particle.x - centerX);
+		const distanceY = Math.abs(particle.y - centerY);
+
+		const maxDistanceX = canvasWidth / 2;
+		const maxDistanceY = canvasHeight / 2;
+
+		const fadeX = 1 - (distanceX / maxDistanceX) * 0.1;
+		const fadeY = 1 - (distanceY / maxDistanceY) * 0.01;
+		const edgeFade = fadeX * fadeY;
+
+		particle.opacity *= 0.99;
 		particle.opacity = Math.min(particle.opacity, 0.1);
 	}
 
 	particle.life *= particle.decay;
+	// particle.strokeWidth *= 0.998;
 
 	// reset out of bounds
 	if (particle.x > bounds.width) {
@@ -171,8 +186,8 @@ const update = (particle, phase, bounds) => {
 const draw = (particle) => {
 	const yPercent = particle.y / canvasHeight;
 	const hue = 180 + 180 * yPercent;
-	const thickness = 1;
-	const opacity = particle.opacity * 50;
+	const thickness = particle.strokeWidth;
+	const opacity = particle.opacity * 10;
 
 	ctx.beginPath();
 	ctx.fillStyle = `hsla(${hue} 50% 50% / ${opacity}%)`;
@@ -191,7 +206,7 @@ const loop = () => {
 
 	addParticle();
 
-	phase += 0.0005;
+	phase += 0.0009;
 
 	rafId = requestAnimationFrame(loop);
 };

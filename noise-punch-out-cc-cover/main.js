@@ -18,19 +18,20 @@ const map = (value, inMin, inMax, outMin, outMax) => {
 	return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 };
 
-const IMAGE_URL = "https://pimskie.dev/public/assets/noise.jpg";
+// const IMAGE_URL = "https://pimskie.dev/public/assets/creative-coding.jpg";
+const IMAGE_URL = "./creative-coding.jpg";
 const PI2 = Math.PI * 2;
 const canvas = document.body.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 
-const canvasWidth = 1500;
-const canvasHeight = 600;
+const canvasWidth = window.innerWidth;
+const canvasHeight = window.innerHeight;
 
 const midX = canvasWidth * 0.5;
 const midY = canvasHeight * 0.5;
 
-const imageWidth = 500;
-const imageHeight = 316;
+const imageWidth = 700;
+const imageHeight = 400;
 
 const noiseLayers = new Array(2).fill(0).map(() => new SimplexNoise());
 
@@ -52,35 +53,20 @@ const loadImage = async (url) => {
 	});
 };
 
-const imageToImageData = (img, canvasWidth, canvasHeight) => {
-	const canvas = document.createElement("canvas");
+const imageToImageData = (img) => {
+	// Create a small canvas just for the image data extraction
+	const imageCanvas = document.createElement("canvas");
+	imageCanvas.width = imageWidth;
+	imageCanvas.height = imageHeight;
 
-	canvas.width = canvasWidth;
-	canvas.height = canvasHeight;
+	const imageCtx = imageCanvas.getContext("2d");
+	imageCtx.fillStyle = "white";
+	imageCtx.fillRect(0, 0, imageWidth, imageHeight);
 
-	const canvasMidX = canvasWidth * 0.5;
-	const canvasMidY = canvasHeight * 0.5;
+	// Draw the image at its natural size on the small canvas
+	imageCtx.drawImage(img, 0, 0, imageWidth, imageHeight);
 
-	const imageHalfWidth = img.width * 0.5;
-	const imageHalfHeight = img.height * 0.5;
-
-	const ctx = canvas.getContext("2d");
-	ctx.fillStyle = "white";
-	ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-	ctx.drawImage(
-		img,
-		0,
-		0,
-		imageWidth,
-		imageHeight,
-		canvasMidX - imageHalfWidth,
-		canvasMidY - imageHalfHeight,
-		img.width,
-		img.height
-	);
-
-	const imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+	const imageData = imageCtx.getImageData(0, 0, imageWidth, imageHeight);
 
 	return imageData;
 };
@@ -93,7 +79,7 @@ let phase = 0;
 let imageData = null;
 let particles = [];
 
-const addParticle = () => {
+const getParticle = () => {
 	const left = midX - imageWidth / 2;
 	const top = midY - imageHeight / 2;
 
@@ -113,11 +99,15 @@ const addParticle = () => {
 		strokeWidth: 1,
 	};
 
-	particles.push(particle);
+	return particle;
+};
+
+const addParticle = () => {
+	particles.push(getParticle());
 };
 
 const generate = () => {
-	for (let i = 0; i < 3000; i++) {
+	for (let i = 0; i < 5000; i++) {
 		addParticle();
 	}
 };
@@ -136,61 +126,46 @@ const update = (particle, phase, bounds) => {
 	particle.x += Math.cos(particle.angle) * particle.velocity;
 	particle.y += Math.sin(particle.angle) * particle.velocity;
 
-	const pixelIndex = getPixelIndex(particle.x, particle.y, imageData);
+	const imageX = particle.x - (midX - imageWidth / 2);
+	const imageY = particle.y - (midY - imageHeight / 2);
+
+	const clampedX = Math.max(0, Math.min(imageWidth - 1, imageX));
+	const clampedY = Math.max(0, Math.min(imageHeight - 1, imageY));
+
+	const pixelIndex = getPixelIndex(clampedX, clampedY, imageData);
 	const pixelData = getPixelData(pixelIndex, imageData);
 	const isDark = pixelData.sum < 300;
 
 	if (isDark) {
-		particle.opacity *= 1.1;
+		particle.opacity *= 2;
 		particle.opacity = Math.min(particle.opacity, 1);
 	} else {
-		// Calculate distance from center of canvas
-		const centerX = canvasWidth / 2;
-		const centerY = canvasHeight / 2;
-
-		const distanceX = Math.abs(particle.x - centerX);
-		const distanceY = Math.abs(particle.y - centerY);
-
-		const maxDistanceX = canvasWidth / 2;
-		const maxDistanceY = canvasHeight / 2;
-
-		const fadeX = 1 - (distanceX / maxDistanceX) * 0.1;
-		const fadeY = 1 - (distanceY / maxDistanceY) * 0.01;
-		const edgeFade = fadeX * fadeY;
-
-		particle.opacity *= 0.99;
+		particle.opacity *= 0.995;
 		particle.opacity = Math.min(particle.opacity, 0.1);
 	}
 
 	particle.life *= particle.decay;
-	// particle.strokeWidth *= 0.998;
 
-	// reset out of bounds
-	if (particle.x > bounds.width) {
-		particle.x = 0;
-	}
-
-	if (particle.x < 0) {
-		particle.x = bounds.width;
-	}
-
-	if (particle.y > bounds.height) {
-		particle.y = 0;
-	}
-
-	if (particle.y < 0) {
-		particle.y = bounds.height;
+	if (
+		particle.x > bounds.width ||
+		particle.x < 0 ||
+		particle.y > bounds.height ||
+		particle.y < 0
+	) {
+		// Mark particle for removal and create a new one at a random position
+		particle.life = 0;
+		particle.opacity = 0;
 	}
 };
 
 const draw = (particle) => {
 	const yPercent = particle.y / canvasHeight;
-	const hue = 180 + 180 * yPercent;
+	const hue = 200 + 100 * yPercent;
 	const thickness = particle.strokeWidth;
 	const opacity = particle.opacity * 10;
 
 	ctx.beginPath();
-	ctx.fillStyle = `hsla(${hue} 50% 50% / ${opacity}%)`;
+	ctx.fillStyle = `hsla(${hue} 50% 10% / ${opacity}%)`;
 	ctx.arc(particle.x, particle.y, thickness, 0, Math.PI * 2);
 	ctx.fill();
 	ctx.closePath();
@@ -202,9 +177,14 @@ const loop = () => {
 		draw(particle);
 	});
 
+	const removedCount = particles.length;
 	particles = particles.filter((particle) => particle.life > 0.1);
 
-	addParticle();
+	const removedParticles = removedCount - particles.length;
+
+	for (let i = 0; i < removedParticles; i++) {
+		addParticle();
+	}
 
 	phase += 0.0009;
 
@@ -213,7 +193,7 @@ const loop = () => {
 
 const img = await loadImage(IMAGE_URL);
 
-imageData = imageToImageData(img, canvasWidth, canvasHeight);
+imageData = imageToImageData(img);
 
 generate();
 
@@ -230,7 +210,15 @@ canvas.addEventListener("mousemove", (event) => {
 	const mouseX = event.clientX - rect.left;
 	const mouseY = event.clientY - rect.top;
 
-	const pixelIndex = getPixelIndex(mouseX, mouseY, imageData);
+	// Convert mouse position to image coordinates
+	const imageX = mouseX - (midX - imageWidth / 2);
+	const imageY = mouseY - (midY - imageHeight / 2);
+
+	// Clamp coordinates to image bounds
+	const clampedX = Math.max(0, Math.min(imageWidth - 1, imageX));
+	const clampedY = Math.max(0, Math.min(imageHeight - 1, imageY));
+
+	const pixelIndex = getPixelIndex(clampedX, clampedY, imageData);
 	const pixelData = getPixelData(pixelIndex, imageData);
 
 	console.log(

@@ -146,15 +146,20 @@ const update = (particle, phase, bounds) => {
 
 	particle.life *= particle.decay;
 
-	if (
-		particle.x > bounds.width ||
-		particle.x < 0 ||
-		particle.y > bounds.height ||
-		particle.y < 0
-	) {
-		// Mark particle for removal and create a new one at a random position
-		particle.life = 0;
-		particle.opacity = 0;
+	if (particle.x > bounds.width) {
+		particle.x = 0;
+	}
+
+	if (particle.x < 0) {
+		particle.x = bounds.width;
+	}
+
+	if (particle.y > bounds.height) {
+		particle.y = 0;
+	}
+
+	if (particle.y < 0) {
+		particle.y = bounds.height;
 	}
 };
 

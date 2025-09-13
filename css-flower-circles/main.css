@@ -1,0 +1,76 @@
+@property --rotation-progress {
+	syntax: "<angle>";
+	inherits: true;
+	initial-value: 0deg;
+}
+
+@property --radius-progress {
+	syntax: "<number>";
+	inherits: true;
+	initial-value: 0;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+
+	--animation-duration: 5s;
+
+	animation: rotationProgress var(--animation-duration) alternate infinite,
+		radiusProgress var(--animation-duration) alternate infinite;
+}
+
+.container {
+	width: 100vw;
+	height: 100vh;
+}
+
+.circle {
+	--element-count: sibling-count();
+	--element-index: sibling-index();
+	--element-percent: calc(var(--element-index) / var(--element-count));
+
+	--rotation: calc(20 * var(--rotation-progress));
+	--radius-base: calc(300 * var(--radius-progress));
+	--scale: var(--element-percent);
+
+	--angle: calc(var(--element-percent) * var(--rotation));
+	--radius: calc(var(--element-percent) * var(--radius-base));
+	--x: calc(var(--radius) * cos(var(--angle)));
+	--y: calc(var(--radius) * sin(var(--angle)));
+	--distance: hypot(var(--x), var(--y));
+	--opacity: calc(1 - var(--distance) / 600);
+
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	background: black;
+
+	position: absolute;
+	inset: 50%;
+	translate: -50% -50%;
+	translate: calc(var(--x) * 1%) calc(var(--y) * 1%);
+	opacity: var(--opacity);
+	scale: var(--scale);
+}
+
+@keyframes rotationProgress {
+	0% {
+		--rotation-progress: 0deg;
+	}
+	100% {
+		--rotation-progress: 100deg;
+	}
+}
+
+@keyframes radiusProgress {
+	0% {
+		--radius-progress: 0;
+	}
+	100% {
+		--radius-progress: 1;
+	}
+}
+

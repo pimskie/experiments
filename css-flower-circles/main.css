@@ -39,6 +39,7 @@ body {
 	--angle: calc(var(--element-percent) * var(--rotation));
 	--radius: calc(var(--element-percent) * var(--radius-base));
 	--x: calc(var(--radius) * cos(var(--angle)));
+
 	--y: calc(var(--radius) * sin(var(--angle)));
 	--distance: hypot(var(--x), var(--y));
 	--opacity: calc(1 - var(--distance) / 600);

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Test - Modern Audio Effects Mixer</title>
+        <link rel="stylesheet" href="styles.css" />
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+                background: #f5f5f5;
+            }
+            .test-info {
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            .test-info h2 {
+                color: #4a90e2;
+                margin-bottom: 10px;
+            }
+            .test-steps {
+                list-style: decimal;
+                margin: 10px 0;
+            }
+            .test-steps li {
+                margin: 5px 0;
+            }
+            .status {
+                padding: 10px;
+                border-radius: 5px;
+                margin: 10px 0;
+            }
+            .status.success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            .status.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="test-info">
+            <h2>🧪 Modern Audio Effects Mixer - Test Page</h2>
+            <p>This page tests the functionality of the modern ES6 rewrite.</p>
+
+            <h3>Test Steps:</h3>
+            <ol class="test-steps">
+                <li>
+                    Click anywhere to start audio playback (browser autoplay
+                    policy)
+                </li>
+                <li>
+                    Verify you can see the Sound, Speaker, and Add Effects
+                    components
+                </li>
+                <li>Click "Delay" or "Bass" to add effect components</li>
+                <li>Drag components around by their drag handles</li>
+                <li>Connect components by clicking input/output circles</li>
+                <li>Adjust sliders to hear audio effects</li>
+                <li>Remove components with the × button</li>
+            </ol>
+
+            <div id="status" class="status success">
+                ✅ Application loaded successfully! Click anywhere to start
+                audio.
+            </div>
+        </div>
+
+        <canvas id="canvas"></canvas>
+        <div id="audio-container"></div>
+        <div id="container"></div>
+
+        <script type="module" src="js/main.js"></script>
+
+        <script>
+            // Test functionality
+            document.addEventListener("DOMContentLoaded", () => {
+                const status = document.getElementById("status");
+
+                // Test if modules loaded
+                setTimeout(() => {
+                    if (window.connectionManager) {
+                        status.innerHTML =
+                            "✅ All modules loaded successfully! Click anywhere to start audio.";
+                        status.className = "status success";
+                    } else {
+                        status.innerHTML =
+                            "❌ Error loading modules. Check console for details.";
+                        status.className = "status error";
+                    }
+                }, 1000);
+
+                // Test audio context
+                document.addEventListener(
+                    "click",
+                    () => {
+                        if (window.connectionManager) {
+                            status.innerHTML =
+                                "🎵 Audio started! Try adding effects and connecting components.";
+                            status.className = "status success";
+                        }
+                    },
+                    { once: true }
+                );
+            });
+        </script>
+    </body>
+</html>
+

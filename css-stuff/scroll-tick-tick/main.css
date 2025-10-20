@@ -4,6 +4,16 @@
   initial-value: 0;
 }
 
+@property --radial-progress {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+:where(h3) {
+  margin-block-end: var(--size-3);
+}
+
 .container {
   max-width: 80rem;
   padding-inline: var(--size-5);
@@ -39,6 +49,11 @@
     text-align: center;
     font-weight: var(--font-weight-9);
   }
+}
+
+.grid-center {
+  display: grid;
+  place-items: center;
 }
 
 .section {
@@ -97,11 +112,15 @@
 }
 
 .panel {
-  color: var(--gray-8);
   box-shadow: var(--shadow-3);
   background: var(--gray-1);
 
   border-radius: var(--radius-3);
+  color: var(--gray-8);
+
+  code {
+    color: var(--text-1);
+  }
 }
 
 .panel--no-overflow {
@@ -210,8 +229,65 @@
   }
 }
 
+.spinner {
+  --progress: calc(var(--radial-progress) * 360deg);
+  --border-width: 10px;
+
+  position: relative;
+
+  width: 10rem;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  border: 10px solid var(--gray-0);
+
+  display: grid;
+  place-items: center;
+
+  box-shadow: var(--shadow-3);
+
+  animation: radialProgress 1ms ease-out forwards;
+  animation-timeline: view(block);
+  animation-range: entry 100% contain 90%;
+}
+
+.spinner__progress {
+  position: absolute;
+  inset: 0;
+
+  border-radius: 50%;
+
+  width: 100%;
+  aspect-ratio: 1;
+  background: conic-gradient(
+    from 0deg,
+    #8b5cf6 0deg,
+    #8b5cf6 var(--progress, 0deg),
+    transparent var(--progress, 0deg)
+  );
+
+  mask: radial-gradient(
+    circle,
+    transparent 0,
+    transparent calc(50% - 5px),
+    black calc(50% - var(--border-width)),
+    black 100%
+  );
+}
+
+.spinner::before {
+  --progress-fixed: calc(var(--radial-progress) * 100);
+  counter-reset: variable var(--progress-fixed);
+  content: "" counter(variable) "%";
+
+  position: relative;
+  z-index: 10;
+
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-7);
+}
+
 .footer {
-  height: 100dvh;
+  height: 50dvh;
 }
 
 p + p {
@@ -262,6 +338,15 @@ p + p {
   }
   to {
     --card-rotation-progress: 1;
+  }
+}
+
+@keyframes radialProgress {
+  from {
+    --radial-progress: 0;
+  }
+  to {
+    --radial-progress: 1;
   }
 }
 

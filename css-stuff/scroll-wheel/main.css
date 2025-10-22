@@ -1,0 +1,74 @@
+@property --progress-x {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+.container {
+  --radius: 100px;
+
+  width: 100%;
+  min-height: 400dvh;
+}
+
+.text-container {
+  display: grid;
+  place-items: center;
+
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+
+  perspective: 600px;
+
+  animation: textRotate 1ms linear forwards;
+  animation-timeline: scroll(root);
+}
+
+.text {
+  --index: sibling-index();
+  --count: sibling-count();
+
+  --angle-step: calc(360deg / (var(--count)));
+  --angle-increment: calc(360deg * var(--progress-x) * -1);
+
+  --element-angle-static: calc(var(--index) * var(--angle-step));
+  --angle-position-y: calc(
+    var(--element-angle-static) + var(--angle-increment)
+  );
+
+  --y: calc(var(--radius) * sin(var(--angle-position-y)));
+  --z: calc(var(--radius) * cos(var(--angle-position-y)));
+
+  --depth: calc((var(--z) + var(--radius)) / var(--radius));
+
+  --opacity: clamp(0.2, var(--depth), 1);
+  --blur: calc(2px * clamp(0, 1 - var(--depth), 1));
+
+  --color: oklch(50% 1 0);
+
+  position: absolute;
+
+  font-size: var(--font-size-fluid-3);
+  text-transform: uppercase;
+  font-weight: var(--font-weight-9);
+  color: var(--color);
+
+  backface-visibility: visible;
+
+  translate: 0 calc(var(--y)) calc(var(--z));
+  rotate: x calc(var(--angle-position-y) * -1);
+  opacity: var(--opacity);
+  filter: blur(var(--blur));
+}
+
+@keyframes textRotate {
+  from {
+    --progress-x: 0;
+  }
+  to {
+    --progress-x: 1;
+  }
+}
+

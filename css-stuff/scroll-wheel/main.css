@@ -5,25 +5,30 @@
 }
 
 .container {
-  --radius: 100px;
-
   width: 100%;
   min-height: 400dvh;
 }
 
 .text-container {
+  --radius: 8vh;
+
+  --bottom-offset: calc(var(--progress-x) * 100%);
+
   display: grid;
   place-items: center;
 
   position: fixed;
-  inset: 0;
+
+  bottom: var(--bottom-offset);
+  left: 50%;
   width: 100%;
-  height: 100vh;
+  transform: translate(-50%, 0);
 
   perspective: 600px;
 
   animation: textRotate 1ms linear forwards;
   animation-timeline: scroll(root);
+  animation-range: 0 90%;
 }
 
 .text {
@@ -31,7 +36,7 @@
   --count: sibling-count();
 
   --angle-step: calc(360deg / (var(--count)));
-  --angle-increment: calc(360deg * var(--progress-x) * -1);
+  --angle-increment: calc(360deg * var(--progress-x));
 
   --element-angle-static: calc(var(--index) * var(--angle-step));
   --angle-position-y: calc(

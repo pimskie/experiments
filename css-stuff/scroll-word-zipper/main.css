@@ -1,0 +1,60 @@
+@property --progress-y {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+body {
+  padding-block: 80vh;
+}
+
+.container {
+  width: 100%;
+}
+
+.text-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.text {
+  --index: sibling-index();
+  --count: sibling-count();
+
+  --progress-y: 1;
+  --modifier: 1;
+  --offset-x: 100;
+
+  --_offset-x: calc(var(--offset-x) * var(--modifier) * var(--progress-y) * 1%);
+
+  margin-inline: auto;
+
+  font-size: var(--font-size-fluid-3);
+  text-transform: uppercase;
+  font-weight: var(--font-weight-9);
+
+  transform: translateX(var(--_offset-x));
+
+  animation: zipper 1ms linear forwards;
+  animation-timeline: view(block);
+  animation-range: entry 0% contain 100%;
+
+  &:nth-child(even) {
+    --modifier: 1;
+  }
+
+  &:nth-child(odd) {
+    --modifier: -1;
+  }
+}
+
+@keyframes zipper {
+  from {
+    --progress-y: 1;
+  }
+
+  to {
+    --progress-y: 0;
+  }
+}
+

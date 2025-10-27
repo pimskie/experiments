@@ -5,20 +5,15 @@
 }
 
 body {
-  --progress-y: 1;
-
-  padding-block: 100vh;
   min-height: 200vh;
-
-  animation: zipper 1ms linear forwards;
-  animation-timeline: scroll(root);
-  animation-range: 0 100%;
 }
 
 .container {
-  position: fixed;
-  inset: 50% 0 0 50%;
-  transform: translate(-50%, 0%);
+  --radius: 50vw;
+
+  margin-block: 90vh;
+
+  transform: translate(calc(var(--radius) * -1), 0%);
 }
 
 .text-container {
@@ -29,10 +24,12 @@ body {
 .text {
   --index: sibling-index();
   --count: sibling-count();
+
+  --progress-y: 1;
+
   --angle-start: 90deg;
   --angle-end: 90deg;
 
-  --radius: 300px;
   --angle-x: calc(var(--angle-start) - (var(--angle-end) * var(--progress-y)));
   --angle-y: calc(var(--angle-start) - (var(--angle-end) * var(--progress-y)));
 
@@ -46,6 +43,10 @@ body {
   font-size: var(--font-size-fluid-3);
   text-transform: uppercase;
   font-weight: var(--font-weight-9);
+
+  animation: zipper 1ms linear forwards;
+  animation-timeline: view(block);
+  animation-range: entry 0% contain 100%;
 
   &:nth-child(even) {
     --modifier: -1;

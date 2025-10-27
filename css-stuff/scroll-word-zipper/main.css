@@ -5,11 +5,20 @@
 }
 
 body {
-  padding-block: 80vh;
+  --progress-y: 1;
+
+  padding-block: 100vh;
+  min-height: 200vh;
+
+  animation: zipper 1ms linear forwards;
+  animation-timeline: scroll(root);
+  animation-range: 0 100%;
 }
 
 .container {
-  width: 100%;
+  position: fixed;
+  inset: 50% 0 0 50%;
+  transform: translate(-50%, 0%);
 }
 
 .text-container {
@@ -20,12 +29,17 @@ body {
 .text {
   --index: sibling-index();
   --count: sibling-count();
+  --angle-start: 90deg;
+  --angle-end: 90deg;
 
-  --progress-y: 1;
-  --modifier: 1;
-  --offset-x: 100;
+  --radius: 300px;
+  --angle-x: calc(var(--angle-start) - (var(--angle-end) * var(--progress-y)));
+  --angle-y: calc(var(--angle-start) - (var(--angle-end) * var(--progress-y)));
 
-  --_offset-x: calc(var(--offset-x) * var(--modifier) * var(--progress-y) * 1%);
+  --x: calc(var(--radius) * cos(var(--angle-x)));
+  --y: calc(var(--radius) * sin(var(--angle-y)));
+
+  transform: translate(var(--x), var(--y));
 
   margin-inline: auto;
 
@@ -33,14 +47,8 @@ body {
   text-transform: uppercase;
   font-weight: var(--font-weight-9);
 
-  transform: translateX(var(--_offset-x));
-
-  animation: zipper 1ms linear forwards;
-  animation-timeline: view(block);
-  animation-range: entry 0% contain 100%;
-
   &:nth-child(even) {
-    --modifier: 1;
+    --modifier: -1;
   }
 
   &:nth-child(odd) {
@@ -50,11 +58,11 @@ body {
 
 @keyframes zipper {
   from {
-    --progress-y: 1;
+    --progress-y: 0;
   }
 
   to {
-    --progress-y: 0;
+    --progress-y: 1;
   }
 }
 

@@ -5,18 +5,16 @@
 }
 
 body {
-  min-height: 200vh;
+  /* min-height: 200vh; */
 }
 
 .container {
-  --radius: 50vw;
-
-  margin-block: 90vh;
-
-  transform: translate(calc(var(--radius) * -1), 0%);
+  width: 100%;
+  overflow-x: clip;
 }
 
 .text-container {
+  margin-block-start: 50vh;
   display: flex;
   flex-direction: column;
 }
@@ -26,15 +24,26 @@ body {
   --count: sibling-count();
 
   --progress-y: 1;
+  --direction: 1;
+  --radius-x: 80vw;
+  --radius-y: 20vh;
 
   --angle-start: 90deg;
   --angle-end: 90deg;
 
-  --angle-x: calc(var(--angle-start) - (var(--angle-end) * var(--progress-y)));
-  --angle-y: calc(var(--angle-start) - (var(--angle-end) * var(--progress-y)));
+  --angle-x: calc(
+    var(--angle-start) - var(--direction) *
+      (var(--angle-end) * var(--progress-y))
+  );
+  --angle-y: calc(
+    var(--angle-start) - var(--direction) *
+      (var(--angle-end) * var(--progress-y))
+  );
 
-  --x: calc(var(--radius) * cos(var(--angle-x)));
-  --y: calc(var(--radius) * sin(var(--angle-y)));
+  --x: calc(
+    var(--radius-x) * cos(var(--angle-x)) - var(--direction) * var(--radius-x)
+  );
+  --y: calc(var(--radius-y) * sin(var(--angle-y)));
 
   transform: translate(var(--x), var(--y));
 
@@ -46,14 +55,10 @@ body {
 
   animation: zipper 1ms linear forwards;
   animation-timeline: view(block);
-  animation-range: entry 0% contain 100%;
+  animation-range: entry 0% contain 50%;
 
   &:nth-child(even) {
-    --modifier: -1;
-  }
-
-  &:nth-child(odd) {
-    --modifier: -1;
+    --direction: -1;
   }
 }
 

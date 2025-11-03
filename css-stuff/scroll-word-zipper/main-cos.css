@@ -1,0 +1,83 @@
+@property --progress-y {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+.container {
+  width: 100%;
+  overflow-x: clip;
+}
+
+.text-container {
+  margin-block-start: 50vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.text {
+  --index: sibling-index();
+  --count: sibling-count();
+
+  --progress-y: 1;
+  --direction: 1;
+  --radius-x: 80vw;
+  --radius-y: 20vh;
+
+  --angle-start: 90deg;
+  --angle-end: 90deg;
+
+  --rotation-start: 20deg;
+
+  --progress-y-inverted: calc(1 - var(--progress-y));
+
+  --angle-x: calc(
+    var(--angle-start) - var(--direction) *
+      (var(--angle-end) * var(--progress-y))
+  );
+  --angle-y: calc(
+    var(--angle-start) - var(--direction) *
+      (var(--angle-end) * var(--progress-y))
+  );
+
+  --opacity: var(--progress-y);
+
+  --rotation: calc(
+    var(--rotation-start) * var(--direction) * var(--progress-y-inverted)
+  );
+
+  --x: calc(
+    var(--radius-x) * cos(var(--angle-x)) - var(--direction) * var(--radius-x)
+  );
+  --y: calc(var(--radius-y) * sin(var(--angle-y)));
+
+  margin-inline: auto;
+
+  font-size: var(--font-size-fluid-3);
+  text-transform: uppercase;
+  font-weight: var(--font-weight-9);
+  text-align: center;
+
+  transform: translate(var(--x), var(--y)) rotate(var(--rotation));
+
+  opacity: var(--opacity);
+
+  animation: zipper 1ms linear forwards;
+  animation-timeline: view(block);
+  animation-range: entry 0% contain 60%;
+
+  &:nth-child(even) {
+    --direction: -1;
+  }
+}
+
+@keyframes zipper {
+  from {
+    --progress-y: 0;
+  }
+
+  to {
+    --progress-y: 1;
+  }
+}
+

@@ -1,0 +1,66 @@
+@property --progress-scroll {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* https://easings.net/#easeOutQuart */
+@function --ease-out-quart(--value) {
+  --value-eased: calc(1 - pow(calc(1 - var(--value)), 4));
+  --value-eased-clamped: clamp(0, var(--value-eased), 1);
+
+  result: var(--value-eased-clamped);
+}
+
+@function --ease-out-expo(--value) {
+  --value-eased: calc(1 - pow(2, calc(-10 * var(--value))));
+  --value-eased-clamped: clamp(0, var(--value-eased), 1);
+
+  result: var(--value-eased-clamped);
+}
+
+@function --ease-in-cubic(--value) {
+  --value-eased: calc(var(--value) * var(--value) * var(--value));
+  --value-eased-clamped: clamp(0, var(--value-eased), 1);
+
+  result: var(--value-eased-clamped);
+}
+
+body {
+  animation: rotate 1ms linear forwards;
+  animation-timeline: scroll(root);
+  animation-range: 0 100%;
+}
+
+.section {
+  width: 100vw;
+  min-height: 100vh;
+}
+
+.container {
+  min-height: 200vh;
+}
+
+.text-container {
+  position: fixed;
+  width: 100%;
+  border: 1px solid red;
+}
+
+.text {
+  font-size: var(--font-size-fluid-2);
+  text-transform: uppercase;
+  font-weight: var(--font-weight-9);
+  text-align: center;
+}
+
+@keyframes rotate {
+  from {
+    --progress-scroll: 0;
+  }
+
+  to {
+    --progress-scroll: 1;
+  }
+}
+

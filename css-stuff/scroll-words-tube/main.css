@@ -1,0 +1,105 @@
+@property --progress-scroll {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* https://easings.net/#easeOutQuart */
+@function --ease-out-quart(--value) {
+  --value-eased: calc(1 - pow(calc(1 - var(--value)), 4));
+  --value-eased-clamped: clamp(0, var(--value-eased), 1);
+
+  result: var(--value-eased-clamped);
+}
+
+@function --ease-out-expo(--value) {
+  --value-eased: calc(1 - pow(2, calc(-10 * var(--value))));
+  --value-eased-clamped: clamp(0, var(--value-eased), 1);
+
+  result: var(--value-eased-clamped);
+}
+
+@function --ease-in-cubic(--value) {
+  --value-eased: calc(var(--value) * var(--value) * var(--value));
+  --value-eased-clamped: clamp(0, var(--value-eased), 1);
+
+  result: var(--value-eased-clamped);
+}
+
+body {
+  animation: rotate 1ms linear forwards;
+  animation-timeline: scroll(root);
+  animation-range: 0 100%;
+}
+
+.section {
+  width: 100vw;
+  min-height: 100vh;
+  overflow: hidden;
+
+  &:nth-child(odd) {
+    background: white;
+  }
+}
+
+.container {
+  perspective: 1000px;
+}
+
+.text-circle-container {
+  --radius: 200px;
+  --rotation-x: calc(360deg * var(--progress-scroll));
+
+  position: relative;
+
+  width: calc(var(--radius) * 2);
+  aspect-ratio: 1/1;
+
+  margin: 0 auto;
+
+  transform-style: preserve-3d;
+  transform: rotateX(-15deg) rotateY(var(--rotation-x));
+}
+
+.text {
+  --index: sibling-index();
+  --count: sibling-count();
+
+  --angle: calc((360deg / var(--count)) * var(--index));
+
+  --x-offset: -50%;
+  --x: calc(var(--x-offset) + var(--radius) * sin(var(--angle)));
+  --y: -50%;
+  --z: calc(var(--radius) * cos(var(--angle)));
+
+  --rotate-y: var(--angle);
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--radius) * 2);
+
+  font-size: var(--font-size-fluid-2);
+  text-transform: uppercase;
+  font-weight: var(--font-weight-9);
+  text-align: center;
+
+  backface-visibility: visible;
+
+  transform-origin: center center;
+
+  transform: translate3d(var(--x), var(--y), var(--z)) rotateY(var(--rotate-y));
+
+  padding: 1rem;
+}
+
+@keyframes rotate {
+  from {
+    --progress-scroll: 0;
+  }
+
+  to {
+    --progress-scroll: 1;
+  }
+}
+

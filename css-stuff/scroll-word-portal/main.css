@@ -4,30 +4,8 @@
   initial-value: 0;
 }
 
-/* https://easings.net/#easeOutQuart */
-@function --ease-out-quart(--value) {
-  --value-eased: calc(1 - pow(calc(1 - var(--value)), 4));
-  --value-eased-clamped: clamp(0, var(--value-eased), 1);
-
-  result: var(--value-eased-clamped);
-}
-
-@function --ease-out-expo(--value) {
-  --value-eased: calc(1 - pow(2, calc(-10 * var(--value))));
-  --value-eased-clamped: clamp(0, var(--value-eased), 1);
-
-  result: var(--value-eased-clamped);
-}
-
-@function --ease-in-cubic(--value) {
-  --value-eased: calc(var(--value) * var(--value) * var(--value));
-  --value-eased-clamped: clamp(0, var(--value-eased), 1);
-
-  result: var(--value-eased-clamped);
-}
-
 body {
-  animation: rotate 1ms linear forwards;
+  animation: portal 1ms linear forwards;
   animation-timeline: scroll(root);
   animation-range: 0 100%;
 }
@@ -44,17 +22,53 @@ body {
 .text-container {
   position: fixed;
   width: 100%;
-  border: 1px solid red;
+
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.portal {
+  width: 5vw;
+  height: clamp(200px, 30vh, 600px);
+
+  &.portal--from {
+    border-left: 3px solid orange;
+  }
+
+  &.portal--to {
+    border-right: 3px solid blue;
+  }
 }
 
 .text {
-  font-size: var(--font-size-fluid-2);
+  --offset-x-base: calc(100% * var(--progress-scroll));
+  --font-size: calc(var(--font-size-fluid-2) * 1);
+
+  position: relative;
+  font-size: var(--font-size);
   text-transform: uppercase;
   font-weight: var(--font-weight-9);
   text-align: center;
+
+  overflow: hidden;
+
+  &.text--a {
+    --offset-x: var(--offset-x-base);
+  }
+
+  &.text--b {
+    --offset-x: calc(-100% + var(--offset-x-base));
+  }
+
+  .text-inner {
+    transform: translateX(var(--offset-x));
+  }
 }
 
-@keyframes rotate {
+@keyframes portal {
   from {
     --progress-scroll: 0;
   }

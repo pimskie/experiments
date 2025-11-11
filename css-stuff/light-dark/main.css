@@ -1,0 +1,36 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+:where(html) {
+  color-scheme: light dark;
+
+  --color-gray-11: #2f2f2f;
+  --color-gray-01: #eaeaea;
+
+  --panel-background: light-dark(var(--color-gray-01), var(--color-gray-11));
+  --panel-color: light-dark(var(--color-gray-11), var(--color-gray-01));
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+
+  background: #000;
+}
+
+.panel {
+  padding: 1rem;
+  background: var(--panel-background);
+  color: var(--panel-color);
+}
+

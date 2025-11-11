@@ -1,13 +1,14 @@
 body {
+  padding-top: 300px;
   min-height: 300vh;
 }
 
 .section {
-  position: relative;
-
-  min-height: 200vh;
-
-  padding-block-start: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-5);
 }
 
 button {
@@ -36,14 +37,9 @@ button {
 .menu {
   position: absolute;
   margin: 0;
-  position-anchor: --trigger;
 
-  left: anchor(--trigger right);
-  top: anchor(--trigger top);
-  margin-left: var(--padding);
-  position-try-fallbacks: --bottom;
-  transition: left 0.1s, top 0.1s;
   width: max-content;
+  height: max-content;
 
   /* https://developer.mozilla.org/en-US/docs/Web/CSS/position-area_value */
   /* position-area: inline-start center; */
@@ -53,12 +49,34 @@ button {
   background-color: var(--blue-4);
   color: var(--blue-0);
   border-radius: var(--radius-2);
+
+  position-anchor: --trigger;
+  inset-block-end: anchor(top);
+  justify-self: anchor-center;
+  margin-block-end: var(--size-3);
+
+  position-try-fallbacks: --bottom, --top;
+
+  /*
+   position-anchor: --trigger;
+  position-area: center block-start;
+  position-try: flip-block;
+  */
+}
+
+@position-try --top {
+  margin-block-end: var(--size-3);
+  margin-block-start: unset;
+
+  inset-block-end: anchor(top);
+  inset-block-start: unset;
 }
 
 @position-try --bottom {
-  margin: var(--padding) 0 0 var(--padding);
-  left: anchor(--trigger left);
-  top: anchor(--trigger bottom);
-  margin-left: var(--padding);
+  margin-block-end: unset;
+  margin-block-start: var(--size-3);
+
+  inset-block-end: unset;
+  inset-block-start: anchor(bottom);
 }
 

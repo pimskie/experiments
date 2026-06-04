@@ -1,0 +1,40 @@
+.container {
+  max-inline-size: 40rem;
+  margin-inline: auto;
+}
+
+.card-grid {
+  position: relative;
+
+  display: grid;
+   grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+
+  aspect-ratio: 1;
+}
+
+.card {
+  position: relative;
+}
+
+.card__title {
+  margin-block-end: var(--size-3);
+  font-size: var(--font-size-5);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  transition: opacity 0.3s ease;
+
+  &[aria-hidden] {
+    display: none;
+  }
+
+  &.is-revealed {
+    opacity: 0;
+    pointer-events: none;
+  }
+}

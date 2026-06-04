@@ -25,7 +25,13 @@ export const initScratchCards = (root = document.body) => {
   const canvases = [...root.querySelectorAll(SCRATCH_CANVAS_SELECTOR)];
 
   const instances = canvases.map((canvasElement) => {
-    const instanceOptions = getOptionsFromDataset(canvasElement);
+    const container = canvasElement.closest('.scratch-card-container');
+    const revealButton = container.querySelector('.js-scratch-reveal');
+
+    const instanceOptions = {
+      ...getOptionsFromDataset(canvasElement),
+      revealButton,
+    };
     const canvasInstance = createScratchCard(canvasElement, instanceOptions);
 
     return canvasInstance;

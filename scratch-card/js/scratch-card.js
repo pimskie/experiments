@@ -6,7 +6,8 @@ import { paintCover, drawPath, drawParticles } from './renderer.js';
 const getPointerVector = ({ offsetX, offsetY }) => ({ x: offsetX, y: offsetY });
 
 export const createScratchCard = (canvas, options = {}) => {
-  const config = { ...DEFAULTS, ...options };
+  const { revealButton, ...overrides } = options;
+  const config = { ...DEFAULTS, ...overrides };
   const state = {
     isDrawing: false,
     rafId: null,
@@ -76,14 +77,21 @@ export const createScratchCard = (canvas, options = {}) => {
     canvas.removeEventListener('pointerdown', onPointerDown);
     canvas.removeEventListener('pointerup', onPointerUp);
     canvas.removeEventListener('pointermove', onPointerMove);
+    revealButton.removeEventListener('click', onRevealClick);
 
     cancelAnimationFrame(state.rafId);
     state.rafId = null;
 
     particleCanvas.remove();
+    revealButton.remove();
   };
 
+  const onRevealClick = () => reveal();
+
   const reveal = () => {
+    // Once revealing starts the button is moot — block a second trigger.
+    revealButton.disabled = true;
+
     canvas.classList.add('is-revealed');
     canvas.addEventListener(
       'transitionend',
@@ -151,6 +159,7 @@ export const createScratchCard = (canvas, options = {}) => {
 
   canvas.addEventListener('pointerdown', onPointerDown);
   canvas.addEventListener('pointerup', onPointerUp);
+  revealButton.addEventListener('click', onRevealClick);
 
   resizeObserver.observe(canvas);
 

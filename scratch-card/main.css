@@ -22,6 +22,14 @@
   font-size: var(--font-size-5);
 }
 
+.particle-canvas {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}
+
 .canvas {
   position: absolute;
   inset: 0;

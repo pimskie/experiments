@@ -89,7 +89,7 @@ export const createScratchCard = (canvas, options = {}) => {
   const onRevealClick = () => reveal();
 
   const reveal = () => {
-    // Once revealing starts the button is moot — block a second trigger.
+    // Once revealing starts the button is moot, block a second trigger
     revealButton.disabled = true;
 
     canvas.classList.add('is-revealed');

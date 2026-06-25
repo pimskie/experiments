@@ -1,0 +1,44 @@
+@import url('https://unpkg.com/open-props@1.7.23/open-props.min.css');
+@import url('https://unpkg.com/open-props@1.7.23/normalize.min.css');
+
+.container {
+    display: flex;
+    inline-size: min(100%, 60rem);
+    block-size: min(80svh, 30rem);
+
+    margin-inline: auto;
+}
+
+.carousel {
+    inline-size: 100%;
+    block-size: 100%;
+    background: var(--indigo-1);
+}
+
+.carousel__slides {
+    block-size: 100%;
+    inline-size: 100%;
+    
+    display: flex;
+    
+    gap: var(--size-2);
+    
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+}
+
+.slide {
+    block-size: 100%;
+    flex-basis: 90%;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    scroll-snap-align: start;
+
+    background: Var(--indigo-2);
+
+    color: var(--gray-10);
+    font-size: var(--font-size-fluid-2);
+}

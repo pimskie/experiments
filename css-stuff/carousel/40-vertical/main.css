@@ -1,0 +1,80 @@
+@import url('https://unpkg.com/open-props@1.7.23/open-props.min.css');
+@import url('https://unpkg.com/open-props@1.7.23/normalize.min.css');
+
+.container {
+    inline-size: min(100%, 60rem);
+    block-size: min(80svh, 30rem);
+
+    margin-inline: auto;
+}
+
+.sections {
+    container-type: scroll-state;
+    container-name: sections;
+    scroll-marker-group: after;
+    anchor-name: --scroll-container;
+
+    display: grid;
+    gap: var(--size-2);
+
+    block-size: 100dvh;
+
+    overflow-x: scroll;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scroll-marker-group: after;
+}
+
+.sections::scroll-marker-group {
+    position: fixed;
+    position-anchor: --scroll-container;
+    position-area: block-start;
+
+    display: flex;
+    gap: var(--size-2);
+
+    transition: opacity 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), 
+        scale 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.section {
+    block-size: min(100svh, 40rem);
+    background: var(--orange-6);
+
+    &::scroll-marker {
+        padding: var(--size-3);
+        content: attr(data-title);
+  
+        display: inline-block;
+        color: var(--gray-8);
+        text-decoration: none;
+
+        background: var(--pink-1);
+        border-radius: var(--radius-2);
+
+        transition: opacity 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), 
+            scale 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+}
+
+.section:nth-child(even) {
+    background: var(--orange-5);
+}
+
+.section::scroll-marker:hover,
+.section::scroll-marker:target-current {
+    background: var(--pink-7);
+    color: var(--gray-1);
+}
+
+.section::scroll-marker:target-before:not(:hover) {
+    scale: 0.7;
+}
+
+@container sections scroll-state(scrollable: top) {
+  .sections::scroll-marker-group:not(:hover) {
+    opacity: 0.75;
+    /* scale: 0.8; */
+  }
+}

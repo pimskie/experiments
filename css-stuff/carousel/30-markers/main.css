@@ -1,0 +1,146 @@
+@import url('https://unpkg.com/open-props@1.7.23/open-props.min.css');
+@import url('https://unpkg.com/open-props@1.7.23/normalize.min.css');
+
+.container {
+    display: flex;
+    inline-size: min(100%, 60rem);
+    block-size: min(80svh, 30rem);
+
+    margin-inline: auto;
+}
+
+.carousel {
+    inline-size: 100%;
+    block-size: 100%;
+
+    display: grid;
+    grid-template-areas: 
+        "prev slides next"
+        ". markers .";
+    grid-template-columns: 5rem 1fr 5rem;
+}
+
+.carousel__slides {
+    container-type: scroll-state;
+    grid-area: slides;
+
+    block-size: 100%;
+    inline-size: 100%;
+    
+    display: grid;
+    gap: var(--size-2);
+    grid-auto-flow: column;
+    grid-auto-columns: 20dvw;
+    
+    overflow-x: scroll;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scroll-marker-group: after;
+}
+
+
+.carousel__slides::scroll-button(inline-start),
+.carousel__slides::scroll-button(inline-end) {
+    align-self: center;
+
+    width: 3rem;
+    aspect-ratio: 1;
+    opacity: 1;
+
+    font-size: 2vw;
+
+    border-radius: 100%;
+    border: none;
+    background: var(--blue-3);
+}
+
+.carousel__slides::scroll-button(inline-start):focus-visible,
+.carousel__slides::scroll-button(inline-end):focus-visible {
+    outline: 2px solid var(--blue-6);
+    outline-offset: 3px;
+}
+
+.carousel__slides::scroll-button(inline-start):enabled:hover,
+.carousel__slides::scroll-button(inline-end):enabled:hover {
+    cursor: pointer;
+    background: var(--blue-4);
+    scale: 1.05;
+}
+
+
+.carousel__slides::scroll-button(inline-start):enabled:active,
+.carousel__slides::scroll-button(inline-end):enabled:active {
+    scale: 0.95;
+}
+
+
+.carousel__slides::scroll-button(inline-start) {
+    grid-area: prev;
+    content: "⬅";
+}
+
+.carousel__slides::scroll-button(inline-end) {
+    grid-area: next;
+    content: "⬅";
+    rotate: 180deg;
+    justify-self: end;
+}
+
+.carousel__slides::scroll-marker-group {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: var(--size-4);
+    gap: var(--size-2);
+
+    grid-area: markers;
+    
+    justify-self: center;
+    inline-size: 100%;
+    align-items: center;
+    justify-content: center;
+    height: 3rem;
+
+    padding: var(--size-3);
+    border: 1px solid var(--gray-7);
+    border-radius: var(--radius-round);
+}
+
+.slide {
+    block-size: 100%;
+    flex-basis: 95%;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    scroll-snap-align: end;
+
+    background: Var(--indigo-2);
+
+    color: var(--gray-10);
+    font-size: var(--font-size-fluid-2);
+}
+
+.slide::scroll-marker {
+    content: "";
+    border: 2px solid var(--blue-5);
+    aspect-ratio: 1;
+    border-radius: var(--radius-round);
+}
+
+.slide::scroll-marker:focus-visible {
+    outline: 2px solid var(--blue-6);
+    outline-offset: 2px;
+}
+
+.slide::scroll-marker:hover {
+    outline: 2px solid var(--blue-6);
+    outline-offset: 2px;
+    scale: 1.1;
+}
+
+.slide::scroll-marker:active,
+.slide::scroll-marker:target-current {
+    background: var(--blue-6);
+}

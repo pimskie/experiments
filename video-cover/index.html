@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Cover</title>
+    <link rel="stylesheet" href="https://unpkg.com/open-props@1.7.23/open-props.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/open-props@1.7.23/normalize.min.css" />
+    <link rel="stylesheet" href="main.css" />
+</head>
+<body>
+<header class="header" data-ref="header">
+    <div class="header__media">
+        <div class="header__still-container" data-ref="still-container">
+            <img src="./video-still.png" alt="" class="header__still">
+        </div>
+
+        <div class="header__video-container"  data-ref="video-container">
+            <video 
+                class="header__video" 
+                src="https://cdn.jsdelivr.net/npm/big-buck-bunny-1080p@0.0.6/video.mp4" 
+                poster="./video-still.png" 
+                data-ref="video"
+                controls />
+        </div>
+    </div>
+
+    <aside class="header__description" data-ref="aside">
+        <h1>Pimskie about webdevelopment</h1>
+    </aside>
+
+</header>
+
+<section class="section">
+    <div class="container">
+
+    </div>
+</section>
+
+<script src="main.js" />
+</body>
+</html>

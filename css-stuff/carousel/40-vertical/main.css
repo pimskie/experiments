@@ -40,7 +40,7 @@
 
 .section {
     block-size: min(100svh, 40rem);
-    background: var(--orange-6);
+    background: var(--gray-4);
 
     &::scroll-marker {
         padding: var(--size-3);
@@ -59,12 +59,12 @@
 }
 
 .section:nth-child(even) {
-    background: var(--orange-5);
+    background: var(--gray-2);
 }
 
 .section::scroll-marker:hover,
 .section::scroll-marker:target-current {
-    background: var(--pink-7);
+    background: var(--pink-3);
     color: var(--gray-1);
 }
 

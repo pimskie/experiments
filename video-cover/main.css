@@ -1,5 +1,7 @@
 :root {
     --color-surface-default: light-dark(var(--gray-3), var(--gray-12));
+    --color-surface-default-altenate: light-dark(var(--gray-4), var(--gray-11));
+
     --color-text-on-surface-default: light-dark(var(--gray-12), var(--gray-3));
 }
 
@@ -97,4 +99,19 @@
 
 .title {
     font-size: var(--font-size-fluid-2);
+}
+
+.story-list {
+    display: grid;
+    gap: 3rem;
+}
+
+
+.story .story__content {
+    padding: var(--size-8);
+    background: var(--color-surface-default);
+}
+
+.story:nth-child(even) .story__content {
+    background: var(--color-surface-default-altenate);
 }

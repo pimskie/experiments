@@ -12,3 +12,6 @@ https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::scroll-ma
 
 MARKER CURRENT
 https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/:target-current
+
+
+https://www.jomaendle.com/blog/css-carousel

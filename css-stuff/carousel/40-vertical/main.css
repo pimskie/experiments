@@ -1,11 +1,19 @@
 @import url('https://unpkg.com/open-props@1.7.23/open-props.min.css');
 @import url('https://unpkg.com/open-props@1.7.23/normalize.min.css');
 
-.container {
-    inline-size: min(100%, 60rem);
-    block-size: min(80svh, 30rem);
+:root {
+    color-scheme: dark;
+    --accent: var(--yellow-3);
+}
 
-    margin-inline: auto;
+body {
+    margin: 0;
+    background: var(--gray-12);
+}
+
+.container {
+    inline-size: 100%;
+    block-size: 100dvh;
 }
 
 .sections {
@@ -14,67 +22,175 @@
     scroll-marker-group: after;
     anchor-name: --scroll-container;
 
-    display: grid;
-    gap: var(--size-2);
-
     block-size: 100dvh;
 
-    overflow-x: scroll;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
-    scroll-marker-group: after;
+
+    scrollbar-width: none;
 }
+
+.sections::-webkit-scrollbar {
+    inline-size: 0;
+}
+
+/* ---------- sticky pill navigation (the scroll markers) ---------- */
 
 .sections::scroll-marker-group {
     position: fixed;
     position-anchor: --scroll-container;
     position-area: block-start;
+    justify-self: center;
 
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: var(--size-2);
 
-    transition: opacity 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), 
-        scale 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+    margin-block-start: var(--size-4);
+    padding: var(--size-2);
+
+    background: color-mix(in oklab, var(--gray-11) 65%, transparent);
+    border: 1px solid var(--gray-9);
+    border-radius: var(--radius-round);
+    backdrop-filter: blur(12px);
+
+    transition:
+        opacity 0.3s var(--ease-3),
+        scale 0.3s var(--ease-3);
 }
 
-.section {
-    block-size: min(100svh, 40rem);
-    background: var(--gray-4);
-
-    &::scroll-marker {
-        padding: var(--size-3);
-        content: attr(data-title);
-  
-        display: inline-block;
-        color: var(--gray-8);
-        text-decoration: none;
-
-        background: var(--pink-1);
-        border-radius: var(--radius-2);
-
-        transition: opacity 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), 
-            scale 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+/* dim the nav once you've scrolled away from the top */
+@container sections scroll-state(scrollable: top) {
+    .sections::scroll-marker-group:not(:hover) {
+        opacity: 0.55;
+        scale: 0.96;
     }
 }
 
-.section:nth-child(even) {
-    background: var(--gray-2);
+/* ---------- the pages ---------- */
+
+.section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+
+    block-size: 100dvh;
+
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: var(--size-8) var(--size-5);
+    overflow: hidden;
+
+    background:
+        radial-gradient(120% 80% at 50% -10%,
+            color-mix(in oklab, var(--accent) 16%, transparent) 0%,
+            transparent 55%),
+        var(--gray-12);
 }
 
-.section::scroll-marker:hover,
+/* giant ghost index number in the back */
+.section::before {
+    content: attr(data-index);
+
+    position: absolute;
+    inset-block-start: -0.15em;
+    inset-inline-end: 0.05em;
+    z-index: 0;
+
+    font-size: 42vh;
+    font-weight: var(--font-weight-9);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: color-mix(in oklab, var(--accent) 8%, transparent);
+    pointer-events: none;
+}
+
+.section:nth-child(even) { --accent: var(--lime-3); }
+.section:nth-child(3n)   { --accent: var(--teal-3); }
+.section:nth-child(6)    { --accent: var(--yellow-4); }
+
+.section__inner {
+    position: relative;
+    z-index: 1;
+
+    display: grid;
+    justify-items: center;
+    gap: var(--size-3);
+
+    max-inline-size: 44rem;
+    text-align: center;
+}
+
+.section__eyebrow {
+    margin: 0;
+    font-size: var(--font-size-1);
+    font-weight: var(--font-weight-7);
+    letter-spacing: var(--font-letterspacing-2);
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.section__title {
+    margin: 0;
+    font-size: var(--font-size-fluid-3);
+    font-weight: var(--font-weight-9);
+    line-height: var(--font-lineheight-0);
+    color: var(--gray-0);
+    text-wrap: balance;
+}
+
+.section__lead {
+    margin: 0;
+    font-size: var(--font-size-3);
+    line-height: var(--font-lineheight-3);
+    color: var(--gray-5);
+    text-wrap: pretty;
+}
+
+.section__lead code {
+    padding: 0.1em 0.4em;
+    font-size: 0.9em;
+    color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 12%, var(--gray-11));
+    border-radius: var(--radius-2);
+}
+
+/* ---------- marker labels ---------- */
+
+.section::scroll-marker {
+    content: attr(data-title);
+
+    padding: var(--size-2) var(--size-3);
+
+    font-size: var(--font-size-0);
+    font-weight: var(--font-weight-6);
+    color: var(--gray-4);
+    text-decoration: none;
+
+    border-radius: var(--radius-round);
+
+    transition:
+        color 0.2s var(--ease-3),
+        background 0.2s var(--ease-3),
+        scale 0.2s var(--ease-3);
+}
+
+.section::scroll-marker:hover {
+    color: var(--gray-0);
+    background: var(--gray-10);
+    cursor: pointer;
+}
+
 .section::scroll-marker:target-current {
-    background: var(--pink-3);
-    color: var(--gray-1);
+    color: var(--gray-12);
+    background: var(--accent);
 }
 
+/* sections you've already passed shrink back a touch */
 .section::scroll-marker:target-before:not(:hover) {
-    scale: 0.7;
-}
-
-@container sections scroll-state(scrollable: top) {
-  .sections::scroll-marker-group:not(:hover) {
-    opacity: 0.75;
-    /* scale: 0.8; */
-  }
+    scale: 0.88;
+    color: var(--gray-6);
 }

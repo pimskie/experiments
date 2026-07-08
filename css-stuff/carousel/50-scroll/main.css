@@ -1,6 +1,17 @@
 @import url('https://unpkg.com/open-props@1.7.23/open-props.min.css');
 @import url('https://unpkg.com/open-props@1.7.23/normalize.min.css');
 
+:root {
+    color-scheme: dark;
+    --accent: var(--lime-3);
+    --accent-deep: var(--lime-5);
+}
+
+body {
+    margin: 0;
+    background: var(--gray-12);
+}
+
 .container {
     inline-size: min(100%, 80cqi);
     block-size: min(80svh, 30cqi);
@@ -19,150 +30,188 @@
 
     display: grid;
     grid-auto-flow: column;
-    gap: var(--size-3);
+    gap: var(--size-4);
 
     overflow-x: scroll;
+    overflow-y: hidden;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
 
-    @container not scroll-state(snapped: inline) {
-        .section-content {
-            translate: 0 6rem;
-            opacity: 0.4;
-        }
-    }
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
 }
 
-
-.sections::scroll-marker-group {
-    display: flex;
-    gap: var(--size-3);
-
-    margin-block-start: var(--size-3);
-    margin-inline: auto;
-    inline-size: min(100%, 20cqi);
+.sections::-webkit-scrollbar {
+    block-size: 0.5rem;
 }
+
+.sections::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: var(--radius-round);
+}
+
+.sections::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ---------- scroll buttons ---------- */
 
 .sections::scroll-button(inline-start),
 .sections::scroll-button(inline-end) {
     position-anchor: --anchor-carousel;
-    --inline-size: 4rem;
+    --inline-size: 3.5rem;
     --inline-offset: 1rem;
 
     position: absolute;
     inset-block-end: calc(anchor(center));
 
-    display: block;
+    display: grid;
+    place-items: center;
     inline-size: var(--inline-size);
     aspect-ratio: 1;
 
-    padding: var(--size-3);
-    background-color: transparent;
-    
+    background-color: color-mix(in oklab, var(--gray-11) 70%, transparent);
+    backdrop-filter: blur(8px);
+
     border-radius: var(--radius-round);
-    border: 1px solid var(--jungle-0);
+    border: 1px solid var(--gray-8);
 
-    color: var(--gray-1);
+    color: var(--gray-2);
+    font-size: var(--font-size-3);
 
-    transition: scale 0.2s var(--ease-out-3);
+    transition:
+        scale 0.2s var(--ease-out-3),
+        background 0.2s var(--ease-out-3),
+        color 0.2s var(--ease-out-3),
+        border-color 0.2s var(--ease-out-3);
 }
 
 .sections::scroll-button(*):not(:disabled):hover {
-    scale: 1.2;
-
-    background: var(--jungle-9);
+    scale: 1.1;
+    cursor: pointer;
+    background: var(--accent);
+    border-color: transparent;
+    color: var(--gray-12);
 }
 
 .sections::scroll-button(*):disabled {
-    scale: 0.8;
-    opacity: 0.2;
+    scale: 0.85;
+    opacity: 0.25;
 }
-
 
 .sections::scroll-button(inline-start) {
     position-area: inline-start;
     margin-inline-end: var(--inline-offset);
-
-    content: "<";
+    content: "\2190"; /* ← */
 }
 
 .sections::scroll-button(inline-end) {
     position-area: inline-end;
     margin-inline-start: var(--inline-offset);
-
-    content: ">";
+    content: "\2192"; /* → */
 }
+
+/* ---------- slides ---------- */
 
 .section {
     container-type: scroll-state;
     container-name: snap-container;
 
-    position: relative;
-
-    flex: 1 0 30%;
-
-    display: grid;
-    place-items: center;
     inline-size: 50cqi;
 
-    padding: var(--size-4);
-
-    color: var(--gray-8);
-    font-size: var(--font-size-5);
-    line-height: var(--font-lineheight-1);
-    font-weight: var(--font-weight-8);
-    text-align: center;
-    background: var(--jungle-1);
+    display: grid;
+    place-items: stretch;
+    padding-block: var(--size-6);
 
     scroll-snap-align: center;
-    container-type: scroll-state;
 }
 
 .section-content {
-    transition: opacity 0.2s var(--ease-out-3),
-        translate 0.2s var(--ease-out-3);
+    display: grid;
+    place-items: center;
+
+    block-size: 100%;
+    padding: var(--size-7);
+
+    text-align: center;
+    text-wrap: balance;
+    font-size: var(--font-size-fluid-2);
+    line-height: var(--font-lineheight-1);
+    font-weight: var(--font-weight-8);
+
+    color: var(--gray-6);
+    background: var(--gray-11);
+    border: 1px solid var(--gray-10);
+    border-radius: var(--radius-4);
+
+    transition:
+        opacity 0.3s var(--ease-out-3),
+        translate 0.3s var(--ease-out-3),
+        scale 0.3s var(--ease-out-3),
+        color 0.3s var(--ease-out-3),
+        background 0.3s var(--ease-out-3),
+        border-color 0.3s var(--ease-out-3);
 }
 
-.section::after {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-
-    background: red;
-    opacity: 0;
-
-    transition: opacity 0.2s var(--ease-out-3);
+/* the snapped (centred) slide takes the spotlight */
+@container snap-container scroll-state(snapped: inline) {
+    .section-content {
+        color: var(--gray-12);
+        background: linear-gradient(160deg, var(--accent), var(--accent-deep));
+        border-color: transparent;
+        box-shadow: 0 1rem 2.5rem -1.75rem color-mix(in oklab, var(--accent) 45%, transparent);
+    }
 }
 
-.section:nth-child(even) {
-    background: var(--jungle-5);
+/* everything else recedes — gently */
+@container snap-container not scroll-state(snapped: inline) {
+    .section-content {
+        translate: 0 0.5rem;
+        scale: 0.97;
+        opacity: 0.65;
+    }
+}
+
+/* ---------- markers (dots) ---------- */
+
+.sections::scroll-marker-group {
+    display: flex;
+    gap: var(--size-3);
+
+    margin-block-start: var(--size-4);
+    margin-inline: auto;
+    justify-content: center;
+    inline-size: min(100%, 20cqi);
 }
 
 .section::scroll-marker {
     content: "";
 
     display: block;
-    block-size: 1rem;
-    inline-size: 1rem;
-
+    block-size: 0.85rem;
+    inline-size: 0.85rem;
     flex-shrink: 0;
 
     border-radius: var(--radius-round);
-    outline: 1px solid var(--camo-0);
+    background: transparent;
+    outline: 1px solid var(--gray-8);
     outline-offset: 2px;
 
-    transition: scale 0.2s var(--ease-out-3);
+    transition:
+        scale 0.2s var(--ease-out-3),
+        background 0.2s var(--ease-out-3),
+        outline-color 0.2s var(--ease-out-3);
 }
 
-.section::scroll-marker:hover,
+.section::scroll-marker:hover {
+    cursor: pointer;
+    scale: 1.3;
+    outline-color: var(--accent);
+}
+
 .section::scroll-marker:target-current {
     scale: 1.3;
-    outline: 1px solid var(--camo-4);
-}
-
-.section::scroll-marker:target-current {
-    background-color: var(--camo-5);
+    background: var(--accent);
+    outline-color: var(--accent);
 }

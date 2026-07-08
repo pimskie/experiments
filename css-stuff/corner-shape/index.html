@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corner shape, yo</title>
+    <link rel="stylesheet" href="https://unpkg.com/open-props@1.7.23/open-props.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/open-props@1.7.23/normalize.min.css">
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <div class="controls">
+                <div class="row">
+                    <div class="control">
+                        <label class="radio-label" for="scoop">
+                            Scoop
+                            <input type="radio" class="radio" name="type" value="scoop" id="scoop"  />
+                        </label>
+                    </div>
+
+                    <div class="control">
+                        <label class="radio-label" for="round">
+                            Round
+                            <input type="radio" class="radio" name="type" value="round" id="round" checked />
+                        </label>
+                    </div>
+
+                    <div class="control">
+                        <label class="radio-label" for="bevel">
+                            Bevel
+                            <input type="radio" class="radio" name="type" value="bevel" id="bevel" />
+                        </label>
+                    </div>
+
+                    <div class="control">
+                        <label class="radio-label" for="notch">
+                            Notch
+                            <input type="radio" class="radio" name="type" value="notch" id="notch" />
+                        </label>
+                    </div>
+
+                    <div class="control">
+                        <label class="radio-label" for="squircle">
+                            Squircle
+                            <input type="radio" class="radio" name="type" value="squircle" id="squircle" />
+                        </label>
+                    </div>
+
+                    <div class="control">
+                        <label class="radio-label" for="superellipse">
+                            Superellipse
+                            <input type="radio" class="radio" name="type" value="superellipse" id="superellipse" />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="row">
+                   <div class="control">
+                        <label for="radius">Radius: </label>
+                        <input type="range" min="0" max="10" value="7" id="radio" data-ref="radius">
+                        <span data-ref="radius-value">0</span>
+                   </div>
+
+                   <div class="control control--superellipse">
+                        <label for="radius">Superellipse: </label>
+                        <input type="range" min="-10" max="10" value="0" id="radio" data-ref="ellipse">
+                        <span data-ref="ellipse-value">0</span>
+                   </div>
+                </div>
+            </div>
+
+            <div class="panel" data-ref="panel">
+                I am a panel with fancy borders
+            </div>
+        </div>
+    </section>
+
+    <script src="main.js" />
+</body>
+</html>

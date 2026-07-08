@@ -1,0 +1,96 @@
+:root {
+    --color-accent: var(--yellow-5);
+    --color-text-on-accent: var(--gray-8);
+}
+
+.container {
+    block-size: 90dvh;
+    inline-size: min(100%, 60rem);
+
+    margin: var(--size-5) auto;
+
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+
+    gap: var(--size-5);
+}
+
+.row {
+    display: flex;
+    gap: var(--size-4);
+    flex-wrap: wrap;
+}
+
+.controls {
+    display: flex;
+    gap: var(--size-3);
+    flex-direction: column;
+}
+
+.radio {
+    width: 0;
+    height: 0;
+    overflow: clip;
+}
+
+.radio-label {
+    display: inline-block;
+    padding: var(--size-2);
+    border-radius: var(--radius-2);
+
+    outline: 2px solid oklch(from var(--color-accent) l calc(c * 0.1) h);
+
+    background: transparent;
+    transition: background .1s var(--ease-out-1);
+}
+
+.radio-label:hover,
+.radio-label:focus,
+.radio-label:has(.radio:checked) {
+    outline-color: var(--color-accent);
+}
+
+.radio-label:focus-within {
+    outline-offset: 4px;
+}
+
+.radio-label:has(.radio:checked) {
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.panel {
+    --radius: 0;
+    --ellipse: 0;
+    --_radius: calc(var(--radius) * 1rem);
+    --_ellipse: calc(var(--ellipse));
+
+    inline-size: 100%;
+    block-size: 100%;
+
+    display: grid;
+    place-items: center;
+    
+    padding: var(--size-4);
+
+    border-radius: var(--_radius);
+
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+}
+
+.section:has(.radio[value="scoop"]:checked) .panel { --shape: scoop; }
+.section:has(.radio[value="round"]:checked) .panel { --shape: round; }
+.section:has(.radio[value="bevel"]:checked) .panel { --shape: bevel; }
+.section:has(.radio[value="notch"]:checked) .panel { --shape: notch; }
+.section:has(.radio[value="squircle"]:checked) .panel { --shape: squircle; }
+
+.section:not(:has(.radio[value="superellipse"]:checked)) .control--superellipse {
+    display: none;
+}
+.section:has(.radio[value="superellipse"]:checked) .panel { 
+    corner-shape: superellipse(var(--_ellipse));
+ }
+.panel {
+    corner-shape: var(--shape) var(--shape);
+}

@@ -1,0 +1,7 @@
+.canvas {
+    position: absolute;
+}
+
+.canvas--grid {
+    z-index: 10;
+}

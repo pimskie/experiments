@@ -1,7 +1,17 @@
 .canvas {
     position: absolute;
+
+    inset: 50% auto auto 50%;
+
+    translate: -50% -50%;
 }
 
 .canvas--grid {
     z-index: 10;
+    pointer-events: none;
+}
+
+.controls {
+    position: absolute;
+    inset: auto 0 auto auto;
 }

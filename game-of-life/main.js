@@ -7,16 +7,18 @@
 const randomArrayValue = arr => arr[Math.floor(Math.random() * arr.length)];
 const randomBetween = (min, max) => Math.floor(Math.random() * (max - min) + min);
 
+const toggle = document.body.querySelector('[data-ref=play]');
+
 const canvasState = document.body.querySelector('[data-ref=state]');
 const ctxState = canvasState.getContext('2d');
 
 const canvasGrid = document.body.querySelector('[data-ref=grid]');
 const ctxGrid = canvasGrid.getContext('2d');
 
-const WIDTH = 400;
+const WIDTH = 700;
 const HEIGHT = WIDTH;
 
-const COLS = 50;
+const COLS = 100;
 const ROWS = COLS;
 const NUM_CELLS = COLS * ROWS;
 
@@ -25,6 +27,19 @@ const CELL_HEIGHT = HEIGHT / ROWS;
 
 canvasState.width =  canvasGrid.width = WIDTH;
 canvasState.height = canvasGrid.height = HEIGHT;
+
+
+const spawnThing = (e) => {
+    const { offsetX: x, offsetY: y } = e;
+
+    const col = Math.floor(x / CELL_WIDTH);
+    const row = Math.floor(y / CELL_HEIGHT);
+    const cell = state.grid[row * COLS + col];
+
+    cell.alive = true;
+
+    drawState();
+}
 
 const getMooreAlive = (cell, grid) => {
     const { col, row, index } = cell;
@@ -53,14 +68,16 @@ const getGrid = (cols, rows) => new Array(cols * rows).fill().map((_, index) => 
 
     const x = col * CELL_WIDTH;
     const y = row * CELL_HEIGHT;
-
     const alive = false;
+    const age = 0;
 
-    return { index, col, row, x, y, alive };
+    return { index, col, row, x, y, alive, age };
 });
 
 const state = {
     grid: getGrid(COLS, ROWS),
+    isSpawning: false,
+    rafId: null,
 }
 
 const clear = () => ctxState.clearRect(0, 0, ctxState.canvas.width, ctxState.canvas.height);
@@ -117,6 +134,7 @@ const updateState = () => {
         const shouldDie = aliveNeighbors.length < 2 || aliveNeighbors.length > 3;
 
         grid[cell.index].alive = !shouldDie;
+        grid[cell.index].age += shouldDie ? 0 : 1;
     });
 
     dead.forEach((cell) => {
@@ -127,25 +145,46 @@ const updateState = () => {
     });
 }
 
-const loop = () => {
+const reset = () => {
     clear();
-    drawGrid();
-    drawState();
 
+    cancelAnimationFrame(state.rafId);
+
+    state.grid = getGrid(COLS, ROWS);
+    state.rafId = null;
+}
+
+const update = () => {
+    clear();
     updateState();
-
+    drawState();
 }
 
-for (let i = 0; i < 100; i++) {
-    const index = randomBetween(0, state.grid.length);
-    const cell = state.grid[index];
+const loop = () => {
+    update();
+    
+    state.rafId = requestAnimationFrame(loop);
+}
 
-    state.grid[index] = {
-        ...cell,
-        alive: true,
+canvasState.addEventListener('pointerdown', () => {
+    canvasState.addEventListener('pointermove', spawnThing);
+    state.isSpawning = true;
+});
+
+document.body.addEventListener('pointerup', () => {
+    canvasState.removeEventListener('pointermove', spawnThing);
+    state.isSpawning = false;
+});
+
+toggle.addEventListener('click', () => {
+    if (state.rafId) {
+        reset();
+    } else {
+        loop();
     }
-}
 
-loop();
+    toggle.textContent = state.rafId ? "Stop" : "Play";
+});
 
-document.body.addEventListener('click', loop)
+drawGrid();
+update();
